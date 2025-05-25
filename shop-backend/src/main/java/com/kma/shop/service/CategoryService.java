@@ -43,9 +43,17 @@ public class CategoryService {
         return toCategoryResponse(category);
     }
 
-    public CategoryResponse getCategoryByName(String name) throws AppException {
+    public CategoryResponse getCategoryByName(String name) {
         CategoryEntity category = repo.findByName(name);
         return toCategoryResponse(category);
+    }
+
+    public CategoryEntity findByName(String name) {
+        return repo.findByName(name);
+    }
+
+    public List<CategoryEntity> findByNames(List<String> names) {
+        return names.stream().map(this::findByName).collect(Collectors.toList());
     }
 
     public void deleteCategoryById(String id) throws AppException {
