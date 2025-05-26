@@ -40,7 +40,7 @@ public class CategoryController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("/{id")
+    @PutMapping("/{id}")
     public ApiResponse<CategoryResponse> update(@RequestBody CategoryCreationRequest category) throws AppException {
         return ApiResponse.<CategoryResponse>builder()
                 .data(categoryService.createCategory(category))

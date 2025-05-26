@@ -3,11 +3,12 @@ package com.kma.shop.dto.request;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+@Builder
 @Getter
 @Setter
-@RequiredArgsConstructor
+@NoArgsConstructor
+@AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Builder
 public class AddCartItemRequest {
     String product_id;
     int quantity;

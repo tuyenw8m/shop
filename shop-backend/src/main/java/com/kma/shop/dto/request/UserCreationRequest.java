@@ -12,12 +12,9 @@ import java.util.Date;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserCreationRequest {
-    String customId;
-    String userName;
+    String name;
     String password;
     String email;
     String phone;
-    String bio;
-    Date dob;
     String address;
 }

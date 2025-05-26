@@ -82,20 +82,19 @@ public class  AuthService {
         throw new AppException(ErrorCode.NOT_AUTHENTICATION);
     }
 
-    public AuthResponse verifySignupByEmail(String email, String code, String customId)
-            throws AppException, JOSEException {
-        if(verifyEmailCode(email, code) && !userService.existByCustomId(customId)){
-            EmailCreationTemporaryEntity entity = emailCreationTemporaryService.findByEmail(email);
-            UserCreationRequest userCreationRequest = userMapping.toUserCreation(entity);
-            userCreationRequest.setCustomId(customId);
-            UserEntity userEntity = userService.createUserByEmail(userCreationRequest);
-            return AuthResponse.builder()
-                    .user(userMapping.toUserResponse(userEntity))
-                    .token(tokenUtils.generateToken(userEntity))
-                    .build();
-        }
-        throw new AppException(ErrorCode.NOT_AUTHENTICATION);
-    }
+//    public AuthResponse verifySignupByEmail(String email, String code, String customId)
+//            throws AppException, JOSEException {
+//        if(verifyEmailCode(email, code) && !userService.existByCustomId(customId)){
+//            EmailCreationTemporaryEntity entity = emailCreationTemporaryService.findByEmail(email);
+//            UserCreationRequest userCreationRequest = userMapping.toUserCreation(entity);
+//            UserEntity userEntity = userService.createUserByEmail(userCreationRequest);
+//            return AuthResponse.builder()
+//                    .user(userMapping.toUserResponse(userEntity))
+//                    .token(tokenUtils.generateToken(userEntity))
+//                    .build();
+//        }
+//        throw new AppException(ErrorCode.NOT_AUTHENTICATION);
+//    }
 
     public boolean verifyEmailCode(String email, String code) throws AppException {
         if(signupVerificationService.verification(email, code)){
@@ -109,14 +108,11 @@ public class  AuthService {
             throws AppException, JOSEException {
         if(!userService.checkAttribute(userCreationRequest))
             throw  new AppException(ErrorCode.CONFLICT);
-        if(userService.existByCustomId(userCreationRequest.getCustomId()))
-            throw  new AppException(ErrorCode.CONFLICT);
-        UserEntity userEntity = null;
-        if(userCreationRequest.getPhone() != null && !userService.existByPhone(userCreationRequest.getPhone()))
-            userEntity = userService.createUserByPhone(userCreationRequest);
-        else if(userCreationRequest.getCustomId() != null
-                && !userService.existByCustomId(userCreationRequest.getCustomId()))
-            userEntity = userService.createUserByCustomId(userCreationRequest);
+        if(userService.existByEmail(userCreationRequest.getEmail())
+                || userService.existByName(userCreationRequest.getEmail())
+                || userService.existByPhone(userCreationRequest.getPhone()))
+            throw new AppException(ErrorCode.USER_EXISTED);
+        UserEntity userEntity = userService.createUser(userCreationRequest);
         if(userEntity == null) throw new AppException(ErrorCode.CONFLICT);
         return AuthResponse.builder()
                 .user(userMapping.toUserResponse(userEntity))
@@ -125,15 +121,10 @@ public class  AuthService {
     }
 
     public AuthResponse login(UserLoginRequest request) throws AppException, JOSEException {
-        UserEntity userEntity;
-        if(request.getEmail() != null && !request.getEmail().isEmpty()
-                && userService.existByEmail(request.getEmail()))
-            userEntity = userService.loginByEmail(request);
-        else if(request.getPhone() != null && !request.getPhone().isEmpty()
-                && userService.existByPhone(request.getPhone()))
-            userEntity = userService.loginByPhone(request);
-        else
-            userEntity = userService.loginByCustomId(request);
+        if(request.getEmail() == null || request.getPassword() == null
+                || request.getEmail().isEmpty() || request.getPassword().isEmpty())
+            throw new AppException(ErrorCode.NOT_AUTHENTICATION);
+        UserEntity userEntity = userService.loginByEmail(request);
         return AuthResponse.builder()
                 .user(userMapping.toUserResponse(userEntity))
                 .token(tokenUtils.generateToken(userEntity))

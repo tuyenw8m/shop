@@ -20,12 +20,9 @@ public class EmailCreationTemporaryEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     String id;
-    String customId;
-    String userName;
+    String name;
     String password;
     String email;
     String phone;
-    String bio;
-    Date dob;
     String address;
 }

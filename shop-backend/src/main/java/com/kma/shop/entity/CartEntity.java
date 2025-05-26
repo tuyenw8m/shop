@@ -22,4 +22,6 @@ public class CartEntity extends FormEntity {
     @OneToOne
     @JoinColumn(name = "user_id")
     private UserEntity user;
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<ProductEntity> products;
 }

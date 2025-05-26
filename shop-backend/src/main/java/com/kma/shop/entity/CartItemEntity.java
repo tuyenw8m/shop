@@ -16,10 +16,10 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Table(name = "cart_item")
 public class CartItemEntity extends FormEntity {
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private CartEntity cart;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private ProductEntity product;
 
     private int quantity;

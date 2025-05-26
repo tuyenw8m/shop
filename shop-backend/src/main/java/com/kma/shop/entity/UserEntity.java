@@ -17,17 +17,14 @@ import java.util.Set;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Table(name = "users")
 public class UserEntity extends FormEntity{
+
     @Column(nullable = false)
-    String customId;
-    @Column(nullable = false)
-    String userName;
+    String name;
     @Column(nullable = false)
     String password;
     String imageLink;
     String email;
     String phone;
-    String bio;
-    Date dob;
     String address;
 
 

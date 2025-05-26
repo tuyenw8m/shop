@@ -48,26 +48,6 @@ public class UserService {
 
 
 
-    public PageResponse<UserSummaryResponse> searchByCustomId(String customId, Integer page, Integer size) {
-        Pageable pageable = PageRequest.of(page, size);
-        String userId  = SecurityContextHolder.getContext().getAuthentication().getName();
-        Page<Object[]> res = userRepo.
-                findFriendByCustomIdContaining(".*" + customId +".*", userId, pageable);
-        List<UserSummaryResponse> ok = res.stream().map(obj -> new UserSummaryResponse(
-                (String)obj[0],
-                (String)obj[1],
-                (String)obj[2],
-                (String)obj[3],
-                (String)null
-                )).toList();
-        return  PageResponse.<UserSummaryResponse>builder()
-                .totalPages(res.getTotalPages())
-                .totalElements(res.getTotalElements())
-                .pageSize(res.getSize())
-                .pageNumber(res.getNumber())
-                .content(ok)
-                .build();
-    }
 
     public UserResponse getCurrentUserInfo() throws AppException, JsonProcessingException {
         String id = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -78,40 +58,23 @@ public class UserService {
     }
 
 
-    public PublicUserProfileResponse getUserInfo(String customId) throws AppException, JsonProcessingException {
-        PublicUserProfileResponse response ;
-        UserEntity user = findUserByCustomId(customId);
-        response =  userMapping.toPublicProfile(user);
-        return response;
-    }
-
     public boolean deleteUser() throws AppException {
         UserEntity user = getUserCurrent();
-        user.setCustomId("null");
         user.setEmail("null");
         user.setPhone("null");
         userRepo.save(user);
         return true;
     }
 
-    public UserResponse changeInfo(UserEditRequest request) throws AppException, ParseException {
+    public UserResponse changeInfo(UserEditRequest request) throws AppException {
         UserEntity user = getUserCurrent();
-        if(request.getCustomId() != null)
-            user.setCustomId(request.getCustomId());
-        if(request.getUserName() != null)
-            user.setUserName(request.getUserName());
-        if(request.getBio() != null)
-            user.setBio(request.getBio());
+        if(request.getName() != null)
+            user.setName(request.getName());
         if(request.getEmail() != null)
             user.setEmail(request.getEmail());
         if(request.getPhone() != null)
             user.setPhone(request.getPhone());
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        Date dob = request.getDob() != null ? dateFormat.parse(request.getDob()) : null;
-        user.setDob(dob);
         user.setAddress(request.getAddress());
-        String link = amazon3SUtils.addImageS3(request.getImageFile());
-        if(link != null) user.setImageLink(link);
         userRepo.save(user);
         return userMapping.toUserResponse(user);
     }
@@ -135,12 +98,6 @@ public class UserService {
         return userRepo.findById(id).orElseThrow(() -> new AppException(ErrorCode.CONFLICT));
     }
 
-    public UserEntity findUserByCustomId(String customId) throws AppException, JsonProcessingException {
-        UserEntity user ;
-        user =  userRepo.findByCustomId(customId)
-                .orElseThrow(() -> new AppException(ErrorCode.CONFLICT));
-        return user;
-    }
 
     public UserEntity loginByEmail(UserLoginRequest request) throws AppException {
         UserEntity user =  userRepo.findByEmail(request.getEmail())
@@ -156,13 +113,7 @@ public class UserService {
         throw new AppException(ErrorCode.NOT_AUTHENTICATION);
     }
 
-    public UserEntity loginByCustomId(UserLoginRequest request) throws AppException {
-        UserEntity user = userRepo.findByCustomId(request.getCustomId())
-                .orElseThrow(() -> new AppException(ErrorCode.NOT_AUTHENTICATION));
-        if(passwordEncoder.matches(request.getPassword(), user.getPassword()))
-            return user;
-        throw new AppException(ErrorCode.NOT_AUTHENTICATION);
-    }
+
 
     public boolean existByEmail(String email){
         return userRepo.existsByEmail(email);
@@ -172,40 +123,20 @@ public class UserService {
         return userRepo.existsByPhone(phone);
     }
 
-    public boolean existByCustomId(String userId){
-        return userRepo.existsByCustomId(userId);
+    public boolean existByName(String name){
+        return userRepo.existsByName(name);
     }
 
-    public UserEntity createUserByCustomId(UserCreationRequest userCreationRequest) throws AppException {
-        UserEntity user = UserEntity.builder()
-                .customId(userCreationRequest.getCustomId())
-                .userName(userCreationRequest.getUserName())
-                .roles(Set.of(roleService.getRoleByRoleName("USER")))
-                .password(passwordEncoder.encode(userCreationRequest.getPassword()))
-                .build();
-        return userRepo.save(user);
-    }
-
-    public UserEntity createUserByEmail(UserCreationRequest userCreationRequest) throws AppException {
-        UserEntity user = UserEntity.builder()
-                .email(userCreationRequest.getEmail())
-                .roles(Set.of(roleService.getRoleByRoleName("USER")))
-                .customId(userCreationRequest.getCustomId())
-                .userName(userCreationRequest.getUserName())
-                .password(passwordEncoder.encode(userCreationRequest.getPassword()))
-                .build();
-        return userRepo.save(user);
-    }
 
     public boolean checkAttribute(UserCreationRequest request)  {
-        return request.getCustomId() != null && !(request.getPassword() == null | request.getUserName() == null);
+        return  !(request.getPassword() == null | request.getName() == null | request.getPhone() == null | request.getEmail() == null);
     }
 
-    public UserEntity createUserByPhone(UserCreationRequest userCreationRequest) throws AppException {
+    public UserEntity createUser(UserCreationRequest userCreationRequest) throws AppException {
         UserEntity user = UserEntity.builder()
                 .phone(userCreationRequest.getPhone())
-                .customId(userCreationRequest.getCustomId())
-                .userName(userCreationRequest.getUserName())
+                .name(userCreationRequest.getName())
+                .email(userCreationRequest.getEmail())
                 .roles(Set.of(roleService.getRoleByRoleName("USER")))
                 .password(passwordEncoder.encode(userCreationRequest.getPassword()))
                 .build();

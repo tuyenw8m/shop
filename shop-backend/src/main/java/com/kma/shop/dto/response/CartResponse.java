@@ -5,11 +5,12 @@ import lombok.experimental.FieldDefaults;
 
 import java.util.List;
 
+@Builder
 @Getter
 @Setter
-@RequiredArgsConstructor
+@NoArgsConstructor
+@AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Builder
 public class CartResponse {
     float total_price;
     int total_items;

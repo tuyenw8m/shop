@@ -5,11 +5,12 @@ import lombok.experimental.FieldDefaults;
 
 import java.util.List;
 
+@Builder
 @Getter
 @Setter
-@RequiredArgsConstructor
+@NoArgsConstructor
+@AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Builder
 public class CartItemResponse {
     String item_id;
     String product_id;
