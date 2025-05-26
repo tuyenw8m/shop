@@ -1,6 +1,7 @@
 package com.kma.shop.entity;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.websocket.OnError;
@@ -16,7 +17,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Table(name = "oimages")
+@Table(name = "productss")
 public class ProductEntity extends FormEntity{
     private String name;
     private float price;
@@ -28,4 +29,6 @@ public class ProductEntity extends FormEntity{
     private List<ImageEntity> image;
     @OneToMany(mappedBy = "product")
     private List<CategoryEntity> categories;
+    @ManyToMany(mappedBy = "products")
+    private List<CartEntity> products;
 }

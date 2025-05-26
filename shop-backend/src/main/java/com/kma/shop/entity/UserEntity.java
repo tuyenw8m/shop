@@ -31,7 +31,8 @@ public class UserEntity extends FormEntity{
     String address;
 
 
-
+    @OneToOne
+    CartEntity cart;
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_role",
