@@ -1,7 +1,7 @@
 server:
   port: 8888
   servlet:
-    context-path: /shop
+    context-path: /shop/api/v1/
 
 spring:
   mail:
