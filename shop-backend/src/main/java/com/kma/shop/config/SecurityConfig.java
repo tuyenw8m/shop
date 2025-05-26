@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -51,10 +52,45 @@ public class SecurityConfig  {
         ;
         httpSecurity
                 .authorizeHttpRequests(request ->
-                        request.requestMatchers("/login").permitAll()
-                                .requestMatchers("/signup").permitAll()
+                        request.requestMatchers("/auth/login").permitAll()
+                                .requestMatchers("/auth/register").permitAll()
+                                .requestMatchers("/users/me").hasRole("USER")
                                 .requestMatchers("/authentication").permitAll()
                                 .requestMatchers("/logoutt").permitAll()
+                                .requestMatchers("/users").permitAll()
+
+
+                                .requestMatchers(HttpMethod.GET, "/products").permitAll()
+                                .requestMatchers(HttpMethod.GET,"/products/*").permitAll()
+                                .requestMatchers(HttpMethod.POST,"/products/add").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.PUT,"/products/*").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.DELETE,"/products/*").hasRole("ADMIN")
+
+                                .requestMatchers(HttpMethod.GET,"/categories").permitAll()
+                                .requestMatchers(HttpMethod.GET,"/categories/*").permitAll()
+                                .requestMatchers(HttpMethod.POST,"/categories").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.PUT,"/categories/*").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.DELETE,"/categories/*").hasRole("ADMIN")
+
+                                .requestMatchers(HttpMethod.GET,"/cart").permitAll()
+                                .requestMatchers(HttpMethod.PUT,"/cart/*").permitAll()
+                                .requestMatchers(HttpMethod.POST,"/cart").permitAll()
+                                .requestMatchers(HttpMethod.DELETE,"/cart/*").permitAll()
+
+                                .requestMatchers(HttpMethod.GET,"/orders").hasRole("USER")
+                                .requestMatchers(HttpMethod.GET,"/orders/*").hasRole("USER")
+                                .requestMatchers(HttpMethod.POST,"/orders").hasRole("USER")
+                                .requestMatchers(HttpMethod.PUT,"/orders/*").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.DELETE,"/orders/*").hasRole("USER")
+
+                                .requestMatchers(HttpMethod.GET,"/products/*/reviews").permitAll()
+                                .requestMatchers(HttpMethod.POST,"/products/*/reviews").hasRole("USER")
+                                .requestMatchers(HttpMethod.DELETE,"/reviews/*").hasRole("USER")
+
+
+                                .requestMatchers(HttpMethod.GET,"/coupons").permitAll()
+                                .requestMatchers(HttpMethod.POST,"/products/*/reviews").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.POST,"/reviews/apply").hasRole("USER")
 
                                 .anyRequest().authenticated());
         return httpSecurity.build();

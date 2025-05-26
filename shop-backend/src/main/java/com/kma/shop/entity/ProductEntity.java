@@ -16,7 +16,6 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
 @Table(name = "productss")
 public class ProductEntity extends FormEntity{
     private String name;
@@ -30,5 +29,5 @@ public class ProductEntity extends FormEntity{
     @OneToMany(mappedBy = "product")
     private List<CategoryEntity> categories;
     @ManyToMany(mappedBy = "products")
-    private List<CartEntity> products;
+    private List<CartEntity> carts;
 }

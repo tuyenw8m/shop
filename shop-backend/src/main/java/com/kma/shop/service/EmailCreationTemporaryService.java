@@ -20,7 +20,7 @@ public class EmailCreationTemporaryService {
     public void save(UserCreationRequest request){
         repo.save(EmailCreationTemporaryEntity.builder()
                         .email(request.getEmail())
-                        .userName(request.getUserName())
+                        .name(request.getName())
                         .password(request.getPassword())
                 .build());
     }

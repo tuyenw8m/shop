@@ -11,6 +11,7 @@ import com.kma.shop.service.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.ParseException;
@@ -21,23 +22,31 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @GetMapping("/user/my_profile")
+    @GetMapping("/users/me")
     public ApiResponse<UserResponse> getMyProfile() throws AppException, JsonProcessingException {
         return ApiResponse.<UserResponse>builder()
                 .data(userService.getCurrentUserInfo())
                 .build();
     }
 
-    @GetMapping("/user/profile")
-    public ApiResponse<PublicUserProfileResponse> getProfile(@RequestParam String customId) throws AppException, JsonProcessingException {
-        return ApiResponse.<PublicUserProfileResponse>builder()
-                .data(userService.getUserInfo(customId))
-                .build();
-    }
+//    @PreAuthorize("hasRole('ADMIN')")
+//    @GetMapping("/users")
+//    public ApiResponse<UserResponse> getMyProfile() throws AppException, JsonProcessingException {
+//        return ApiResponse.<UserResponse>builder()
+//                .data(userService.getCurrentUserInfo())
+//                .build();
+//    }
+
+//    @GetMapping("/user/profile")
+//    public ApiResponse<PublicUserProfileResponse> getProfile(@RequestParam String customId) throws AppException, JsonProcessingException {
+//        return ApiResponse.<PublicUserProfileResponse>builder()
+//                .data(userService.getUserInfo(customId))
+//                .build();
+//    }
 
     @Transactional
-    @PutMapping("/user/edit")
-    public ApiResponse<UserResponse> editUserInfo(@ModelAttribute UserEditRequest request) throws AppException, ParseException {
+    @PutMapping("/user/me")
+    public ApiResponse<UserResponse> editUserInfo(@RequestBody UserEditRequest request) throws AppException{
         return ApiResponse.<UserResponse>builder()
                 .data(userService.changeInfo(request))
                 .build();

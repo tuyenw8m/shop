@@ -34,7 +34,7 @@ public class AuthController {
                 .build();
     }
 
-    @PostMapping("/signup")
+    @PostMapping("/auth/register")
     public ApiResponse<AuthResponse> signup(@RequestBody UserCreationRequest request)
             throws AppException, JOSEException, JsonProcessingException, MessagingException {
         return ApiResponse.<AuthResponse>builder()
@@ -50,18 +50,18 @@ public class AuthController {
                 .build();
     }
 
-    @PostMapping("/verify/email")
-    public ApiResponse<AuthResponse> signup(@RequestBody VerificationEmailRequest request)
-            throws AppException, JOSEException {
-        return ApiResponse.<AuthResponse>builder()
-                .data(authService.verifySignupByEmail(request.getEmail(), request.getCode(), request.getCustomId()))
-                .build();
-    }
+//    @PostMapping("/verify/email")
+//    public ApiResponse<AuthResponse> signup(@RequestBody VerificationEmailRequest request)
+//            throws AppException, JOSEException {
+//        return ApiResponse.<AuthResponse>builder()
+//                .data(authService.verifySignupByEmail(request.getEmail(), request.getCode(), request.getCustomId()))
+//                .build();
+//    }
 
     @Transactional
-    @PostMapping("/login")
+    @PostMapping("/auth/login")
     public ApiResponse<AuthResponse> login(@RequestBody UserLoginRequest request)
-            throws AppException, JOSEException, JsonProcessingException {
+            throws AppException, JOSEException {
         return ApiResponse.<AuthResponse>builder()
                 .data(authService.login(request))
                 .build();

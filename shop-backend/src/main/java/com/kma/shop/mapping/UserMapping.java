@@ -23,27 +23,21 @@ public class UserMapping {
 
     public UserCreationRequest toUserCreation(EmailCreationTemporaryEntity request){
         return UserCreationRequest.builder()
-                .bio(request.getBio())
                 .phone(request.getPhone())
-                .dob(request.getDob())
                 .address(request.getAddress())
                 .email(request.getEmail())
                 .password(request.getPassword())
-                .customId(request.getCustomId())
-                .userName(request.getUserName())
+                .name(request.getName())
                 .build();
     }
 
     public EmailCreationTemporaryEntity toEmailTemporary(UserCreationRequest request){
         return EmailCreationTemporaryEntity.builder()
-                .bio(request.getBio())
                 .phone(request.getPhone())
-                .dob(request.getDob())
                 .address(request.getAddress())
                 .email(request.getEmail())
                 .password(request.getPassword())
-                .customId(request.getCustomId())
-                .userName(request.getUserName())
+                .name(request.getName())
                 .build();
     }
 
@@ -119,8 +113,7 @@ public class UserMapping {
     public UserSummaryResponse toAllAcceptedResponse(UserEntity userEntity) {
         return UserSummaryResponse.builder()
                 .userId(userEntity.getId())
-                .userName(userEntity.getUserName())
-                .customId(userEntity.getCustomId())
+                .userName(userEntity.getName())
                 .imageLink(userEntity.getImageLink())
                 .build();
     }
@@ -128,8 +121,7 @@ public class UserMapping {
     public UserSummaryResponse toAllPendingResponse(UserEntity userEntity) {
         return UserSummaryResponse.builder()
                 .userId(userEntity.getId())
-                .userName(userEntity.getUserName())
-                .customId(userEntity.getCustomId())
+                .userName(userEntity.getName())
                 .imageLink(userEntity.getImageLink())
                 .build();
     }
@@ -137,8 +129,7 @@ public class UserMapping {
     public UserSummaryResponse toAllWaitingResponse(UserEntity userEntity) {
         return UserSummaryResponse.builder()
                 .userId(userEntity.getId())
-                .userName(userEntity.getUserName())
-                .customId(userEntity.getCustomId())
+                .userName(userEntity.getName())
                 .imageLink(userEntity.getImageLink())
                 .build();
     }
@@ -146,8 +137,7 @@ public class UserMapping {
     public UserSummaryResponse toUserSummaryResponse(UserEntity userEntity) {
         return UserSummaryResponse.builder()
                 .userId(userEntity.getId())
-                .userName(userEntity.getUserName())
-                .customId(userEntity.getCustomId())
+                .userName(userEntity.getName())
                 .imageLink(userEntity.getImageLink())
                 .build();
     }
@@ -157,10 +147,8 @@ public class UserMapping {
             return null;
         }
         PublicUserProfileResponse response = new PublicUserProfileResponse();
-        response.setCustomId(user.getCustomId());
-        response.setUserName(user.getUserName());
+        response.setUserName(user.getName());
         response.setImageLink(user.getImageLink() != null ? user.getImageLink() : "");
-        response.setBio(user.getBio() != null ? user.getBio() : "");
         response.setUserId(user.getId());
         return response;
     }
@@ -171,13 +159,11 @@ public class UserMapping {
         }
         UserResponse response = new UserResponse();
         response.setId(user.getId());
-        response.setCustomId(user.getCustomId());
-        response.setUserName(user.getUserName());
+        response.setName(user.getName());
         response.setEmail(user.getEmail() != null ? user.getEmail() : ""); // Xử lý null thành chuỗi rỗng
         response.setPhone(user.getPhone() != null ? user.getPhone() : "");
         response.setImageLink(user.getImageLink() != null ? user.getImageLink() : "");
-        response.setBio(user.getBio() != null ? user.getBio() : "");
-        response.setDob(user.getDob() != null ? user.getDob() : null);
+
         response.setAddress(user.getAddress() != null ? user.getAddress() : "");
         return response;
     }

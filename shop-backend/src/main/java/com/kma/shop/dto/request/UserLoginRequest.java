@@ -9,7 +9,7 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserLoginRequest {
-    String customId;
+    String name;
     String email;
     String phone;
     String password;

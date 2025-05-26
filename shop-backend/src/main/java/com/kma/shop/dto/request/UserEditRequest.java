@@ -12,11 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Getter
 @Setter
 public class UserEditRequest {
-    MultipartFile imageFile;
-    String customId;
-    String userName;
-    String bio;
-    String dob;
+    String name;
     String address;
     String email;
     String phone;
