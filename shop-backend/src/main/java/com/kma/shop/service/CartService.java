@@ -3,12 +3,13 @@ package com.kma.shop.service;
 import com.kma.shop.dto.request.AddCartItemRequest;
 import com.kma.shop.dto.response.CartItemResponse;
 import com.kma.shop.dto.response.CartResponse;
-import com.kma.shop.dto.response.ProductResponse;
 import com.kma.shop.entity.CartEntity;
 import com.kma.shop.entity.CartItemEntity;
 import com.kma.shop.entity.ProductEntity;
 import com.kma.shop.entity.UserEntity;
 import com.kma.shop.exception.AppException;
+import com.kma.shop.exception.ErrorCode;
+import com.kma.shop.repo.CartItemRepo;
 import com.kma.shop.repo.CartRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -16,8 +17,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class CartService {
@@ -27,6 +26,8 @@ public class CartService {
     private UserService userService;
     @Autowired
     private ProductService productService;
+    @Autowired
+    private CartItemRepo cartItemRepo;
 
     private CartItemResponse toCartItemResponse(CartItemEntity cart) {
         return CartItemResponse.builder()
@@ -38,10 +39,22 @@ public class CartService {
                 .build();
     }
 
-    public CartResponse getCart() throws AppException {
-        String userId =  SecurityContextHolder.getContext().getAuthentication().getName();
-        UserEntity user = userService.findUserById(userId);
-        CartEntity cart = user.getCart();
+    public CartEntity createNewCart(UserEntity user) {
+        CartEntity cartEntity = new CartEntity();
+        cartEntity.setUser(user);
+        cartEntity.setProducts(new ArrayList<>());
+        return cartRepo.save(cartEntity);
+    }
+
+    public CartItemEntity createNewCartItem(CartEntity cart, ProductEntity product, int quantity) {
+        CartItemEntity cartItemEntity = new CartItemEntity();
+        cartItemEntity.setProduct(product);
+        cartItemEntity.setQuantity(quantity);
+        cartItemEntity.setCart(cart);
+        return cartItemEntity;
+    }
+
+    public CartResponse setUpCartResponseInfo(CartEntity cart) {
         List<CartItemResponse> cartItemResponses = new ArrayList<>();
         float totalPrice = 0;
         int totalQuantity = 0;
@@ -50,6 +63,7 @@ public class CartService {
             totalQuantity += item.getQuantity();
             totalPrice += item.getProduct().getPrice() * item.getQuantity();
         }
+
         return CartResponse.builder()
                 .items(cartItemResponses)
                 .total_items(totalQuantity)
@@ -57,34 +71,38 @@ public class CartService {
                 .build();
     }
 
+    public CartResponse getCart() throws AppException {
+
+        //get cart
+        String userId =  SecurityContextHolder.getContext().getAuthentication().getName();
+        UserEntity user = userService.findUserById(userId);
+        CartEntity cart = user.getCart();
+        if(cart == null) cart = createNewCart(user);
+
+        return setUpCartResponseInfo(cart);
+    }
+
     public void delete(String item_id){
         cartRepo.deleteById(item_id);
     }
 
      public CartItemResponse update(String item_id, int quantity) throws AppException {
+
         String userId = SecurityContextHolder.getContext().getAuthentication().getName();
         UserEntity user = userService.findUserById(userId);
         ProductEntity product = productService.findById(item_id);
 
         CartEntity cart = cartRepo.findByUser(user);
-        if (cart == null) {
-            cart = new CartEntity();
-            cart.setUser(user);
-            cart.setItems(new ArrayList<>());
-        }
+        if (cart == null) throw new AppException(ErrorCode.CONFLICT);
 
-        Optional<CartItemEntity> existingItem = cart.getItems().stream()
-                .filter(item -> item.getProduct().getId().equals(product.getId()))
-                .findFirst();
-        CartItemEntity item;
-        if (existingItem.isPresent()) {
-            item = existingItem.get();
-            item.setQuantity(quantity);
-        } else {
-            return null;
+        for(CartItemEntity item : cart.getItems()) {
+            if(item.getProduct().getId().equals(product.getId())) {
+                item.setQuantity(quantity);
+                cartRepo.save(cart);
+                return toCartItemResponse(item);
+            }
         }
-        cartRepo.save(cart);
-        return toCartItemResponse(item);
+        throw new AppException(ErrorCode.CONFLICT);
     }
 
     public CartItemResponse add(AddCartItemRequest request) throws AppException {
@@ -100,24 +118,15 @@ public class CartService {
         }
 
         // Kiểm tra nếu sản phẩm đã có trong cart thì tăng số lượng
-        Optional<CartItemEntity> existingItem = cart.getItems().stream()
-                .filter(item -> item.getProduct().getId().equals(product.getId()))
-                .findFirst();
-        CartItemEntity item;
-        if (existingItem.isPresent()) {
-            item = existingItem.get();
-            item.setQuantity(item.getQuantity() + request.getQuantity());
-
-        } else {
-            item = new CartItemEntity();
-            item.setCart(cart);
-            item.setProduct(product);
-            item.setQuantity(request.getQuantity());
-            cart.getItems().add(item);
+        for(CartItemEntity item : cart.getItems()) {
+            if(item.getProduct().getId().equals(product.getId())) {
+                item.setQuantity(request.getQuantity());
+                cartRepo.save(cart);
+                return toCartItemResponse(item);
+            }
         }
-        cartRepo.save(cart);
 
-        // Trả response
+        CartItemEntity item = cartItemRepo.save(createNewCartItem(cart, product, request.getQuantity()));
         return toCartItemResponse(item);
     }
 }
