@@ -7,7 +7,6 @@ import com.kma.shop.dto.response.CartResponse;
 import com.kma.shop.exception.AppException;
 import com.kma.shop.service.CartService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
