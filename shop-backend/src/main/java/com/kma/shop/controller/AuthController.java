@@ -36,7 +36,7 @@ public class AuthController {
 
     @PostMapping("/auth/register")
     public ApiResponse<AuthResponse> signup(@RequestBody UserCreationRequest request)
-            throws AppException, JOSEException, JsonProcessingException, MessagingException {
+            throws AppException, JOSEException {
         return ApiResponse.<AuthResponse>builder()
                 .data(authService.signup(request))
                 .build();

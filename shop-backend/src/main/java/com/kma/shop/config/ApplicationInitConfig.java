@@ -16,6 +16,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -35,7 +36,7 @@ public class ApplicationInitConfig {
                         .build();
                 authorityRepo.save(authority);
             }
-            List<RoleEntity> roles = new ArrayList<>();
+            Set<RoleEntity> roles = new HashSet<>();
             if(!roleRepo.existsByRoleName("ADMIN")){
                 RoleEntity admin = RoleEntity.builder()
                         .roleName("ADMIN")
@@ -55,6 +56,7 @@ public class ApplicationInitConfig {
                 UserEntity user = UserEntity
                                 .builder()
                                 .name("ADMIN")
+                        .roles(roles)
                                 .password(passwordEncoder.encode("ADMIN"))
                                 .build();
                 userRepo.save(user);
