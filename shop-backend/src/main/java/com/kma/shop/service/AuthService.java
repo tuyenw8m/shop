@@ -109,8 +109,7 @@ public class  AuthService {
         if(!userService.checkAttribute(userCreationRequest))
             throw  new AppException(ErrorCode.CONFLICT);
         if(userService.existByEmail(userCreationRequest.getEmail())
-                || userService.existByName(userCreationRequest.getEmail())
-                || userService.existByPhone(userCreationRequest.getPhone()))
+                || userService.existByName(userCreationRequest.getEmail()))
             throw new AppException(ErrorCode.USER_EXISTED);
         UserEntity userEntity = userService.createUser(userCreationRequest);
         if(userEntity == null) throw new AppException(ErrorCode.CONFLICT);

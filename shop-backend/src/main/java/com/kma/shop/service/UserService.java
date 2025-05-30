@@ -129,7 +129,7 @@ public class UserService {
 
 
     public boolean checkAttribute(UserCreationRequest request)  {
-        return  !(request.getPassword() == null | request.getName() == null | request.getPhone() == null | request.getEmail() == null);
+        return  !(request.getPassword() == null | request.getName() == null | request.getEmail() == null);
     }
 
     public UserEntity createUser(UserCreationRequest userCreationRequest) throws AppException {

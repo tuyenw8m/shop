@@ -77,7 +77,7 @@ public class ProductService {
                 .name(product.getName())
                 .price(product.getPrice())
                 .stock(product.getStock())
-                .categories(categoryService.findByNames(product.getCategories_name()))
+                .categories(categoryService.findByNames(product.getCategory_name()))
                 .description(product.getDescription())
                 .highlight_specs(product.getHighlight_specs())
                 .technical_specs(product.getTechnical_specs())
@@ -92,7 +92,7 @@ public class ProductService {
         entity.setName(product.getName());
         entity.setPrice(product.getPrice());
         entity.setStock(product.getStock());
-        entity.setCategories(categoryService.findByNames(product.getCategories_name()));
+        entity.setCategories(categoryService.findByNames(product.getCategory_name()));
         entity.setDescription(product.getDescription());
         entity.setHighlight_specs(product.getHighlight_specs());
         entity.setTechnical_specs(product.getTechnical_specs());

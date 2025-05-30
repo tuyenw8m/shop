@@ -29,15 +29,15 @@ public class ProductController {
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ApiResponse<ProductResponse> deleteProduct
-            (@PathVariable String id, @RequestBody ProductCreationRequest request) throws AppException {
+            (@PathVariable String id, @ModelAttribute ProductCreationRequest request) throws AppException {
         return ApiResponse.<ProductResponse>builder()
                 .data(productService.update(id, request))
                 .build();
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping()
-    public ApiResponse<ProductResponse> deleteProduct(@RequestBody ProductCreationRequest request) throws AppException {
+    @PostMapping("/add")
+    public ApiResponse<ProductResponse> add(@ModelAttribute ProductCreationRequest request) throws AppException {
         return ApiResponse.<ProductResponse>builder()
                 .data(productService.create(request))
                 .build();

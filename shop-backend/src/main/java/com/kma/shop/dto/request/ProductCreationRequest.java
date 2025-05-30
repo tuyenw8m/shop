@@ -22,5 +22,5 @@ public class ProductCreationRequest {
     private String highlight_specs;
     private int stock;
     private List<MultipartFile> image;
-    private List<String> categories_name;
+    private List<String> category_name;
 }
