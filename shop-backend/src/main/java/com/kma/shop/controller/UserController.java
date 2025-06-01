@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 
 import com.kma.shop.dto.ApiResponse;
 import com.kma.shop.dto.request.UserEditRequest;
+import com.kma.shop.dto.response.PageResponse;
 import com.kma.shop.dto.response.PublicUserProfileResponse;
 import com.kma.shop.dto.response.UserResponse;
 import com.kma.shop.exception.AppException;
@@ -29,13 +30,17 @@ public class UserController {
                 .build();
     }
 
-//    @PreAuthorize("hasRole('ADMIN')")
-//    @GetMapping("/users")
-//    public ApiResponse<UserResponse> getMyProfile() throws AppException, JsonProcessingException {
-//        return ApiResponse.<UserResponse>builder()
-//                .data(userService.getCurrentUserInfo())
-//                .build();
-//    }
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/users")
+    public ApiResponse<PageResponse<UserResponse>> getUsersProfile(
+            @RequestParam(required = false, defaultValue = "")  String search,
+            @RequestParam(required = false, defaultValue = "1") int page,
+            @RequestParam(required = false, defaultValue = "10") int limit
+    ) throws AppException {
+        return ApiResponse.<PageResponse<UserResponse>>builder()
+                .data(userService.getUsers(search, page - 1, limit))
+                .build();
+    }
 
 //    @GetMapping("/user/profile")
 //    public ApiResponse<PublicUserProfileResponse> getProfile(@RequestParam String customId) throws AppException, JsonProcessingException {

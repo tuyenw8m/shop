@@ -19,4 +19,6 @@ public class ImageEntity extends FormEntity {
     String url;
     @ManyToOne(fetch = FetchType.LAZY)
     private ProductEntity product;
+    @ManyToOne(fetch = FetchType.LAZY)
+    private ReviewEntity review;
 }

@@ -46,10 +46,35 @@ public class UserService {
     @Autowired
     private Amazon3SUtils amazon3SUtils;
 
+    public UserResponse toUserResponse(UserEntity userEntity) {
+        return UserResponse.builder()
+                .id(userEntity.getId())
+                .name(userEntity.getName())
+                .email(userEntity.getEmail())
+                .phone(userEntity.getPhone())
+                .avatar_url(userEntity.getImageLink())
+                .address(userEntity.getAddress())
+                .build();
+    }
+
+    public PageResponse<UserResponse> getUsers(String search, int page, int limit) throws AppException {
+        Pageable pageable = PageRequest.of(page, limit);
+        Page<UserEntity> users = userRepo.findByNameContaining(search, pageable).orElseThrow(() -> new AppException(ErrorCode.CONFLICT));
+        return PageResponse.<UserResponse>builder()
+                .content(users.getContent().stream().map(this::toUserResponse).toList())
+                .totalElements(users.getTotalElements())
+                .totalPages(users.getTotalPages())
+                .pageSize(users.getSize())
+                .pageNumber(users.getNumber())
+                .build();
+    }
 
 
+    public UserEntity save(UserEntity user) {
+        return userRepo.save(user);
+    }
 
-    public UserResponse getCurrentUserInfo() throws AppException, JsonProcessingException {
+    public UserResponse getCurrentUserInfo() throws AppException {
         String id = SecurityContextHolder.getContext().getAuthentication().getName();
         UserResponse response;
         UserEntity user = getUserCurrent();

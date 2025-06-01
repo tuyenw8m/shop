@@ -162,7 +162,7 @@ public class UserMapping {
         response.setName(user.getName());
         response.setEmail(user.getEmail() != null ? user.getEmail() : ""); // Xử lý null thành chuỗi rỗng
         response.setPhone(user.getPhone() != null ? user.getPhone() : "");
-        response.setImageLink(user.getImageLink() != null ? user.getImageLink() : "");
+        response.setAvatar_url(user.getImageLink() != null ? user.getImageLink() : "");
 
         response.setAddress(user.getAddress() != null ? user.getAddress() : "");
         return response;

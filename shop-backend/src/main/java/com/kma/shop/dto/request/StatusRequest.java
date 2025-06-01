@@ -1,4 +1,4 @@
-package com.kma.shop.dto.response;
+package com.kma.shop.dto.request;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -6,11 +6,9 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @Getter
 @Setter
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CategoryResponse {
-    String name;
-    String description;
-    String id;
+public class StatusRequest {
+    String status;
 }

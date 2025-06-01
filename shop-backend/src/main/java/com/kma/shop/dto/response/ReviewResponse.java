@@ -3,7 +3,7 @@ package com.kma.shop.dto.response;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 @Builder
 @Getter
@@ -11,11 +11,13 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UserResponse {
+public class ReviewResponse {
+
     String id;
-    String name;
-    String avatar_url;
-    String email;
-    String phone;
-    String address;
+    String product_id;
+    String user_id;
+    String user_name;
+    int rating;
+    String comment;
+    LocalDate created_at;
 }

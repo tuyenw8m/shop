@@ -9,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.awt.*;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 @Service
