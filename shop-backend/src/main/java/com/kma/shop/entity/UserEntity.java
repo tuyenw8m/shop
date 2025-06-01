@@ -6,6 +6,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 @Builder
@@ -30,6 +31,8 @@ public class UserEntity extends FormEntity{
 
     @OneToOne
     CartEntity cart;
+    @OneToOne
+    UserOrderProductEntity orderProduct;
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_role",
@@ -37,7 +40,8 @@ public class UserEntity extends FormEntity{
             inverseJoinColumns = @JoinColumn(name ="role_id")
     )
     Set<RoleEntity> roles;
-
+    @OneToMany(fetch = FetchType.EAGER, orphanRemoval = true)
+    List<ReviewEntity> reviews;
 
 }
 

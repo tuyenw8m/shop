@@ -57,8 +57,7 @@ public class SecurityConfig  {
                                 .requestMatchers("/users/me").hasRole("USER")
                                 .requestMatchers("/authentication").permitAll()
                                 .requestMatchers("/logoutt").permitAll()
-                                .requestMatchers("/users").permitAll()
-
+                                .requestMatchers(HttpMethod.GET, "/users").hasRole("ADMIN")
 
                                 .requestMatchers(HttpMethod.GET, "/products").permitAll()
                                 .requestMatchers(HttpMethod.GET,"/products/*").permitAll()
@@ -86,6 +85,7 @@ public class SecurityConfig  {
                                 .requestMatchers(HttpMethod.GET,"/products/*/reviews").permitAll()
                                 .requestMatchers(HttpMethod.POST,"/products/*/reviews").hasRole("USER")
                                 .requestMatchers(HttpMethod.DELETE,"/reviews/*").hasRole("USER")
+                                .requestMatchers(HttpMethod.PUT,"/products/*/reviews").hasRole("USER")
 
 
                                 .requestMatchers(HttpMethod.GET,"/coupons").permitAll()

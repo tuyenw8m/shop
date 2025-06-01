@@ -18,6 +18,6 @@ public interface UserRepo extends JpaRepository<UserEntity, String> {
     boolean existsByName(String name);
     Optional<UserEntity> findByEmail(String email);
     Optional<UserEntity> findByPhone(String phone);
-
+    Optional<Page<UserEntity>> findByNameContaining(String name, Pageable pageable);
 
 }

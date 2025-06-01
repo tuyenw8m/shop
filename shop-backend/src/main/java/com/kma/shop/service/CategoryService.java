@@ -17,7 +17,14 @@ public class CategoryService {
     @Autowired
     private CategoryRepo repo;
 
-    public CategoryResponse createCategory(CategoryCreationRequest request){
+    public boolean existsByName(String name) {
+        return repo.existsByName(name);
+    }
+
+    public CategoryResponse createCategory(CategoryCreationRequest request) throws AppException {
+        if(!existsByName(request.getName())){
+            throw new AppException(ErrorCode.CONFLICT);
+        }
         CategoryEntity category = CategoryEntity.builder()
                 .name(request.getName())
                 .description(request.getDescription())
@@ -30,6 +37,7 @@ public class CategoryService {
         return CategoryResponse.builder()
                 .description(category.getDescription())
                 .name(category.getName())
+                .id(category.getId())
                 .build();
     }
 
@@ -64,9 +72,9 @@ public class CategoryService {
         repo.deleteByName(name);
     }
 
-    public CategoryResponse updateCategory(String name, CategoryCreationRequest request) throws AppException {
-        CategoryEntity category = repo.findByName(name);
-        category.setName(name);
+    public CategoryResponse updateCategory(String id, CategoryCreationRequest request) throws AppException {
+        CategoryEntity category = repo.findById(id).orElseThrow(() -> new AppException(ErrorCode.CONFLICT));
+        category.setName(request.getName());
         category.setDescription(request.getDescription());
         category = repo.save(category);
         return toCategoryResponse(category);

@@ -57,7 +57,13 @@ public class ProductService {
             (String categoryName, String search, float min_price, float max_price,
              Integer Page, Integer limit, String sort_by)  {
         CategoryEntity category = categoryService.findByName(categoryName);
-        PageRequest pageRequest = PageRequest.of(Page, limit, Sort.by(sort_by).descending());
+        PageRequest pageRequest;
+        if(sort_by != null) {
+            pageRequest = PageRequest.of(Page, limit, Sort.by(sort_by).descending());
+        }
+        else{
+            pageRequest = PageRequest.of(Page, limit);
+        }
         Specification<ProductEntity> spec = Specification
                 .where(ProductSpecification.hasName(search))
                 .and(ProductSpecification.hasPriceBetween(min_price, max_price))
@@ -98,8 +104,7 @@ public class ProductService {
         entity.setTechnical_specs(product.getTechnical_specs());
         imageService.delete(entity.getImage());
         entity.setImage(imageService.saveImages(product.getImage()));
-        repo.save(entity);
-        return toProductResponse(entity);
+        return toProductResponse(repo.save(entity));
     }
 
     public void delete(String id) throws AppException {

@@ -28,7 +28,7 @@ public class ProductController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
-    public ApiResponse<ProductResponse> deleteProduct
+    public ApiResponse<ProductResponse> update
             (@PathVariable String id, @ModelAttribute ProductCreationRequest request) throws AppException {
         return ApiResponse.<ProductResponse>builder()
                 .data(productService.update(id, request))
@@ -37,7 +37,7 @@ public class ProductController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/add")
-    public ApiResponse<ProductResponse> add(@ModelAttribute ProductCreationRequest request) throws AppException {
+    public ApiResponse<ProductResponse> add(@ModelAttribute ProductCreationRequest request)   {
         return ApiResponse.<ProductResponse>builder()
                 .data(productService.create(request))
                 .build();
@@ -48,13 +48,13 @@ public class ProductController {
             @RequestParam(required = false) String category_name,
             @RequestParam(required = false) String search,
             @RequestParam(required = false, defaultValue = "0.0") float min_price,
-            @RequestParam(required = false, defaultValue = "Float.MAX_VALUE") float max_price,
+            @RequestParam(required = false, defaultValue = "99999999999.9") float max_price,
             @RequestParam(required = false, defaultValue = "1") int page,
             @RequestParam(required = false, defaultValue = "10") int limit,
             @RequestParam(required = false) String sort_by
             )   {
         return ApiResponse.<PageResponse<ProductResponse>>builder()
-                .data(productService.find(category_name, search, min_price, max_price, page, limit, sort_by))
+                .data(productService.find(category_name, search, min_price, max_price, page - 1, limit, sort_by))
                 .build();
     }
 

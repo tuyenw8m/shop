@@ -12,6 +12,7 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.IOException;
+import java.util.Random;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -29,6 +30,9 @@ public class AmazonS3Client {
     }
     public String uploadFile(MultipartFile file) {
         String key = file.getOriginalFilename();
+        Random rand = new Random();
+        int randomNumber = rand.nextInt(900) + 100; // Tạo số từ 100 đến 999
+        key += String.valueOf(randomNumber);
         PutObjectRequest putObjectRequest = PutObjectRequest.builder()
                 .bucket(bucket)
                 .key(key)

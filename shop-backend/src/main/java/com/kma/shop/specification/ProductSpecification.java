@@ -20,7 +20,7 @@ public class ProductSpecification {
     }
 
     public static Specification<ProductEntity> hasCategory(CategoryEntity category){
-        return (root, query, cb) ->
-                cb.equal(root.get("category"), category);
+        return (category == null) ? null :(root, query, cb) ->
+                cb.isMember(category, root.get("categories"));
     }
 }
