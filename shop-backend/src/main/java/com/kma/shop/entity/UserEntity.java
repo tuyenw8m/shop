@@ -29,9 +29,9 @@ public class UserEntity extends FormEntity{
     String address;
 
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.EAGER, mappedBy = "user")
     CartEntity cart;
-    @OneToOne
+    @OneToOne(fetch = FetchType.EAGER, mappedBy = "user")
     UserOrderProductEntity orderProduct;
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(

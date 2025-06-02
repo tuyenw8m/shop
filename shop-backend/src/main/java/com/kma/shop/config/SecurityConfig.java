@@ -71,10 +71,10 @@ public class SecurityConfig  {
                                 .requestMatchers(HttpMethod.PUT,"/categories/*").hasRole("ADMIN")
                                 .requestMatchers(HttpMethod.DELETE,"/categories/*").hasRole("ADMIN")
 
-                                .requestMatchers(HttpMethod.GET,"/cart").permitAll()
-                                .requestMatchers(HttpMethod.PUT,"/cart/*").permitAll()
-                                .requestMatchers(HttpMethod.POST,"/cart").permitAll()
-                                .requestMatchers(HttpMethod.DELETE,"/cart/*").permitAll()
+                                .requestMatchers(HttpMethod.GET,"/cart").hasRole("USER")
+                                .requestMatchers(HttpMethod.PUT,"/cart/*").hasRole("USER")
+                                .requestMatchers(HttpMethod.POST,"/cart").hasRole("USER")
+                                .requestMatchers(HttpMethod.DELETE,"/cart/*").hasRole("USER")
 
                                 .requestMatchers(HttpMethod.GET,"/orders").hasRole("USER")
                                 .requestMatchers(HttpMethod.GET,"/orders/*").hasRole("USER")

@@ -7,6 +7,7 @@ import com.kma.shop.dto.response.OrderResponse;
 import com.kma.shop.dto.response.PageResponse;
 import com.kma.shop.exception.AppException;
 import com.kma.shop.service.UserOrderProductService;
+import jakarta.transaction.Transactional;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,12 +30,12 @@ public class OrderController{
 
     @GetMapping
     public ApiResponse<PageResponse<OrderResponse>> getAll(
-            @RequestParam(required = false, defaultValue = "") String status,
+            @RequestParam(required = false) String status,
             @RequestParam(required = false, defaultValue = "") String search,
             @RequestParam(required = false, defaultValue = "1") int page,
             @RequestParam(required = false, defaultValue = "10") int limit) throws AppException {
         return ApiResponse.<PageResponse<OrderResponse>>builder()
-                .data(userOrderProductService.getMyOrders(status, search, page, limit))
+                .data(userOrderProductService.getMyOrders(status, search, page - 1, limit))
                 .build();
     }
 
@@ -46,6 +47,7 @@ public class OrderController{
     }
 
     @PostMapping
+    @Transactional
     public ApiResponse<OrderResponse> create(@RequestBody AddCartItemRequest request) throws AppException {
         return ApiResponse.<OrderResponse>builder()
                 .data(userOrderProductService.order(request))
