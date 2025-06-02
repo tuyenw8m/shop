@@ -4,7 +4,7 @@ class Http {
   instance: AxiosInstance
   constructor() {
     this.instance = axios.create({
-      baseURL: 'https://api-ecom.duthanhduoc.com/',
+      baseURL: 'https://localhost:4000/', // để port chung cho đồng bộ khi pull về
       timeout: 10000,
       headers: {
         'Content-Type': 'application/json'
