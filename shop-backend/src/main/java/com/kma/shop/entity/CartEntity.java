@@ -20,7 +20,6 @@ public class CartEntity extends FormEntity {
     private List<CartItemEntity> items = new ArrayList<>();
 
     @OneToOne
-    @JoinColumn(name = "user_id")
     private UserEntity user;
     @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<ProductEntity> products;

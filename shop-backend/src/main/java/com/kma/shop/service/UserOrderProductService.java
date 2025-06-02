@@ -22,7 +22,9 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 
 
@@ -90,14 +92,8 @@ public class UserOrderProductService {
         if(user.getOrderProduct() == null)
         {
             UserOrderProductEntity userOrderProductEntity = new UserOrderProductEntity();
-            user.setOrderProduct(userOrderProductEntity);
-            userService.save(user);
-        }
-        else{
-            if(user.getOrderProduct().getOrderNumbers()  == null){
-                user.getOrderProduct().setOrderNumbers(new ArrayList<OrderNumberEntity>());
-                userService.save(user);
-            }
+            userOrderProductEntity.setUser(user);
+            userOrderProductRepo.save(userOrderProductEntity);
         }
     }
 
@@ -107,7 +103,7 @@ public class UserOrderProductService {
         String userId = SecurityContextHolder.getContext().getAuthentication().getName();
 
         Specification<OrderNumberEntity> spec = Specification
-                .where(OrderSpecification.hasStatus(Status.valueOf(status)))
+                .where(OrderSpecification.hasStatus(status == null ? null : Status.valueOf(status)))
                 .and(OrderSpecification.hasProductId(search))
                 .and(OrderSpecification.hasUserId(userId));
 
@@ -115,7 +111,7 @@ public class UserOrderProductService {
 
         return PageResponse.<OrderResponse>builder()
                 .content(orderNumberEntityPage.getContent().stream().map(this::toOrderResponse).toList())
-                .pageNumber(orderNumberEntityPage.getNumber())
+                .pageNumber(orderNumberEntityPage.getNumber() + 1)
                 .pageSize(orderNumberEntityPage.getSize())
                 .totalElements(orderNumberEntityPage.getTotalElements())
                 .totalPages(orderNumberEntityPage.getTotalPages())
@@ -123,10 +119,13 @@ public class UserOrderProductService {
     }
 
     public OrderResponse toOrderResponse(OrderNumberEntity orderNumberEntity){
+        Instant instant = orderNumberEntity.getCreationDate(); // UTC
+        ZoneId zoneId = ZoneId.of("Asia/Ho_Chi_Minh");
+        LocalDate localDate = instant.atZone(zoneId).toLocalDate();
         return OrderResponse.builder()
                 .id(orderNumberEntity.getId())
                 .user_id(orderNumberEntity.getOrderProduct().getUser().getId())
-                .created_at(LocalDate.from(orderNumberEntity.getCreationDate()))
+                .created_at(localDate)
                 .items_count(orderNumberEntity.getNumber())
                 .product_id(orderNumberEntity.getProduct().getId())
                 .total_price(orderNumberEntity.getNumber() * orderNumberEntity.getProduct().getPrice())

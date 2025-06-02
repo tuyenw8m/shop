@@ -13,10 +13,10 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "productss")
+@Table(name = "UserOrderProductEntity")
 public class UserOrderProductEntity extends FormEntity{
     @OneToMany
     private List<OrderNumberEntity> orderNumbers;
-    @OneToOne(mappedBy = "orderProduct")
+    @OneToOne
     private UserEntity user;
 }

@@ -6,8 +6,8 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @Getter
 @Setter
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class AddCartItemRequest {
     String product_id;

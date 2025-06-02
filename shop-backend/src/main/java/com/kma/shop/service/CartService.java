@@ -63,7 +63,6 @@ public class CartService {
             totalQuantity += item.getQuantity();
             totalPrice += item.getProduct().getPrice() * item.getQuantity();
         }
-
         return CartResponse.builder()
                 .items(cartItemResponses)
                 .total_items(totalQuantity)
@@ -90,18 +89,20 @@ public class CartService {
 
         String userId = SecurityContextHolder.getContext().getAuthentication().getName();
         UserEntity user = userService.findUserById(userId);
-        ProductEntity product = productService.findById(item_id);
 
         CartEntity cart = cartRepo.findByUser(user);
-        if (cart == null) throw new AppException(ErrorCode.CONFLICT);
-
-        for(CartItemEntity item : cart.getItems()) {
-            if(item.getProduct().getId().equals(product.getId())) {
-                item.setQuantity(quantity);
-                cartRepo.save(cart);
-                return toCartItemResponse(item);
-            }
+        if (cart == null) {
+            throw new AppException(ErrorCode.CONFLICT);
         }
+
+         // Kiểm tra nếu sản phẩm đã có trong cart thì sửa lại số lượng
+         for(int i = 0; i < cart.getItems().size(); i++) {
+             if(cart.getItems().get(i).getId().equals(item_id)) {
+                 cart.getItems().get(i).setQuantity(quantity);
+                 cartRepo.save(cart);
+                 return toCartItemResponse(cart.getItems().get(i));
+             }
+         }
         throw new AppException(ErrorCode.CONFLICT);
     }
 
@@ -117,12 +118,12 @@ public class CartService {
             cart.setItems(new ArrayList<>());
         }
 
-        // Kiểm tra nếu sản phẩm đã có trong cart thì tăng số lượng
-        for(CartItemEntity item : cart.getItems()) {
-            if(item.getProduct().getId().equals(product.getId())) {
-                item.setQuantity(request.getQuantity());
+        // Kiểm tra nếu sản phẩm đã có trong cart thì sửa lại số lượng
+        for(int i = 0; i < cart.getItems().size(); i++) {
+            if(cart.getItems().get(i).getProduct().getId().equals(product.getId())) {
+                cart.getItems().get(i).setQuantity(request.getQuantity());
                 cartRepo.save(cart);
-                return toCartItemResponse(item);
+                return toCartItemResponse(cart.getItems().get(i));
             }
         }
 
