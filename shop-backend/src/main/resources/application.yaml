@@ -3,7 +3,10 @@ server:
   servlet:
     context-path: /shop/api/v1/
 
-spring:
+
+
+
+
   mail:
     host: smtp.gmail.com
     port: 587

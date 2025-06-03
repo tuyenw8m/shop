@@ -42,8 +42,11 @@ public class  AuthService {
     @Autowired
     private EmailService emailService;
 
+    @Autowired
+    private TokenService tokenService;
 
-    public AuthResponse changePassword(ChangePasswordRequest request) throws JOSEException, AppException {
+
+    public AuthResponse changePassword(ChangePasswordRequest request) throws JOSEException, AppException, ParseException {
         UserEntity userEntity = userService.getUserCurrent();
         if( !  userService.isRightPassword(request.getOldPassword()))
             throw new AppException(ErrorCode.CONFLICT);
@@ -53,7 +56,6 @@ public class  AuthService {
                 .token(tokenUtils.generateToken(userEntity))
                 .build();
     }
-
 
     public boolean logout(String token) throws ParseException {
         return tokenUtils.removeToken(token);
@@ -105,7 +107,7 @@ public class  AuthService {
     }
 
     public AuthResponse signup(UserCreationRequest userCreationRequest)
-            throws AppException, JOSEException {
+            throws AppException, JOSEException, ParseException {
         if(!userService.checkAttribute(userCreationRequest))
             throw  new AppException(ErrorCode.CONFLICT);
         if(userService.existByEmail(userCreationRequest.getEmail())
@@ -119,7 +121,7 @@ public class  AuthService {
                 .build();
     }
 
-    public AuthResponse login(UserLoginRequest request) throws AppException, JOSEException {
+    public AuthResponse login(UserLoginRequest request) throws AppException, JOSEException, ParseException {
         if(request.getEmail() == null || request.getPassword() == null
                 || request.getEmail().isEmpty() || request.getPassword().isEmpty())
             throw new AppException(ErrorCode.NOT_AUTHENTICATION);

@@ -2,9 +2,11 @@ package com.kma.shop.utils;
 
 import com.kma.shop.entity.Authority;
 import com.kma.shop.entity.RoleEntity;
+import com.kma.shop.entity.TokenEntity;
 import com.kma.shop.entity.UserEntity;
 import com.kma.shop.exception.AppException;
 import com.kma.shop.exception.ErrorCode;
+import com.kma.shop.service.TokenService;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
@@ -28,7 +30,8 @@ public class TokenUtils {
     @Value("${jwt.signerKey}")
     private String SIGNER_KEY;
 
-
+    @Autowired
+    private TokenService tokenService;
 
     public String getUserId(String token) throws ParseException {
         SignedJWT signedJWT = SignedJWT.parse(token);
@@ -60,7 +63,7 @@ public class TokenUtils {
         } catch (ParseException e) {
             return false;
         }
-        String id = signedJWT.getJWTClaimsSet().getSubject();
+        tokenService.deleteByToken(token);
         return true;
     }
 
@@ -79,7 +82,7 @@ public class TokenUtils {
         String userId = signedJWT.getJWTClaimsSet().getSubject();
 
         Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
-        if (expiryTime.before(new Date())) {
+        if (expiryTime.before(new Date()) || !tokenService.exist(token)) {
             throw new AppException(ErrorCode.NOT_AUTHENTICATION);
         }
         else{
@@ -93,10 +96,10 @@ public class TokenUtils {
         String id = signedJWT.getJWTClaimsSet().getSubject();
         Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
         boolean verified = signedJWT.verify(verifier);
-        return verified && expiryTime.after(new Date());
+        return verified && expiryTime.after(new Date()) && tokenService.exist(token);
     }
 
-    public String generateToken(UserEntity user) throws JOSEException {
+    public String generateToken(UserEntity user) throws JOSEException, ParseException {
         JWSHeader jwsHeader = new JWSHeader(JWSAlgorithm.HS512);
         JWTClaimsSet jwtClaimsSet;
         if(user.getRoles().size() == 1){
@@ -124,6 +127,11 @@ public class TokenUtils {
         JWSObject jwsObject = new JWSObject(jwsHeader, new Payload(jwtClaimsSet.toJSONObject()));
         jwsObject.sign(new MACSigner(SIGNER_KEY.getBytes()));
         String token =  jwsObject.serialize();
+        TokenEntity tokenEntity = TokenEntity.builder()
+                .token(token)
+                .user(user)
+                .build();
+        tokenService.save(tokenEntity);
         return token;
     }
 
