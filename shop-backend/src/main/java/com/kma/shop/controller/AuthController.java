@@ -25,24 +25,31 @@ public class AuthController {
     @Autowired
     private AuthService authService;
 
+    @GetMapping("/test")
+    public String test() {
+        return "Hell0";
+    }
+
     @Transactional
     @PutMapping("/changepassword")
     public ApiResponse<AuthResponse> changePassword(@RequestBody ChangePasswordRequest request)
-            throws JOSEException, AppException {
+            throws JOSEException, AppException, ParseException {
                 return ApiResponse.<AuthResponse>builder()
                 .data(authService.changePassword(request))
                 .build();
     }
 
     @PostMapping("/auth/register")
+    @Transactional
     public ApiResponse<AuthResponse> signup(@RequestBody UserCreationRequest request)
-            throws AppException, JOSEException {
+            throws AppException, JOSEException, ParseException {
         return ApiResponse.<AuthResponse>builder()
                 .data(authService.signup(request))
                 .build();
     }
 
     @PostMapping("/signup/email")
+    @Transactional
     public ApiResponse<Boolean> signupByEmail(@RequestBody UserCreationRequest request)
             throws MessagingException, AppException {
         return ApiResponse.<Boolean>builder()
@@ -61,7 +68,7 @@ public class AuthController {
     @Transactional
     @PostMapping("/auth/login")
     public ApiResponse<AuthResponse> login(@RequestBody UserLoginRequest request)
-            throws AppException, JOSEException {
+            throws AppException, JOSEException, ParseException {
         return ApiResponse.<AuthResponse>builder()
                 .data(authService.login(request))
                 .build();

@@ -19,6 +19,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -52,8 +53,16 @@ public class UserOrderProductService {
         return false;
     }
 
-    public void delete(String id){
-        orderNumberRepo.deleteById(id);
+    public void delete(String id) throws AppException {
+        OrderNumberEntity orderNumberEntity = orderNumberRepo.findById(id).orElseThrow(
+                () -> new AppException(ErrorCode.CONFLICT));
+        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
+        if(orderNumberEntity.getOrderProduct().getUser().getId().equals(userId)
+                || SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains(new SimpleGrantedAuthority("ADMIN"))){
+            orderNumberRepo.deleteById(id);
+            return;
+        }
+        throw new AppException(ErrorCode.NOT_AUTHORIZATION);
     }
 
     public OrderResponse update(String orderId, String state) throws AppException {

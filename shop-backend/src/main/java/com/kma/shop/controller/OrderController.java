@@ -22,6 +22,7 @@ public class OrderController{
     private UserOrderProductService userOrderProductService;
 
     @PutMapping("/{id}")
+    @Transactional
     public ApiResponse<OrderResponse> update(@PathVariable String id, @RequestBody StatusRequest status) throws AppException {
         return ApiResponse.<OrderResponse>builder()
                 .data(userOrderProductService.update(id, status.getStatus()))

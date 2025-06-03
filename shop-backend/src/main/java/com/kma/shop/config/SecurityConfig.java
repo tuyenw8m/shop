@@ -41,18 +41,19 @@ public class SecurityConfig  {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity.oauth2ResourceServer(oauth2->
-                oauth2.jwt(jwtConfigurer
-                        ->jwtConfigurer.decoder(customJwtDecoder)
-                        .jwtAuthenticationConverter(jwtAuthenticationConverter()))
-                        .authenticationEntryPoint(jwtAuthenticationEntryPoint))
+        httpSecurity
+                .oauth2ResourceServer(oauth2->
+                        oauth2.jwt(jwtConfigurer -> jwtConfigurer
+                                .decoder(customJwtDecoder)
+                                .jwtAuthenticationConverter(jwtAuthenticationConverter()))
+                                .authenticationEntryPoint(jwtAuthenticationEntryPoint))
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(withDefaults())
-//                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         ;
         httpSecurity
                 .authorizeHttpRequests(request ->
-                        request.requestMatchers("/auth/login").permitAll()
+                        request
+                                .requestMatchers("/auth/login").permitAll()
                                 .requestMatchers("/auth/register").permitAll()
                                 .requestMatchers("/users/me").hasRole("USER")
                                 .requestMatchers("/authentication").permitAll()

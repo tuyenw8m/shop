@@ -43,6 +43,8 @@ public class UserEntity extends FormEntity{
     @OneToMany(fetch = FetchType.EAGER, orphanRemoval = true)
     List<ReviewEntity> reviews;
 
+    @OneToOne(fetch = FetchType.EAGER, mappedBy = "user")
+    TokenEntity token;
 }
 
 
