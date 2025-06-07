@@ -5,7 +5,7 @@ import com.kma.shop.dto.request.ProductCreationRequest;
 import com.kma.shop.dto.response.PageResponse;
 import com.kma.shop.dto.response.ProductResponse;
 import com.kma.shop.exception.AppException;
-import com.kma.shop.service.ProductService;
+import com.kma.shop.service.impl.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;

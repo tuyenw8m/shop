@@ -1,9 +1,6 @@
 package com.kma.shop.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -18,7 +15,7 @@ import lombok.experimental.FieldDefaults;
 public class ImageEntity extends FormEntity {
     String url;
     @ManyToOne(fetch = FetchType.LAZY)
-    private ProductEntity product;
+    ProductEntity product;
     @ManyToOne(fetch = FetchType.LAZY)
-    private ReviewEntity review;
+    ReviewEntity review;
 }

@@ -1,29 +1,28 @@
 package com.kma.shop.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.kma.shop.dto.ApiResponse;
 import com.kma.shop.dto.request.ChangePasswordRequest;
 import com.kma.shop.dto.request.UserCreationRequest;
 import com.kma.shop.dto.request.UserLoginRequest;
-import com.kma.shop.dto.request.VerificationEmailRequest;
 import com.kma.shop.dto.response.AuthResponse;
 import com.kma.shop.exception.AppException;
-import com.kma.shop.service.AuthService;
+import com.kma.shop.service.interfaces.AuthService;
 import com.nimbusds.jose.JOSEException;
 
 import jakarta.mail.MessagingException;
 import jakarta.transaction.Transactional;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.experimental.FieldDefaults;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.ParseException;
 
 @RestController
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AuthController {
-    @Autowired
-    private AuthService authService;
+    AuthService authService;
 
     @GetMapping("/test")
     public String test() {
@@ -65,7 +64,7 @@ public class AuthController {
 //                .build();
 //    }
 
-    @Transactional
+
     @PostMapping("/auth/login")
     public ApiResponse<AuthResponse> login(@RequestBody UserLoginRequest request)
             throws AppException, JOSEException, ParseException {
@@ -76,7 +75,7 @@ public class AuthController {
 
     @GetMapping("/authentication")
     public ApiResponse<Boolean> authentication(@RequestParam String token)
-            throws AppException, ParseException, JOSEException {
+            throws  ParseException, JOSEException {
         return ApiResponse.<Boolean>builder()
                 .data(authService.authenticateToken(token))
                 .build();

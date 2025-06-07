@@ -4,7 +4,10 @@ import com.kma.shop.dto.ApiResponse;
 import com.kma.shop.dto.request.CategoryCreationRequest;
 import com.kma.shop.dto.response.CategoryResponse;
 import com.kma.shop.exception.AppException;
-import com.kma.shop.service.CategoryService;
+import com.kma.shop.service.interfaces.CategoryService;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -13,9 +16,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/categories")
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@RequiredArgsConstructor
 public class CategoryController {
-    @Autowired
-    private CategoryService categoryService;
+    CategoryService categoryService;
 
     @GetMapping
     public ApiResponse<List<CategoryResponse>> getAll() {

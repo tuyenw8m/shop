@@ -5,15 +5,18 @@ import com.kma.shop.dto.request.AddCartItemRequest;
 import com.kma.shop.dto.response.CartItemResponse;
 import com.kma.shop.dto.response.CartResponse;
 import com.kma.shop.exception.AppException;
-import com.kma.shop.service.CartService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.kma.shop.service.interfaces.CartService;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/cart")
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@RequiredArgsConstructor
 public class CartController {
-    @Autowired
-    private CartService cartService;
+    CartService cartService;
 
     @GetMapping
     public ApiResponse<CartResponse> getCart() throws AppException {

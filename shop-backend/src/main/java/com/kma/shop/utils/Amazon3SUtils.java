@@ -12,8 +12,8 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE,  makeFinal = true)
 public class Amazon3SUtils {
-    @Autowired
     AmazonS3Client amazonS3Client;
+
     public String addImageS3(MultipartFile multipartFile){
         return amazonS3Client.uploadFile(multipartFile);
     }

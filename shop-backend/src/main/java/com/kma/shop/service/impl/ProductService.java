@@ -1,4 +1,4 @@
-package com.kma.shop.service;
+package com.kma.shop.service.impl;
 
 import com.kma.shop.dto.request.ProductCreationRequest;
 import com.kma.shop.dto.response.PageResponse;
@@ -9,7 +9,13 @@ import com.kma.shop.entity.ProductEntity;
 import com.kma.shop.exception.AppException;
 import com.kma.shop.exception.ErrorCode;
 import com.kma.shop.repo.ProductRepo;
+import com.kma.shop.service.interfaces.CategoryService;
+import com.kma.shop.service.interfaces.ImageService;
+import com.kma.shop.service.interfaces.UserService;
 import com.kma.shop.specification.ProductSpecification;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -18,13 +24,12 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 @Service
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@RequiredArgsConstructor
 public class ProductService {
-    @Autowired
-    private ProductRepo repo;
-    @Autowired
-    private CategoryService categoryService;
-    @Autowired
-    private ImageService imageService;
+    ProductRepo repo;
+    CategoryService categoryService;
+    ImageService imageService;
 
     private ProductResponse toProductResponse(ProductEntity response) {
         return ProductResponse.builder()
@@ -45,7 +50,7 @@ public class ProductService {
     }
 
     public ProductEntity findById(String id) throws AppException {
-        return repo.findById(id).orElseThrow(() -> new AppException(ErrorCode.CONFLICT));
+        return repo.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
     }
 
     public ProductResponse getByName(String name) throws AppException {

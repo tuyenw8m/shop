@@ -1,20 +1,22 @@
-package com.kma.shop.service;
+package com.kma.shop.service.impl;
 
 import com.kma.shop.dto.request.ChangePasswordRequest;
 import com.kma.shop.dto.request.UserCreationRequest;
 import com.kma.shop.dto.request.UserLoginRequest;
 import com.kma.shop.dto.response.AuthResponse;
-import com.kma.shop.entity.EmailCreationTemporaryEntity;
 import com.kma.shop.entity.UserEntity;
 import com.kma.shop.exception.AppException;
 import com.kma.shop.exception.ErrorCode;
 import com.kma.shop.mapping.UserMapping;
+import com.kma.shop.service.interfaces.AuthService;
+import com.kma.shop.service.interfaces.UserService;
 import com.kma.shop.utils.TokenUtils;
 import com.nimbusds.jose.JOSEException;
 
 import jakarta.mail.MessagingException;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
 import java.text.ParseException;
@@ -22,30 +24,19 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class  AuthService {
+@FieldDefaults(level = AccessLevel.PRIVATE,  makeFinal = true)
+public class  AuthServiceImpl  implements AuthService {
 
-    @Autowired
-    private UserMapping userMapping;
-
-    @Autowired
-    private TokenUtils tokenUtils;
-
-    @Autowired
-    private UserService userService;
-
-    @Autowired
-    private SignupVerificationService signupVerificationService;
-
-    @Autowired
-    private EmailCreationTemporaryService emailCreationTemporaryService;
-
-    @Autowired
-    private EmailService emailService;
-
-    @Autowired
-    private TokenService tokenService;
+    UserMapping userMapping;
+    TokenUtils tokenUtils;
+    UserService userService;
+    SignupVerificationService signupVerificationService;
+    EmailCreationTemporaryService emailCreationTemporaryService;
+    EmailService emailService;
+    TokenService tokenService;
 
 
+    @Override
     public AuthResponse changePassword(ChangePasswordRequest request) throws JOSEException, AppException, ParseException {
         UserEntity userEntity = userService.getUserCurrent();
         if( !  userService.isRightPassword(request.getOldPassword()))
@@ -56,20 +47,20 @@ public class  AuthService {
                 .token(tokenUtils.generateToken(userEntity))
                 .build();
     }
-
+    @Override
     public boolean logout(String token) throws ParseException {
         return tokenUtils.removeToken(token);
     }
-
+    @Override
     public boolean authenticateToken(String token) throws ParseException, JOSEException  {
         return tokenUtils.checkToken(token);
     }
-
+    @Override
     public String generateSignupVerificationCode(){
         return UUID.randomUUID().toString();
     }
 
-
+    @Override
     public boolean  signupByEmail(UserCreationRequest userCreationRequest)
             throws MessagingException, AppException {
         if(userCreationRequest.getEmail() != null && !userService.existByEmail(userCreationRequest.getEmail()))
@@ -97,15 +88,15 @@ public class  AuthService {
 //        }
 //        throw new AppException(ErrorCode.NOT_AUTHENTICATION);
 //    }
-
-    public boolean verifyEmailCode(String email, String code) throws AppException {
+@Override
+public boolean verifyEmailCode(String email, String code) throws AppException {
         if(signupVerificationService.verification(email, code)){
             signupVerificationService.delete(email);
             return true;
         }
         return false;
     }
-
+    @Override
     public AuthResponse signup(UserCreationRequest userCreationRequest)
             throws AppException, JOSEException, ParseException {
         if(!userService.checkAttribute(userCreationRequest))
@@ -120,7 +111,7 @@ public class  AuthService {
                 .token(tokenUtils.generateToken(userEntity))
                 .build();
     }
-
+    @Override
     public AuthResponse login(UserLoginRequest request) throws AppException, JOSEException, ParseException {
         if(request.getEmail() == null || request.getPassword() == null
                 || request.getEmail().isEmpty() || request.getPassword().isEmpty())
