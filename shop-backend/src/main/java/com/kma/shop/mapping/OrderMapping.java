@@ -21,7 +21,7 @@ public class OrderMapping {
                 .user_id(entity.getUser().getId())
                 .product_id(entity.getProduct().getId())
                 .items_count(entity.getQuantity())
-                .created_at(LocalDate.from(entity.getCreationDate()))
+                .created_at(entity.getCreationDate())
                 .status(entity.getStatus())
                 .total_price(entity.getQuantity() * entity.getProduct().getPrice())
                 .build();

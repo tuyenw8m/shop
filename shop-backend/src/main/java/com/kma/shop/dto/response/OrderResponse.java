@@ -5,6 +5,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Builder
 @Getter
@@ -19,5 +20,5 @@ public class OrderResponse {
     private float total_price;
     private Status status;
     private int items_count;
-    private LocalDate created_at;
+    private LocalDateTime created_at;
 }

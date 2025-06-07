@@ -2,12 +2,20 @@ package com.kma.shop.specification;
 
 import com.kma.shop.entity.CategoryEntity;
 import com.kma.shop.entity.ProductEntity;
+import com.kma.shop.enums.EntityStatus;
 import org.springframework.data.jpa.domain.Specification;
+
+import java.util.List;
 
 public class ProductSpecification {
     public static Specification<ProductEntity> hasName(String name){
         return (name == null || name.isBlank()) ? null : (root, query, cb) ->
                 cb.like(cb.lower(root.get("name")), "%" + name.toLowerCase() + "%");
+    }
+
+    public static Specification<ProductEntity> hasEntityStatus(List<EntityStatus> status){
+        return (status == null || status.isEmpty()) ? null : (root, query, cb) ->
+                root.get("entityStatus").in(status);
     }
 
     public static Specification<ProductEntity> hasPriceBetween(float min, float max){
