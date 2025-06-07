@@ -1,7 +1,6 @@
 import { yupResolver } from '@hookform/resolvers/yup'
 import { useForm } from 'react-hook-form'
 import { Link } from 'react-router-dom'
-import Input from 'src/components/Input'
 import { type FormDataTypeRegister } from 'src/utils/rulesValidate'
 import { schema } from 'src/utils/rulesValidate'
 

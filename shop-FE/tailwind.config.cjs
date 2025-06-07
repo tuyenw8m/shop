@@ -1,16 +1,24 @@
-const plugin = require('tailwindcss/plugin')
+import plugin from 'tailwindcss/plugin'
+import type { Config } from 'tailwindcss'
 
-/** @type {import('tailwindcss').Config} */
-module.exports = {
+const config: Config = {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
       colors: {
         orange: '#ee4d2d'
       },
-      // Thêm cấu hình maxWidth nếu chưa có
       maxWidth: {
-        '7xl': '80rem' // Giá trị mặc định của 7xl trong Tailwind
+        '7xl': '80rem'
+      },
+      animation: {
+        scaleIn: 'popup 0.5s ease-out forwards'
+      },
+      keyframes: {
+        popup: {
+          '0%': { transform: 'scale(0.5)', opacity: '0' },
+          '100%': { transform: 'scale(1)', opacity: '1' }
+        }
       }
     }
   },
@@ -28,3 +36,5 @@ module.exports = {
     })
   ]
 }
+
+export default config
