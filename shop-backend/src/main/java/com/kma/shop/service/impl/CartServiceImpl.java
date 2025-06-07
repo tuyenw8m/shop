@@ -12,6 +12,7 @@ import com.kma.shop.exception.ErrorCode;
 import com.kma.shop.repo.CartItemRepo;
 import com.kma.shop.repo.CartRepo;
 import com.kma.shop.service.interfaces.CartService;
+import com.kma.shop.service.interfaces.ProductService;
 import com.kma.shop.service.interfaces.UserService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
