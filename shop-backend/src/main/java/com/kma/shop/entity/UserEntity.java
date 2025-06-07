@@ -31,8 +31,7 @@ public class UserEntity extends FormEntity{
 
     @OneToOne(fetch = FetchType.EAGER, mappedBy = "user")
     CartEntity cart;
-    @OneToOne(fetch = FetchType.EAGER, mappedBy = "user")
-    UserOrderProductEntity orderProduct;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_role",
@@ -45,6 +44,9 @@ public class UserEntity extends FormEntity{
 
     @OneToOne(fetch = FetchType.EAGER, mappedBy = "user")
     TokenEntity token;
+
+    @OneToMany(mappedBy = "user")
+    List<OrderEntity> orders;
 }
 
 

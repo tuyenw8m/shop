@@ -1,4 +1,4 @@
-package com.kma.shop.service;
+package com.kma.shop.service.impl;
 
 import com.kma.shop.dto.request.AddCartItemRequest;
 import com.kma.shop.dto.response.CartItemResponse;
@@ -11,7 +11,12 @@ import com.kma.shop.exception.AppException;
 import com.kma.shop.exception.ErrorCode;
 import com.kma.shop.repo.CartItemRepo;
 import com.kma.shop.repo.CartRepo;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.kma.shop.service.interfaces.CartService;
+import com.kma.shop.service.interfaces.ProductService;
+import com.kma.shop.service.interfaces.UserService;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -19,17 +24,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class CartService {
-    @Autowired
-    private CartRepo cartRepo;
-    @Autowired
-    private UserService userService;
-    @Autowired
-    private ProductService productService;
-    @Autowired
-    private CartItemRepo cartItemRepo;
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE,  makeFinal = true)
+public class CartServiceImpl implements CartService {
+    CartRepo cartRepo;
+    UserService userService;
+    ProductService productService;
+    CartItemRepo cartItemRepo;
 
-    private CartItemResponse toCartItemResponse(CartItemEntity cart) {
+    @Override
+    public CartItemResponse toCartItemResponse(CartItemEntity cart) {
         return CartItemResponse.builder()
                 .item_id(cart.getId())
                 .product_id(cart.getProduct().getId())
@@ -38,14 +42,14 @@ public class CartService {
                 .price(cart.getQuantity() * cart.getProduct().getPrice())
                 .build();
     }
-
+    @Override
     public CartEntity createNewCart(UserEntity user) {
         CartEntity cartEntity = new CartEntity();
         cartEntity.setUser(user);
         cartEntity.setProducts(new ArrayList<>());
         return cartRepo.save(cartEntity);
     }
-
+    @Override
     public CartItemEntity createNewCartItem(CartEntity cart, ProductEntity product, int quantity) {
         CartItemEntity cartItemEntity = new CartItemEntity();
         cartItemEntity.setProduct(product);
@@ -53,7 +57,7 @@ public class CartService {
         cartItemEntity.setCart(cart);
         return cartItemEntity;
     }
-
+    @Override
     public CartResponse setUpCartResponseInfo(CartEntity cart) {
         List<CartItemResponse> cartItemResponses = new ArrayList<>();
         float totalPrice = 0;
@@ -69,7 +73,7 @@ public class CartService {
                 .total_price(totalPrice)
                 .build();
     }
-
+    @Override
     public CartResponse getCart() throws AppException {
 
         //get cart
@@ -80,12 +84,12 @@ public class CartService {
 
         return setUpCartResponseInfo(cart);
     }
-
+    @Override
     public void delete(String item_id){
         cartRepo.deleteById(item_id);
     }
-
-     public CartItemResponse update(String item_id, int quantity) throws AppException {
+    @Override
+    public CartItemResponse update(String item_id, int quantity) throws AppException {
 
         String userId = SecurityContextHolder.getContext().getAuthentication().getName();
         UserEntity user = userService.findUserById(userId);
@@ -105,7 +109,7 @@ public class CartService {
          }
         throw new AppException(ErrorCode.CONFLICT);
     }
-
+    @Override
     public CartItemResponse add(AddCartItemRequest request) throws AppException {
         String userId = SecurityContextHolder.getContext().getAuthentication().getName();
         UserEntity user = userService.findUserById(userId);

@@ -5,23 +5,21 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.kma.shop.dto.ApiResponse;
 import com.kma.shop.dto.request.UserEditRequest;
 import com.kma.shop.dto.response.PageResponse;
-import com.kma.shop.dto.response.PublicUserProfileResponse;
 import com.kma.shop.dto.response.UserResponse;
 import com.kma.shop.exception.AppException;
-import com.kma.shop.service.UserService;
+import com.kma.shop.service.interfaces.UserService;
 import jakarta.transaction.Transactional;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.experimental.FieldDefaults;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.text.ParseException;
-
 @RestController
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
 public class UserController {
-    @Autowired
-    private UserService userService;
+    UserService userService;
 
     @GetMapping("/users/me")
     public ApiResponse<UserResponse> getMyProfile() throws AppException, JsonProcessingException {

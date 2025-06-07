@@ -29,7 +29,6 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @RequiredArgsConstructor
 @EnableMethodSecurity
 @EnableWebSecurity
-@EnableJpaAuditing
 public class SecurityConfig  {
     @Value("${jwt.signerKey}")
     private String SIGNED_KEY;
@@ -65,6 +64,7 @@ public class SecurityConfig  {
                                 .requestMatchers(HttpMethod.POST,"/products/add").hasRole("ADMIN")
                                 .requestMatchers(HttpMethod.PUT,"/products/*").hasRole("ADMIN")
                                 .requestMatchers(HttpMethod.DELETE,"/products/*").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.PUT,"/products/disable/*").hasRole("ADMIN")
 
                                 .requestMatchers(HttpMethod.GET,"/categories").permitAll()
                                 .requestMatchers(HttpMethod.GET,"/categories/*").permitAll()
@@ -87,6 +87,7 @@ public class SecurityConfig  {
                                 .requestMatchers(HttpMethod.POST,"/products/*/reviews").hasRole("USER")
                                 .requestMatchers(HttpMethod.DELETE,"/reviews/*").hasRole("USER")
                                 .requestMatchers(HttpMethod.PUT,"/products/*/reviews").hasRole("USER")
+                                .requestMatchers(HttpMethod.PUT,"/reviews/*").hasRole("USER")
 
 
                                 .requestMatchers(HttpMethod.GET,"/coupons").permitAll()

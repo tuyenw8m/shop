@@ -1,9 +1,10 @@
-package com.kma.shop.service;
+package com.kma.shop.service.impl;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.experimental.FieldDefaults;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -12,13 +13,10 @@ import org.thymeleaf.spring6.SpringTemplateEngine;
 
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class  EmailService {
-
-    @Autowired
-    private JavaMailSender mailSender;
-
-    @Autowired
-    private SpringTemplateEngine templateEngine;
+    JavaMailSender mailSender;
+    SpringTemplateEngine templateEngine;
 
     public void signupVerify(String email, String code) throws MessagingException {
         MimeMessage mimeMessage  = mailSender.createMimeMessage();

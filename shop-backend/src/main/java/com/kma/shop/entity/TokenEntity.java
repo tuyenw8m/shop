@@ -1,10 +1,9 @@
 package com.kma.shop.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.w3c.dom.Text;
 
 @Builder
 @Entity
@@ -15,7 +14,9 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Table(name = "tokens")
 public class TokenEntity extends  FormEntity{
+    @Column(columnDefinition = "TEXT", nullable = false)
     String token;
-    @OneToOne
+
+    @OneToOne(fetch = FetchType.LAZY)
     UserEntity user;
 }

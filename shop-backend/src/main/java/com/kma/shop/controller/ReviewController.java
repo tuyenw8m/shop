@@ -5,7 +5,8 @@ import com.kma.shop.dto.request.ReviewCreationRequest;
 import com.kma.shop.dto.response.PageResponse;
 import com.kma.shop.dto.response.ReviewResponse;
 import com.kma.shop.exception.AppException;
-import com.kma.shop.service.ReviewService;
+import com.kma.shop.service.impl.ReviewService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -24,11 +25,12 @@ public class ReviewController {
              @RequestParam(required = false, defaultValue = "1") int page,
              @RequestParam(required = false, defaultValue = "10") int limit) {
         return ApiResponse.<PageResponse<ReviewResponse>>builder()
-                .data(reviewService.findAll(id, rating, search, page, limit))
+                .data(reviewService.findAll(id, rating, search, page - 1, limit))
                 .build();
     }
 
     @PostMapping("/products/{id}/reviews")
+    @Transactional
     public ApiResponse<ReviewResponse> create(@PathVariable String id,
                                               @ModelAttribute ReviewCreationRequest request) throws AppException {
         return ApiResponse.<ReviewResponse>builder()
@@ -36,11 +38,23 @@ public class ReviewController {
                 .build();
     }
 
+    @PutMapping("/reviews/{id}")
+    @Transactional
+    public ApiResponse<ReviewResponse> update2(@PathVariable String id,
+                                              @ModelAttribute ReviewCreationRequest request) throws AppException {
+        ReviewResponse response = reviewService.update(id, request);
+        return ApiResponse.<ReviewResponse>builder()
+                .data(response)
+                .build();
+    }
+
     @PutMapping("/products/{id}/reviews")
+    @Transactional
     public ApiResponse<ReviewResponse> update(@PathVariable String id,
                                               @ModelAttribute ReviewCreationRequest request) throws AppException {
+        ReviewResponse response = reviewService.update(id, request);
         return ApiResponse.<ReviewResponse>builder()
-                .data(reviewService.update(id, request))
+                .data(response)
                 .build();
     }
 
