@@ -4,6 +4,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Builder
 @Getter
@@ -20,4 +21,5 @@ public class ReviewResponse {
     int rating;
     String comment;
     LocalDate created_at;
+    List<String> image_url;
 }

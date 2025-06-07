@@ -3,6 +3,7 @@ package com.kma.shop.repo;
 
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -15,14 +16,17 @@ import java.io.IOException;
 import java.util.Random;
 
 @Service
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@FieldDefaults(level = AccessLevel.PRIVATE,  makeFinal = true)
 public class AmazonS3Client {
 
     @Value("${amazon.bucket-name}")
+    @NonFinal
     String bucket;
+    @NonFinal
     @Value("${amazon.region}")
     String region;
-    final S3Client s3Client; // Inject vào constructor
+
+    S3Client s3Client; // Inject vào constructor
 
     @Autowired
     public AmazonS3Client(S3Client s3Client) {

@@ -1,10 +1,10 @@
 package com.kma.shop.repo;
 
-import com.kma.shop.entity.UserOrderProductEntity;
+import com.kma.shop.entity.OrderEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface UserOrderProductRepo extends JpaRepository<UserOrderProductEntity, String>, JpaSpecificationExecutor<UserOrderProductEntity> {
+public interface OrderRepo extends JpaRepository<OrderEntity, String> , JpaSpecificationExecutor<OrderEntity> {
 }

@@ -31,7 +31,9 @@ public class ProductEntity extends FormEntity{
     @ManyToMany(mappedBy = "products")
     private List<CartEntity> carts;
     @OneToMany(mappedBy = "product")
-    private List<OrderNumberEntity> orderNumbers;
-    @OneToMany(mappedBy = "product")
     private List<ReviewEntity> reviews;
+    @OneToMany(mappedBy = "product")
+    private List<EventProductEntity> eventProducts;
+    @OneToMany(mappedBy = "product")
+    private List<OrderEntity> orders;
 }

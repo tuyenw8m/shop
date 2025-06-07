@@ -6,7 +6,7 @@ import com.kma.shop.entity.TokenEntity;
 import com.kma.shop.entity.UserEntity;
 import com.kma.shop.exception.AppException;
 import com.kma.shop.exception.ErrorCode;
-import com.kma.shop.service.TokenService;
+import com.kma.shop.service.impl.TokenService;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
@@ -14,8 +14,10 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -26,12 +28,13 @@ import java.util.*;
 
 @Component
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE,  makeFinal = true)
 public class TokenUtils {
     @Value("${jwt.signerKey}")
-    private String SIGNER_KEY;
+    @NonFinal
+    String SIGNER_KEY;
 
-    @Autowired
-    private TokenService tokenService;
+    TokenService tokenService;
 
     public String getUserId(String token) throws ParseException {
         SignedJWT signedJWT = SignedJWT.parse(token);
@@ -100,6 +103,9 @@ public class TokenUtils {
     }
 
     public String generateToken(UserEntity user) throws JOSEException, ParseException {
+        if(tokenService.existsByUser(user)){
+            return tokenService.findByUser(user).getToken();
+        }
         JWSHeader jwsHeader = new JWSHeader(JWSAlgorithm.HS512);
         JWTClaimsSet jwtClaimsSet;
         if(user.getRoles().size() == 1){

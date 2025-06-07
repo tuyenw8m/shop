@@ -1,4 +1,4 @@
-package com.kma.shop.service;
+package com.kma.shop.service.impl;
 
 
 import com.kma.shop.entity.SignupVerificationEntity;
