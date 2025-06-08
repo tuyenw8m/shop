@@ -3,17 +3,12 @@ package com.kma.shop.service.impl;
 import com.kma.shop.dto.request.ReviewCreationRequest;
 import com.kma.shop.dto.response.PageResponse;
 import com.kma.shop.dto.response.ReviewResponse;
-import com.kma.shop.entity.ImageEntity;
-import com.kma.shop.entity.ProductEntity;
-import com.kma.shop.entity.ReviewEntity;
-import com.kma.shop.entity.UserEntity;
+import com.kma.shop.entity.*;
 import com.kma.shop.exception.AppException;
 import com.kma.shop.exception.ErrorCode;
+import com.kma.shop.mapping.ProductMapping;
 import com.kma.shop.repo.ReviewRepo;
-import com.kma.shop.service.interfaces.ImageService;
-import com.kma.shop.service.interfaces.OrderService;
-import com.kma.shop.service.interfaces.ProductService;
-import com.kma.shop.service.interfaces.UserService;
+import com.kma.shop.service.interfaces.*;
 import com.kma.shop.specification.ReviewSpecification;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
@@ -26,7 +21,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -34,14 +28,16 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class ReviewService{
+public class ReviewServiceImpl implements ReviewService{
     ReviewRepo repo;
     UserService userService;
     ImageService imageService;
     ProductService productService;
     OrderService orderService;
+    private final ProductMapping productMapping;
 
     //create review for product is ordered
+    @Override
     public ReviewResponse create(String productId, ReviewCreationRequest request) throws AppException {
 
         //check input
@@ -65,19 +61,18 @@ public class ReviewService{
                 .build();
 
         //upload image and add review entity for image entity
-        List<ImageEntity> savedImages = imageService.saveImages(request.getImages());
-        if (savedImages != null && !savedImages.isEmpty()) {
-            savedImages.forEach(image -> image.setReview(reviewEntity));
-            reviewEntity.setImages(savedImages);
-        } else {
-            reviewEntity.setImages(new ArrayList<>());
+        //Save image
+        List<ReviewImageEntity> newImage = imageService.createReviewImageEntities(request.getImages());
+        for(ReviewImageEntity imageEntity : newImage) {
+            imageEntity.setReview(reviewEntity);
         }
-        reviewEntity.setImages(savedImages);
+        reviewEntity.getImages().addAll(newImage);
 
         //return after update
         return toResponse(repo.save(reviewEntity));
     }
 
+    @Override
     @Transactional
     public ReviewResponse update(String reviewId, ReviewCreationRequest request) throws AppException {
         if (reviewId == null || reviewId.isEmpty()) {
@@ -99,19 +94,19 @@ public class ReviewService{
             throw new AppException(ErrorCode.INVALID_INPUT);
         }
 
-        // Delete existing images and clear the list
-        if (reviewEntity.getImages() != null && !reviewEntity.getImages().isEmpty()) {
-            imageService.delete(reviewEntity.getImages());
-            reviewEntity.getImages().clear(); // Clear to avoid orphaned references
-        }
 
-        List<ImageEntity> savedImages = imageService.saveImages(request.getImages());
-        if (savedImages != null && !savedImages.isEmpty()) {
-            savedImages.forEach(image -> image.setReview(reviewEntity));
-            reviewEntity.setImages(savedImages);
-        } else {
-            reviewEntity.setImages(new ArrayList<>());
-        }
+        // Xóa ảnh cũ (orphanRemoval sẽ lo phần còn lại)
+        reviewEntity.getImages().clear();
+
+//        if (reviewEntity.getImages() != null) {
+//            reviewEntity.getImages().clear(); // hoặc imageRepository.deleteAllByReview(reviewEntity)
+//        }
+
+        //Save image
+        List<ReviewImageEntity> newImage = imageService.createReviewImageEntities(
+                request.getImages() == null ? null :request.getImages());
+        newImage.forEach(img -> img.setReview(reviewEntity));
+        reviewEntity.getImages().addAll(newImage);
 
         // Update fields
         reviewEntity.setComment(request.getComment());
@@ -121,7 +116,7 @@ public class ReviewService{
         ReviewEntity savedEntity = repo.save(reviewEntity);
         return toResponse(savedEntity);
     }
-
+    @Override
     public void delete(String reviewId) throws AppException {
         if(reviewId == null || reviewId.isEmpty()) {
             throw new AppException(ErrorCode.CONFLICT);
@@ -135,7 +130,7 @@ public class ReviewService{
         repo.delete(reviewEntity);
     }
 
-
+    @Override
     public PageResponse<ReviewResponse> findAll(String productId, int rating, String search, int page, int limit) {
         Pageable pageable = PageRequest.of(page, limit);
         Specification<ReviewEntity> spec = Specification.where(ReviewSpecification.hasRating(rating))
@@ -150,7 +145,7 @@ public class ReviewService{
                 .totalPages(result.getTotalPages())
                 .build();
     }
-
+    @Override
     public ReviewResponse toResponse(ReviewEntity entity) {
         return ReviewResponse.builder()
                 .comment(entity.getComment())
@@ -160,7 +155,7 @@ public class ReviewService{
                 .product_id(entity.getProduct().getId())
                 .user_id(entity.getUser().getId())
                 .user_name(entity.getUser().getName())
-                .image_url(entity.getImages() == null || entity.getImages().isEmpty() ? null : entity.getImages().stream().map(ImageEntity::getUrl).collect(Collectors.toList()))
+                .image_url(entity.getImages() == null || entity.getImages().isEmpty() ? null : entity.getImages().stream().map(ReviewImageEntity::getUrl).collect(Collectors.toList()))
                 .build();
     }
 }

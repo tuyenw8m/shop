@@ -124,7 +124,7 @@ public class TokenUtils {
                     .issuer("hoangtuyen.com")
                     .subject(user.getId())
                     .issueTime(new Date())
-                    .expirationTime(Date.from(Instant.now().plus(24*60*60, ChronoUnit.SECONDS)))
+                    .expirationTime(Date.from(Instant.now().plus(24*60*60*100, ChronoUnit.SECONDS)))
                     .jwtID(UUID.randomUUID().toString())
                     .claim("roles",buildRoles(user.getRoles()))
                     .claim("scope", buildAuthorities(user.getRoles()))

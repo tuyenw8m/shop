@@ -7,6 +7,7 @@ import com.kma.shop.dto.response.ProductAdminResponse;
 import com.kma.shop.dto.response.ProductResponse;
 import com.kma.shop.exception.AppException;
 import com.kma.shop.service.interfaces.ProductService;
+import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -25,6 +26,7 @@ public class ProductController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
+    @Transactional
     public ApiResponse<ProductResponse> update
             (@PathVariable String id, @ModelAttribute ProductCreationRequest request) throws AppException {
         return ApiResponse.<ProductResponse>builder()

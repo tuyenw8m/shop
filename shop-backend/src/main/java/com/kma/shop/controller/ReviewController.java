@@ -5,7 +5,7 @@ import com.kma.shop.dto.request.ReviewCreationRequest;
 import com.kma.shop.dto.response.PageResponse;
 import com.kma.shop.dto.response.ReviewResponse;
 import com.kma.shop.exception.AppException;
-import com.kma.shop.service.impl.ReviewService;
+import com.kma.shop.service.interfaces.ReviewService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;

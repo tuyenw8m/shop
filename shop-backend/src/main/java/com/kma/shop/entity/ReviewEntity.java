@@ -19,6 +19,8 @@ public class ReviewEntity extends  FormEntity {
     UserEntity user;
     @ManyToOne(fetch = FetchType.LAZY)
     ProductEntity product;
-    @OneToMany(mappedBy = "review", cascade = CascadeType.ALL)
-    List<ImageEntity> images;
+    @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
+    List<ImageEntity> imagesV1;
+    @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
+    List<ReviewImageEntity> images;
 }
