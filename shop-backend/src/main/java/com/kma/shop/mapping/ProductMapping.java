@@ -5,6 +5,7 @@ import com.kma.shop.dto.response.ProductResponse;
 import com.kma.shop.entity.CategoryEntity;
 import com.kma.shop.entity.ImageEntity;
 import com.kma.shop.entity.ProductEntity;
+import com.kma.shop.entity.ProductImageEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -24,7 +25,7 @@ public class ProductMapping {
                 .id(response.getId())
                 .highlight_specs(response.getHighlight_specs())
                 .technical_specs(response.getTechnical_specs())
-                .image_url(response.getImage().stream().map(ImageEntity::getUrl).toList())
+                .image_url(response.getImages().stream().map(ProductImageEntity::getUrl).toList())
                 .price(response.getPrice())
                 .name(response.getName())
                 .description(response.getDescription())
@@ -41,7 +42,7 @@ public class ProductMapping {
                 .id(response.getId())
                 .highlight_specs(response.getHighlight_specs())
                 .technical_specs(response.getTechnical_specs())
-                .image_url(response.getImage().stream().map(ImageEntity::getUrl).toList())
+                .image_url(response.getImages().stream().map(ProductImageEntity::getUrl).toList())
                 .price(response.getPrice())
                 .name(response.getName())
                 .description(response.getDescription())

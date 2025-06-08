@@ -5,7 +5,9 @@ import com.kma.shop.dto.response.PageResponse;
 import com.kma.shop.dto.response.ProductAdminResponse;
 import com.kma.shop.dto.response.ProductResponse;
 import com.kma.shop.entity.CategoryEntity;
+import com.kma.shop.entity.ImageEntity;
 import com.kma.shop.entity.ProductEntity;
+import com.kma.shop.entity.ProductImageEntity;
 import com.kma.shop.enums.EntityStatus;
 import com.kma.shop.exception.AppException;
 import com.kma.shop.exception.ErrorCode;
@@ -15,6 +17,7 @@ import com.kma.shop.service.interfaces.CategoryService;
 import com.kma.shop.service.interfaces.ImageService;
 import com.kma.shop.service.interfaces.ProductService;
 import com.kma.shop.specification.ProductSpecification;
+import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -127,6 +130,8 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @PreAuthorize("hasRole('ADMIN')")
     public ProductResponse create(ProductCreationRequest product)  {
+        if(product == null ) return null;
+
         ProductEntity entity = ProductEntity.builder()
                 .name(product.getName())
                 .price(product.getPrice())
@@ -135,8 +140,15 @@ public class ProductServiceImpl implements ProductService {
                 .description(product.getDescription())
                 .highlight_specs(product.getHighlight_specs())
                 .technical_specs(product.getTechnical_specs())
-                .image(imageService.saveImages(product.getImage()))
                 .build();
+
+        //Save image
+        List<ProductImageEntity> productImageEntities = imageService.createProductImageEntities(product.getImage());
+        for(ProductImageEntity imageEntity : productImageEntities) {
+            imageEntity.setProduct(entity);
+        }
+        entity.setImages(productImageEntities);
+
         repo.save(entity);
         return productMapping.toProductResponse(entity);
     }
@@ -144,6 +156,7 @@ public class ProductServiceImpl implements ProductService {
     //Only ADMIN can update info of product
     @Override
     @PreAuthorize("hasRole('ADMIN')")
+    @Transactional
     public ProductResponse update(String id, ProductCreationRequest product) throws AppException {
         //check in put
         if(id == null || id.isEmpty())  throw new AppException(ErrorCode.INVALID_INPUT);
@@ -156,15 +169,20 @@ public class ProductServiceImpl implements ProductService {
         entity.setName(product.getName());
         entity.setPrice(product.getPrice());
         entity.setStock(product.getStock());
-        entity.setCategories(categoryService.findByNames(product.getCategory_name()));
+//        entity.setCategories(categoryService.findByNames(product.getCategory_name()));
         entity.setDescription(product.getDescription());
         entity.setHighlight_specs(product.getHighlight_specs());
         entity.setTechnical_specs(product.getTechnical_specs());
         entity.setEntityStatus(EntityStatus.UPDATED);
 
-        //disconnect with current image
-        imageService.delete(entity.getImage());
-        entity.setImage(imageService.saveImages(product.getImage()));
+        //Delete old image and add new image
+        entity.getImages().clear();
+        //Save image
+        List<ProductImageEntity> productImageEntities = imageService.createProductImageEntities(product.getImage());
+        productImageEntities.forEach(img -> img.setProduct(entity));
+        entity.getImages().addAll(productImageEntities);
+
+        //return value
         return productMapping.toProductResponse(repo.save(entity));
     }
 
