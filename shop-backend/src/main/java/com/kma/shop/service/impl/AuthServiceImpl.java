@@ -14,6 +14,7 @@ import com.kma.shop.utils.TokenUtils;
 import com.nimbusds.jose.JOSEException;
 
 import jakarta.mail.MessagingException;
+import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -111,7 +112,9 @@ public boolean verifyEmailCode(String email, String code) throws AppException {
                 .token(tokenUtils.generateToken(userEntity))
                 .build();
     }
+
     @Override
+    @Transactional
     public AuthResponse login(UserLoginRequest request) throws AppException, JOSEException, ParseException {
         if(request.getEmail() == null || request.getPassword() == null
                 || request.getEmail().isEmpty() || request.getPassword().isEmpty())

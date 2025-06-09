@@ -29,6 +29,8 @@ public class TokenService {
     }
 
     public void deleteByUser(UserEntity user)   {
+        if(user == null)  return;
+        user.setToken(null);
         tokenRepo.deleteByUser(user);
     }
 

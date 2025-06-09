@@ -54,11 +54,12 @@ public class ApplicationInitConfig {
             }
             if(!userRepo.existsByName("ADMIN")){
                 UserEntity user = UserEntity
-                                .builder()
-                                .name("ADMIN")
+                        .builder()
+                        .name("ADMIN")
+                        .email("ADMIN")
                         .roles(roles)
-                                .password(passwordEncoder.encode("ADMIN"))
-                                .build();
+                        .password(passwordEncoder.encode("ADMIN"))
+                        .build();
                 userRepo.save(user);
             }
         };

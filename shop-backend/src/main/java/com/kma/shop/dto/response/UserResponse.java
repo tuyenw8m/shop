@@ -4,6 +4,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.util.Date;
+import java.util.List;
 
 @Builder
 @Getter
@@ -18,4 +19,5 @@ public class UserResponse {
     String email;
     String phone;
     String address;
+    List<String> roles;
 }

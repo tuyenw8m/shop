@@ -103,9 +103,7 @@ public class TokenUtils {
     }
 
     public String generateToken(UserEntity user) throws JOSEException, ParseException {
-        if(tokenService.existsByUser(user)){
-            return tokenService.findByUser(user).getToken();
-        }
+        tokenService.deleteByUser(user);
         JWSHeader jwsHeader = new JWSHeader(JWSAlgorithm.HS512);
         JWTClaimsSet jwtClaimsSet;
         if(user.getRoles().size() == 1){
