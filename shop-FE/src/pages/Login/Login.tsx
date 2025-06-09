@@ -1,19 +1,22 @@
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
-import { Link } from 'react-router-dom';
-import loginImage from '../Logo/logo.png';
-import LeftImage from '../Logo/leftimages.jpg'; // Đảm bảo ảnh này tồn tại đúng vị trí
+import { Link, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import LeftImage from '../leftimages/leftimages.jpg';
 
 // Yup schema validation
 const schema = yup.object({
-  fullname: yup.string().required('Vui lòng nhập tên đăng nhập'),
+  email: yup.string().required('Vui lòng nhập email của bạn! '),
   password: yup.string().min(6, 'Mật khẩu phải ít nhất 6 ký tự').required('Vui lòng nhập mật khẩu'),
 });
 
 type LoginForm = {
-  fullname: string;
+  // emailemail: string;
+  email: string;
   password: string;
+
+
 };
 
 export default function Login() {
@@ -24,27 +27,67 @@ export default function Login() {
   } = useForm<LoginForm>({
     resolver: yupResolver(schema),
   });
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false); // State cho hiển thị mật khẩu
 
-  const onSubmit = (data: LoginForm) => {
-    console.log('Dữ liệu gửi:', data);
-    alert('✅ Đăng nhập thành công!');
+  const onSubmit = async (data: LoginForm) => {
+    setLoading(true);
+    setApiError(null);
+    try {
+      const response = await fetch('http://localhost:8888/shop/api/v1/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+      console.log("reponse", response);
+
+      // Kiểm tra phản hồi có phải JSON không
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error('Phản hồi từ server không hợp lệ!');
+      }
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || 'Đăng nhập thất bại!');
+      }
+
+      console.log('Dữ liệu phản hồi:', result);
+      alert('✅ Đăng nhập thành công!');
+      // Lưu token (nếu có) - Cảnh báo: localStorage không an toàn cho môi trường production
+      if (result.token) {
+        localStorage.setItem('token', result.token);
+      }
+      navigate('/');
+    } catch (error: any) {
+      console.error('Lỗi:', error);
+      setApiError(error.message || 'Có lỗi xảy ra khi đăng nhập!');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Xử lý đăng nhập qua Gmail (giả lập, cần tích hợp OAuth thực tế)
+  const handleGoogleLogin = () => {
+    setLoading(true);
+    setApiError(null);
+    try {
+      alert('Chức năng đăng nhập qua SĐT đang được phát triển!');
+    } catch (error: any) {
+      setApiError('Lỗi khi đăng nhập qua Gmail!');
+      console.error('Lỗi:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen flex flex-col bg-cover bg-center bg-[#E7E7E7] overflow-hidden">
-      {/* Header Section */}
-      <header className="bg-teal-800 text-white p-4 flex items-center justify-between w-full">
-        <div className="flex items-center">
-          <img src={loginImage} alt="Logo" className="w-10 h-10 mr-2" />
-          <span className="text-xl font-bold">STQ shop</span>
-        </div>
-        <div className="flex-1 mx-4"></div>
-        <div className="flex space-x-4">
-          <a href="#" className="hover:underline">
-            Contact
-          </a>
-        </div>
-      </header>
 
       {/* Main Content */}
       <div className="flex-1 flex items-center justify-center w-full">
@@ -63,18 +106,18 @@ export default function Login() {
               <div>
                 <input
                   type="text"
-                  {...register('fullname')}
-                  placeholder="Tên đăng nhập"
+                  {...register('email')}
+                  placeholder="abcd@gmail.com"
                   className="w-full px-5 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-teal-500 bg-gray-50 text-gray-700 placeholder-gray-400 transition-all duration-200"
                 />
-                {errors.fullname && (
-                  <span className="text-red-500 text-sm block mt-1">{errors.fullname.message}</span>
+                {errors.email && (
+                  <span className="text-red-500 text-sm block mt-1">{errors.email.message}</span>
                 )}
               </div>
 
               <div>
                 <input
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   {...register('password')}
                   placeholder="Mật khẩu"
                   className="w-full px-5 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-teal-500 bg-gray-50 text-gray-700 placeholder-gray-400 transition-all duration-200"
@@ -86,7 +129,11 @@ export default function Login() {
 
               <div className="flex justify-between items-center text-sm text-gray-600">
                 <label className="flex items-center">
-                  <input type="checkbox" className="mr-2 accent-teal-600" /> Hiển thị mật khẩu
+                  <input
+                    type="checkbox"
+                    className="mr-2 accent-teal-600"
+                    onChange={() => setShowPassword(!showPassword)}
+                  /> Hiển thị mật khẩu
                 </label>
                 <div className="flex space-x-2">
                   <Link to="/forgot-password" className="text-teal-600 hover:underline">
@@ -99,18 +146,26 @@ export default function Login() {
                 </div>
               </div>
 
+              {/* Hiển thị lỗi từ API nếu có */}
+              {apiError && (
+                <div className="text-red-500 text-sm text-center">{apiError}</div>
+              )}
+
               <button
                 type="submit"
-                className="w-full bg-[#1C2A37] text-white py-3 rounded-full hover:bg-teal-700 transition-all duration-200 shadow-md hover:shadow-lg"
+                disabled={loading}
+                className="w-full bg-[#1C2A37] text-white py-3 rounded-full hover:bg-teal-700 transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Đăng nhập
+                {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
               </button>
 
               <button
                 type="button"
-                className="w-full bg-red-600 text-white py-3 rounded-full hover:bg-red-700 transition-all duration-200 shadow-md hover:shadow-lg"
+                onClick={handleGoogleLogin}
+                disabled={loading}
+                className="w-full bg-red-600 text-white py-3 rounded-full hover:bg-red-700 transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Đăng nhập qua Gmail
+                {loading ? 'Đăng nhập bằng SĐT' : 'Đăng nhập bằng SĐT'}
               </button>
             </form>
           </div>

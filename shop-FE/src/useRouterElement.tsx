@@ -1,28 +1,35 @@
-import { useRoutes } from 'react-router-dom'
-import ProductList from './pages/ProductList'
-import Login from './pages/Login'
-import Register from './pages/Register'
-import RegisterLayout from './layouts/RegisterLayout'
+import { useRoutes } from 'react-router-dom';
+import ProductList from './pages/ProductList';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import WebLayout from './layouts/WebLayout';
 
 export default function useRouterElement() {
   const routeElements = useRoutes([
-    { path: '/', element: <ProductList /> },
+    {
+      path: '/',
+      element: (
+        <WebLayout isProductPage={true}>
+          <ProductList />
+        </WebLayout>
+      ),
+    },
     {
       path: '/login',
       element: (
-        <RegisterLayout>
+        <WebLayout>
           <Login />
-        </RegisterLayout>
-      )
+        </WebLayout>
+      ),
     },
     {
       path: '/register',
       element: (
-        <RegisterLayout>
+        <WebLayout>
           <Register />
-        </RegisterLayout>
-      )
-    }
-  ])
-  return routeElements
+        </WebLayout>
+      ),
+    },
+  ]);
+  return routeElements;
 }
