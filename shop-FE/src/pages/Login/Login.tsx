@@ -12,11 +12,8 @@ const schema = yup.object({
 });
 
 type LoginForm = {
-  // emailemail: string;
   email: string;
   password: string;
-
-
 };
 
 export default function Login() {

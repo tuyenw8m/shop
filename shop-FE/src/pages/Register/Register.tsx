@@ -1,70 +1,122 @@
-import { yupResolver } from '@hookform/resolvers/yup'
-import { useForm } from 'react-hook-form'
-import { Link } from 'react-router-dom'
-import { type FormDataTypeRegister } from 'src/utils/rulesValidate'
-import { schema } from 'src/utils/rulesValidate'
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { Link } from 'react-router-dom';
+import { type FormDataTypeRegister } from 'src/utils/rulesValidate';
+import { schema } from 'src/utils/rulesValidate';
+import LeftImage from '../leftimages/leftimages.jpg';
 
 export default function Register() {
   const {
     register,
     handleSubmit,
-    formState: { errors }
+    formState: { errors },
   } = useForm<FormDataTypeRegister>({
-    resolver: yupResolver(schema)
-  })
+    resolver: yupResolver(schema),
+  });
 
-  const onSubmit = handleSubmit((data) => console.log(data))
+  const onSubmit = async (data: FormDataTypeRegister) => {
+    try {
+      const response = await fetch('http://localhost:8888/shop/api/v1/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error('Phản hồi từ server không hợp lệ!');
+      }
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || 'Đăng ký thất bại!');
+      }
+
+      console.log('Dữ liệu phản hồi:', result);
+      alert('✅ Đăng ký thành công!');
+    } catch (error: any) {
+      console.error('Lỗi:', error);
+      alert(error.message || 'Có lỗi xảy ra khi đăng ký!');
+    }
+  };
 
   return (
-    <div className='bg-orange-500'>
-      <div className='max-w-7xl mx-auto px-4'>
-        <div className='grid grid-cols-1 lg:grid-cols-5 py-12 lg:py-32 lg:pr-10'>
-          <div className='lg:col-span-2 lg:col-start-4'>
-            <form className='p-10 rounded bg-white shadow-md' onSubmit={onSubmit} noValidate>
-              <div className='text-2xl text-center'>Đăng Ký</div>
-              <Input
-                type='email'
-                errorMessage={errors?.email?.message}
-                placeholder='Email'
-                className='mt-8'
-                name='email'
-                register={register}
-              />
-              <Input
-                type='password'
-                errorMessage={errors?.password?.message}
-                placeholder='Password'
-                className='mt-3'
-                name='password'
-                register={register}
-              />
-              <Input
-                type='password'
-                errorMessage={errors?.confirm_password?.message}
-                placeholder='Password'
-                className='mt-3'
-                name='confirm_password'
-                register={register}
-              />
+    <div className="min-h-screen flex flex-col bg-cover bg-center bg-[#E7E7E7] overflow-hidden">
+      {/* Main Content */}
+      <div className="flex-1 flex items-center justify-center w-full">
+        <div className="bg-white rounded-3xl border-4 border-[#EADCCF] max-w-6xl w-full min-h-[500px] flex shadow-lg bg-gradient-to-br from-white to-gray-100 overflow-hidden animate-scaleIn">
+          {/* Left Section (image) */}
+          <div
+            className="hidden md:block w-1/2 bg-cover bg-center"
+            style={{ backgroundImage: `url(${LeftImage})` }}
+          ></div>
 
-              <div className='mt-3'>
-                <button
-                  type='submit'
-                  className='w-full text-center py-4 px-2 uppercase bg-red-500 text-white text-sm hover:bg-red-600'
-                >
-                  Đăng Ký
-                </button>
+          {/* Right Section (form) */}
+          <div className="w-full md:w-1/2 p-6 flex flex-col justify-center items-center">
+            <h2 className="text-center text-2xl font-bold text-gray-800 mb-6">ĐĂNG KÝ</h2>
+
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 w-full max-w-md" noValidate>
+              <div>
+                <input
+                  type="email"
+                  placeholder="abcd@gmail.com"
+                  className="w-full px-5 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-teal-500 bg-gray-50 text-gray-700 placeholder-gray-400 transition-all duration-200"
+                  {...register('email')}
+                />
+                {errors?.email && (
+                  <span className="text-red-500 text-sm block mt-1">{errors.email.message}</span>
+                )}
               </div>
-              <div className='flex items-center justify-center mt-8'>
-                <span className='text-gray-300'>Bạn đã có tài khoản?</span>
-                <Link className='text-red-400 ml-1' to='/login'>
-                  Đăng nhập
-                </Link>
+
+              <div>
+                <input
+                  type="password"
+                  placeholder="Mật khẩu"
+                  className="w-full px-5 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-teal-500 bg-gray-50 text-gray-700 placeholder-gray-400 transition-all duration-200"
+                  {...register('password')}
+                />
+                {errors?.password && (
+                  <span className="text-red-500 text-sm block mt-1">{errors.password.message}</span>
+                )}
               </div>
+
+              <div>
+                <input
+                  type="password"
+                  placeholder="Xác Nhận Mật Khẩu"
+                  className="w-full px-5 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-teal-500 bg-gray-50 text-gray-700 placeholder-gray-400 transition-all duration-200"
+                  {...register('confirm_password')}
+                />
+                {errors?.confirm_password && (
+                  <span className="text-red-500 text-sm block mt-1">{errors.confirm_password.message}</span>
+                )}
+              </div>
+
+              <div className="flex justify-between items-center text-sm text-gray-600">
+                <div className="flex space-x-2">
+                  <Link to="/forgot-password" className="text-teal-600 hover:underline">
+                    Quên mật khẩu
+                  </Link>
+                  <span>|</span>
+                  <Link to="/login" className="text-teal-600 hover:underline">
+                    Đăng nhập
+                  </Link>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                className="w-full bg-[#1C2A37] text-white py-3 rounded-full hover:bg-teal-700 transition-all duration-200 shadow-md hover:shadow-lg"
+              >
+                Đăng Ký
+              </button>
             </form>
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }
