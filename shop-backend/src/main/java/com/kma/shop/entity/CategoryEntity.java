@@ -1,11 +1,10 @@
 package com.kma.shop.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+
+import java.util.List;
 
 @Builder
 @Entity
@@ -18,6 +17,9 @@ import lombok.experimental.FieldDefaults;
 public class CategoryEntity extends FormEntity {
     private String name;
     private String description;
-    @ManyToOne(fetch = FetchType.LAZY)
-    private ProductEntity product;
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "category_product",
+            joinColumns = @JoinColumn(name = "category_id"),
+            inverseJoinColumns = @JoinColumn(name = "product_id"))
+    private List<ProductEntity> products;
 }

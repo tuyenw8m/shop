@@ -1,10 +1,12 @@
 package com.kma.shop.config;
 
 
+import com.kma.shop.controller.DataSeeder;
 import com.kma.shop.entity.Authority;
 import com.kma.shop.entity.RoleEntity;
 import com.kma.shop.entity.UserEntity;
 import com.kma.shop.repo.AuthorityRepo;
+import com.kma.shop.repo.ProductRepo;
 import com.kma.shop.repo.RoleRepo;
 import com.kma.shop.repo.UserRepo;
 import lombok.AccessLevel;
@@ -28,7 +30,7 @@ public class ApplicationInitConfig {
 
 
     @Bean
-    ApplicationRunner applicationRunner(UserRepo userRepo, RoleRepo roleRepo, AuthorityRepo authorityRepo){
+    ApplicationRunner applicationRunner(UserRepo userRepo, RoleRepo roleRepo, AuthorityRepo authorityRepo, DataSeeder dataSeeder){
         return args->{
             if(!authorityRepo.existsByName("SUPER_ADMIN")){
                 Authority authority = Authority.builder()
@@ -62,6 +64,8 @@ public class ApplicationInitConfig {
                         .build();
                 userRepo.save(user);
             }
+            dataSeeder.run();
+            dataSeeder.product();
         };
     }
 }

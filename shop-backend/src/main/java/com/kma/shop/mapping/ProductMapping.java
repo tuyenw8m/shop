@@ -28,6 +28,7 @@ public class ProductMapping {
                 .image_url(response.getImages().stream().map(ProductImageEntity::getUrl).toList())
                 .price(response.getPrice())
                 .name(response.getName())
+                .stock(response.getStock())
                 .description(response.getDescription())
                 .category_name(response.getCategories().stream().map(CategoryEntity::getName).toList())
                 .build();
@@ -44,6 +45,7 @@ public class ProductMapping {
                 .technical_specs(response.getTechnical_specs())
                 .image_url(response.getImages().stream().map(ProductImageEntity::getUrl).toList())
                 .price(response.getPrice())
+                .stock(response.getStock())
                 .name(response.getName())
                 .description(response.getDescription())
                 .category_name(response.getCategories().stream().map(CategoryEntity::getName).toList())

@@ -19,6 +19,8 @@ import javax.crypto.spec.SecretKeySpec;
 import java.text.ParseException;
 import java.util.Objects;
 
+
+//custom default decoder
 @Component
 @RequiredArgsConstructor
 public class CustomJwtDecoder implements JwtDecoder {

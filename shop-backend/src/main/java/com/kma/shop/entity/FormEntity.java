@@ -38,5 +38,6 @@ public class FormEntity {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX", timezone = "Asia/Ho_Chi_Minh")
     LocalDateTime deleteDate;
 
+    @Enumerated(EnumType.STRING)
     EntityStatus entityStatus = EntityStatus.CREATED;
 }

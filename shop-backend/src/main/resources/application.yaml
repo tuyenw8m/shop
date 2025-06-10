@@ -37,7 +37,7 @@ spring:
           time_zone: ${TIME_ZONE:Asia/Ho_Chi_Minh}
     hibernate:
       ddl-auto: update
-    show-sql: true
+    show-sql: false
 jwt:
   signerKey: ${SIGNED_KEY:4FUNMjFiPr1J29IIqbjc7QbPpX2RPfQSVAH8b5dQHVK5XxyTdjC6Ax9DG8YodTb5}
 
