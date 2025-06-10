@@ -1069,7 +1069,7 @@ chownr@^3.0.0:
     "@tanstack/react-query" "^5.79.0"
     "@tanstack/react-query-devtools" "^5.79.0"
     axios "^1.9.0"
-    client "file:C:/Users/Admin/AppData/Local/Yarn/Cache/v6/npm-client-0.0.0-76202c72-f491-476b-a25e-2578be869265-1749489045185/node_modules/client"
+    client "file:../../../../AppData/Local/Yarn/Cache/v6/npm-client-0.0.0-3e577744-6629-4d31-8701-0cc1df9370d3-1749521112160/node_modules/client"
     react "^19.1.0"
     react-dom "^19.1.0"
     react-hook-form "^7.56.4"
