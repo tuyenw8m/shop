@@ -36,11 +36,8 @@ public class TokenUtils {
 
     TokenService tokenService;
 
-    public String getUserId(String token) throws ParseException {
-        SignedJWT signedJWT = SignedJWT.parse(token);
-        return signedJWT.getJWTClaimsSet().getSubject();
-    }
 
+    //get token fron request
     public String getTokenFromRequest(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
         if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
@@ -49,6 +46,7 @@ public class TokenUtils {
         return null;
     }
 
+    //get user id by token
     public String getUserIdByToken(String token) throws ParseException {
         SignedJWT signedJWT;
         try {
@@ -59,10 +57,10 @@ public class TokenUtils {
         return signedJWT.getJWTClaimsSet().getSubject();
     }
 
+    //remove token
     public boolean removeToken(String token) throws ParseException {
-        SignedJWT signedJWT;
         try {
-            signedJWT = SignedJWT.parse(token);
+            SignedJWT.parse(token);
         } catch (ParseException e) {
             return false;
         }
@@ -70,6 +68,7 @@ public class TokenUtils {
         return true;
     }
 
+    // verify token
     public void isValidToken(String token) throws AppException, ParseException, JOSEException {
         SignedJWT signedJWT;
         try {
@@ -82,8 +81,6 @@ public class TokenUtils {
         if (!verified) {
             throw new AppException(ErrorCode.NOT_AUTHENTICATION);
         }
-        String userId = signedJWT.getJWTClaimsSet().getSubject();
-
         Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
         if (expiryTime.before(new Date()) || !tokenService.exist(token)) {
             throw new AppException(ErrorCode.NOT_AUTHENTICATION);
@@ -93,15 +90,16 @@ public class TokenUtils {
         }
     }
 
+
     public boolean checkToken(String token) throws JOSEException, ParseException {
         JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
         SignedJWT signedJWT = SignedJWT.parse(token);
-        String id = signedJWT.getJWTClaimsSet().getSubject();
         Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
         boolean verified = signedJWT.verify(verifier);
         return verified && expiryTime.after(new Date()) && tokenService.exist(token);
     }
 
+    //generate token from user
     public String generateToken(UserEntity user) throws JOSEException, ParseException {
         tokenService.deleteByUser(user);
         JWSHeader jwsHeader = new JWSHeader(JWSAlgorithm.HS512);

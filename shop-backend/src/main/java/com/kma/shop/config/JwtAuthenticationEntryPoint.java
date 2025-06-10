@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
+//custom jwt authentication entry point to resolve unauthentication access
 @Component
 public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
 

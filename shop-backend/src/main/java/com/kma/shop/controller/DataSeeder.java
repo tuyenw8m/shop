@@ -4,24 +4,32 @@ import com.github.javafaker.Faker;
 import com.kma.shop.entity.CategoryEntity;
 import com.kma.shop.entity.ProductEntity;
 import com.kma.shop.entity.UserEntity;
+import com.kma.shop.enums.EntityStatus;
 import com.kma.shop.repo.CategoryRepo;
 import com.kma.shop.repo.ProductRepo;
 import com.kma.shop.repo.UserRepo;
+import jakarta.transaction.Transactional;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
 
 @Component
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class DataSeeder implements CommandLineRunner {
 
-    private final UserRepo repo;
-    private final Faker faker;
-    private final CategoryRepo categoryRepo;
-    private  final ProductRepo productRepo;
-    private static List<String> categoryNames = Arrays.asList(
+    UserRepo repo;
+    Faker faker;
+    CategoryRepo categoryRepo;
+    ProductRepo productRepo;
+    PasswordEncoder encoder;
+
+     static List<String> categoryNames = Arrays.asList(
             "Linh kiện máy tính",
             "Thiết bị điện tử",
             "Thiết bị mạng",
@@ -50,11 +58,9 @@ public class DataSeeder implements CommandLineRunner {
     );
 
 
-
-
     @Override
     public void run(String... args) throws Exception {
-        if(categoryRepo.count() < 0) {
+        if(categoryRepo.count() < 20) {
             List<CategoryEntity> categories = new ArrayList<>();
             for(String categoryName : categoryNames) {
                 CategoryEntity category  = CategoryEntity.builder()
@@ -65,7 +71,7 @@ public class DataSeeder implements CommandLineRunner {
             }
             categoryRepo.saveAll(categories);
         }
-
+        List<UserEntity> users = new ArrayList<>();
         if(repo.count() < 1000) {
             for (int i = 0; i < 1000; i++) {
                 UserEntity user = new UserEntity();
@@ -73,16 +79,15 @@ public class DataSeeder implements CommandLineRunner {
                 user.setPhone(faker.phoneNumber().cellPhone());
                 user.setAddress(faker.address().fullAddress());
                 user.setName(faker.name().username());
-                user.setPassword("123456"); // Đặt cứng cho đơn giản
-
-                repo.save(user);
+                user.setPassword(encoder.encode("123456")); // Đặt cứng cho đơn giản
+                users.add(user);
             }
         }
-
-
+        repo.saveAll(users);
     }
-
+    @Transactional
     public void product(){
+
         List<CategoryEntity> allCategories = categoryRepo.findAll();
         if (productRepo.count() < 10000) {
             List<ProductEntity> products = new ArrayList<>();
@@ -92,31 +97,27 @@ public class DataSeeder implements CommandLineRunner {
             List<String> specs = Arrays.asList("i5-12400F", "B660M", "16GB DDR4", "512GB NVMe", "RTX 4060", "24 inch 144Hz", "Bluetooth", "RGB");
 
             for (int i = 0; i < 10000; i++) {
-                // Chọn brand/type/spec ngẫu nhiên
                 String brand = brands.get(rand.nextInt(brands.size()));
                 String type = types.get(rand.nextInt(types.size()));
                 String spec = specs.get(rand.nextInt(specs.size()));
                 String name = brand + " " + type + " " + spec;
 
-                // Chọn ngẫu nhiên 1–2 category
                 Set<CategoryEntity> categoryEntities = new HashSet<>();
                 categoryEntities.add(allCategories.get(rand.nextInt(allCategories.size())));
                 if (rand.nextBoolean()) {
                     categoryEntities.add(allCategories.get(rand.nextInt(allCategories.size())));
                 }
 
-
-
-                // Tạo product
                 ProductEntity product = ProductEntity.builder()
                         .name(name)
-                        .price(rand.nextFloat() * 15000000)
+                        .price(rand.nextInt(1000) * 10000)
                         .stock(rand.nextInt(100))
                         .description(faker.lorem().sentence())
                         .technical_specs(faker.lorem().sentence())
                         .highlight_specs(faker.lorem().sentence())
                         .categories(new ArrayList<>(categoryEntities))
                         .build();
+                categoryEntities.forEach(a -> a.getProducts().add(product));
                 products.add(product);
             }
 

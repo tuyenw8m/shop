@@ -25,7 +25,7 @@ public class ProductEntity extends FormEntity{
     private List<ImageEntity> imageV1;
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductImageEntity> images;
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ManyToMany(mappedBy = "products", fetch = FetchType.EAGER)
     private List<CategoryEntity> categories;
     @ManyToMany(mappedBy = "products")
     private List<CartEntity> carts;

@@ -1,52 +1,45 @@
 package com.kma.shop.config;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.jwt.JwtValidators;
-import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
-import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
-
-import javax.crypto.spec.SecretKeySpec;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
-@RequiredArgsConstructor
 @EnableMethodSecurity
 @EnableWebSecurity
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class SecurityConfig  {
-    @Value("${jwt.signerKey}")
-    private String SIGNED_KEY;
-    @Autowired
-    private CustomJwtDecoder customJwtDecoder;
-    @Autowired
-    private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    CustomJwtDecoder customJwtDecoder;
+    JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
+    public SecurityConfig(CustomJwtDecoder customJwtDecoder, JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint) {
+        this.customJwtDecoder = customJwtDecoder;
+        this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
+    }
 
+    //khi server khởi chạy, spring security sẽ tìm 1 Bean có kiểu là SecurityFilterChain trong ApplicationContext
+    //nếu không tìm thấy Bean đó thì nó sẽ tự tạo với cấu hình mặc định
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
+        System.err.println("Secuity filterchain");
         httpSecurity
                 .oauth2ResourceServer(oauth2->
                         oauth2.jwt(jwtConfigurer -> jwtConfigurer
-                                .decoder(customJwtDecoder)
-                                .jwtAuthenticationConverter(jwtAuthenticationConverter()))
-                                .authenticationEntryPoint(jwtAuthenticationEntryPoint))
+                                .decoder(customJwtDecoder) //decode bằng custom decoder
+                                .jwtAuthenticationConverter(jwtAuthenticationConverter())) //use converter
+                                .authenticationEntryPoint(jwtAuthenticationEntryPoint)) // config handle error when authentication
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(withDefaults());
 
@@ -92,8 +85,8 @@ public class SecurityConfig  {
 
 
                                 .requestMatchers(HttpMethod.GET,"/coupons").permitAll()
-                                .requestMatchers(HttpMethod.POST,"/products/*/reviews").hasRole("ADMIN")
-                                .requestMatchers(HttpMethod.POST,"/reviews/apply").hasRole("USER")
+//                                .requestMatchers(HttpMethod.POST,"/products/*/reviews").hasRole("ADMIN")
+//                                .requestMatchers(HttpMethod.POST,"/reviews/apply").hasRole("USER")
 
                                 .anyRequest().authenticated());
         return httpSecurity.build();
