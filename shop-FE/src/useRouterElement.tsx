@@ -2,32 +2,33 @@ import { useRoutes } from 'react-router-dom'
 import ProductList from './pages/ProductList'
 import Login from './pages/Login'
 import Register from './pages/Register'
-import MainLayout from './layouts/WebLayout/MainLayout'
+import DefaultLayout from './layouts/DefaultLayout/DefaultLayout'
+import AccountLayout from './layouts/AccountLayout/AccountLayout'
 
 export default function useRouterElement() {
   const routeElements = useRoutes([
     {
       path: '/',
       element: (
-        <MainLayout>
+        <DefaultLayout>
           <ProductList />
-        </MainLayout>
+        </DefaultLayout>
       )
     },
     {
       path: '/login',
       element: (
-        <MainLayout>
+        <AccountLayout>
           <Login />
-        </MainLayout>
+        </AccountLayout>
       )
     },
     {
       path: '/register',
       element: (
-        <MainLayout>
+        <AccountLayout>
           <Register />
-        </MainLayout>
+        </AccountLayout>
       )
     }
   ])

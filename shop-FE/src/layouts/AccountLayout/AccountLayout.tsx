@@ -1,18 +1,18 @@
-import Header from 'src/components/Header'
 import Footer from 'src/components/Footer'
+import HeaderAuth from 'src/components/HeaderAuth'
 
 interface Props {
   children: React.ReactNode
 }
 
-function MainLayout({ children }: Props) {
+function AccountLayout({ children }: Props) {
   return (
     <>
-      <Header />
+      <HeaderAuth />
       {children}
       <Footer />
     </>
   )
 }
 
-export default MainLayout
+export default AccountLayout
