@@ -166,7 +166,6 @@ public class UserMapping {
         response.setEmail(user.getEmail() != null ? user.getEmail() : ""); // Xử lý null thành chuỗi rỗng
         response.setPhone(user.getPhone() != null ? user.getPhone() : "");
         response.setAvatar_url(user.getImageLink() != null ? user.getImageLink() : "");
-        List<String> roles = new ArrayList<>();
         response.setRoles(user.getRoles().stream().map(RoleEntity::getRoleName).collect(Collectors.toList()));
 
         response.setAddress(user.getAddress() != null ? user.getAddress() : "");
