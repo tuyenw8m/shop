@@ -11,7 +11,7 @@ export default function Header() {
 
           {/* Search box */}
           <div className='flex-1 w-full'>
-            <form className='flex items-center bg-white rounded-full border border-gray-300 overflow-hidden w-full'>
+            <form className='flex items-center bg-white rounded-lg border border-gray-300 overflow-hidden w-full'>
               <input
                 type='text'
                 className='flex-grow px-4 py-2 outline-none text-sm'
