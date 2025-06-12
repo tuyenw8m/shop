@@ -1,38 +1,27 @@
+import { Link } from 'react-router-dom'
+import { useEffect, useState } from 'react'
 import Slideshow from 'src/components/SlideShow'
 
 export default function ProductList() {
-  const products = [
-    {
-      id: 1,
-      name: 'Sản phẩm 1',
-      price: '1.000.000₫',
-      image: 'https://placehold.co/300x200?text=Product+1'
-    },
-    {
-      id: 2,
-      name: 'Sản phẩm 2',
-      price: '2.000.000₫',
-      image: 'https://placehold.co/300x200?text=Product+2'
-    },
-    {
-      id: 3,
-      name: 'Sản phẩm 3',
-      price: '3.000.000₫',
-      image: 'https://placehold.co/300x200?text=Product+3'
-    },
-    {
-      id: 4,
-      name: 'Sản phẩm 4',
-      price: '4.000.000₫',
-      image: 'https://placehold.co/300x200?text=Product+4'
-    },
-    {
-      id: 5,
-      name: 'Sản phẩm 5',
-      price: '5.000.000₫',
-      image: 'https://placehold.co/300x200?text=Product+5'
+  const [products, setProducts] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await fetch('https://api.example.com/products') //goiapi
+        const data = await response.json()
+        setProducts(data)
+      } catch (error) {
+        console.error('Lỗi khi lấy danh sách sản phẩm:', error)
+      } finally {
+        setLoading(false)
+      }
     }
-  ]
+    fetchProducts()
+  }, [])
+
+  if (loading) return <div className="pl-12 pr-12 pt-8 pb-8">Đang tải...</div>
 
   return (
     <>
@@ -49,7 +38,6 @@ export default function ProductList() {
                   <li className='hover:text-teal-600 cursor-pointer'>Xiaomi</li>
                 </ul>
               </div>
-
               <div>
                 <h4 className='font-semibold text-gray-800 mb-2'>Laptop</h4>
                 <ul className='space-y-1 ml-4 text-gray-600'>
@@ -58,7 +46,6 @@ export default function ProductList() {
                   <li className='hover:text-teal-600 cursor-pointer'>ASUS</li>
                 </ul>
               </div>
-
               <div>
                 <h4 className='font-semibold text-gray-800 mb-2'>Phụ Kiện</h4>
                 <ul className='space-y-1 ml-4 text-gray-600'>
@@ -70,19 +57,20 @@ export default function ProductList() {
             </div>
           </aside>
 
-          {/* Product Grid */}
           <section className='flex-1 mb-12'>
             <Slideshow />
             <div className='grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-6 mt-6'>
               {products.map((product) => (
-                <div key={product.id} className='bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow'>
-                  <img src={product.image} alt={product.name} className='w-full h-40 object-cover mb-4 rounded' />
-                  <h3 className='text-lg font-semibold text-gray-800'>{product.name}</h3>
-                  <p className='text-green-600 font-bold mt-2'>{product.price}</p>
-                  <button className='mt-4 w-full bg-teal-600 text-white py-2 rounded-full hover:bg-teal-700 transition-colors'>
-                    Thêm vào giỏ hàng
-                  </button>
-                </div>
+                <Link to={`/product/${product.id}`} key={product.id} className="block">
+                  <div className='bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow'>
+                    <img src={product.image} alt={product.name} className='w-full h-40 object-cover mb-4 rounded' />
+                    <h3 className='text-lg font-semibold text-gray-800'>{product.name}</h3>
+                    <p className='text-green-600 font-bold mt-2'>{product.price}</p>
+                    <button className='mt-4 w-full bg-teal-600 text-white py-2 rounded-full hover:bg-teal-700 transition-colors'>
+                      Thêm vào giỏ hàng
+                    </button>
+                  </div>
+                </Link>
               ))}
             </div>
           </section>
