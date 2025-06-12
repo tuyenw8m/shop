@@ -21,7 +21,7 @@ export default function ProductList() {
     fetchProducts()
   }, [])
 
-  if (loading) return <div className="pl-12 pr-12 pt-8 pb-8">Đang tải...</div>
+  if (loading) return <div className='pl-12 pr-12 pt-8 pb-8'>Đang tải...</div>
 
   return (
     <>
@@ -61,7 +61,7 @@ export default function ProductList() {
             <Slideshow />
             <div className='grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-6 mt-6'>
               {products.map((product) => (
-                <Link to={`/product/${product.id}`} key={product.id} className="block">
+                <Link to={`/product/${product.id}`} key={product.id} className='block'>
                   <div className='bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow'>
                     <img src={product.image} alt={product.name} className='w-full h-40 object-cover mb-4 rounded' />
                     <h3 className='text-lg font-semibold text-gray-800'>{product.name}</h3>

@@ -4,12 +4,16 @@ class Http {
   instance: AxiosInstance
   constructor() {
     this.instance = axios.create({
-      baseURL: 'https://localhost:8888/', // để port chung cho đồng bộ khi pull về
+      baseURL: 'http://localhost:8888/shop/api/v1',
       timeout: 10000,
       headers: {
         'Content-Type': 'application/json'
       }
     })
+    // Add a request interceptor
+    // this.instance.interceptors.request.use()
+    // // Add a response interceptor
+    // this.instance.interceptors.response.use()
   }
 }
 
