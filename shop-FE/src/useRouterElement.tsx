@@ -1,47 +1,55 @@
 // src/useRouterElement.tsx
-import { useRoutes } from 'react-router-dom';
+import { useRoutes, Navigate } from 'react-router-dom';
+import { useAuth } from './pages/contexts/AuthContext'; // Import useAuth
 import Login from './pages/Login';
 import Register from './pages/Register';
 import ProductDetail from './pages/productDetail/productDetail';
 import DefaultLayout from './layouts/DefaultLayout/DefaultLayout';
 import AccountLayout from './layouts/AccountLayout/AccountLayout';
 import Home from './pages/Home';
-import ProtectedRoute from './components/ProtectedRoute';
 
 export default function useRouterElement() {
+  const { user } = useAuth() || { user: null }; // Lấy thông tin user từ AuthContext
+
   const routeElements = useRoutes([
     {
       path: '/',
-      element: (
-        <ProtectedRoute>
-          <DefaultLayout>
-            <Home />
-          </DefaultLayout>
-        </ProtectedRoute>
+      element: user ? (
+        <DefaultLayout>
+          <Home />
+        </DefaultLayout>
+      ) : (
+        <Navigate to="/login" />
       ),
     },
     {
       path: '/login',
-      element: (
+      element: !user ? (
         <AccountLayout>
           <Login />
         </AccountLayout>
+      ) : (
+        <Navigate to="/" />
       ),
     },
     {
       path: '/register',
-      element: (
+      element: !user ? (
         <AccountLayout>
           <Register />
         </AccountLayout>
+      ) : (
+        <Navigate to="/" />
       ),
     },
     {
       path: '/product/:id',
-      element: (
+      element: user ? (
         <DefaultLayout>
           <ProductDetail />
         </DefaultLayout>
+      ) : (
+        <Navigate to="/login" />
       ),
     },
   ]);
