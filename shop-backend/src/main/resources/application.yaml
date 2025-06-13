@@ -27,9 +27,9 @@ spring:
   datasource:
     hikari:
       maximum-pool-size: 10
-    url: ${DATABASE_URL:jdbc:mysql://localhost:3306/test3?useSSL=false&allowPublicKeyRetrieval=true}
+    url: ${DATABASE_URL:jdbc:mysql://localhost:3306/db_ecommerceKMA?useSSL=false&allowPublicKeyRetrieval=true}
     username: ${DATABASE_USERNAME:root}
-    password: ${DATABASE_PASSWORD:12345678}
+    password: ${DATABASE_PASSWORD:07102004}
   jpa:
     properties:
       hibernate:

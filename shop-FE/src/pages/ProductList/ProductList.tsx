@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useEffect, useState } from 'react'
-import Slideshow from 'src/components/SlideShow'
+import Slideshow from 'src/components/HeroSlide'
 
 export default function ProductList() {
   const [products, setProducts] = useState([])

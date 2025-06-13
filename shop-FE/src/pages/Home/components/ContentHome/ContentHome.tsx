@@ -1,26 +1,37 @@
 import { useQuery } from '@tanstack/react-query'
 import productApi from 'src/apis/ProductService.api'
-import CardProduct from 'src/components/CardProduct'
-import Slideshow from 'src/components/SlideShow'
+import HeroSlide from 'src/components/HeroSlide/SlideShow'
 import useQueryParams from 'src/hooks/useQueryParams'
+import FeatureBanner from './components/FeatureBanner'
+import FeaturedBrands from './components/FeaturedBrands'
+import ProductGrid from 'src/components/ProductGird'
+import type { ProductList } from 'src/types/product.type'
 
 export default function ContentHome() {
   const queryParamsUrl = useQueryParams()
-  // const [page, setPage] = useState(1)
-  const { data } = useQuery({
+
+  const { data, isLoading, error } = useQuery({
     queryKey: ['products', queryParamsUrl],
-    queryFn: () => {
-      return productApi.getAllProducts(queryParamsUrl)
-    }
+    queryFn: () => productApi.getAllProducts(queryParamsUrl)
   })
-  console.log(queryParamsUrl, data)
+
+  if (isLoading) return <div>Đang tải...</div>
+  if (error || !data) return <div>Có lỗi xảy ra</div>
+
+  const products: ProductList = data.data.data
+
+  const listSuggest: ProductList = {
+    ...products,
+    content: products.content?.filter((product) => product.category_name.length < 2) || []
+  }
 
   return (
     <section className='flex-1 mb-12'>
-      <Slideshow />
-      <div className='grid grid-cols-2 sm:grid-cols-3 lg:grid xl:grid-cols-5 gap-6 mt-6'>
-        {data?.data.data.content.map((product) => <CardProduct product={product} />)}
-      </div>
+      <HeroSlide />
+      <FeatureBanner />
+      <ProductGrid title='Flash Sale 🔥' products={products} viewAllLink='/flash-sale' />
+      <ProductGrid title='Gợi Ý Cho Bạn ' products={listSuggest} viewAllLink='/suggest' />
+      <FeaturedBrands />
     </section>
   )
 }
