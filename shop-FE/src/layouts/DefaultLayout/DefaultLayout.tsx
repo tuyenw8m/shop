@@ -1,3 +1,4 @@
+import { Fragment, useState } from 'react'
 import Footer from 'src/components/Footer'
 import Header from 'src/components/Header'
 
@@ -6,12 +7,14 @@ interface Props {
 }
 
 function DefaultLayout({ children }: Props) {
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+
   return (
-    <>
-      <Header />
+    <Fragment>
+      <Header onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
       {children}
       <Footer />
-    </>
+    </Fragment>
   )
 }
 
