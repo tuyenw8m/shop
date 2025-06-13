@@ -1,9 +1,11 @@
+// src/pages/Login.tsx
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { Link, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import LeftImage from '../leftimages/leftimages.jpg';
+import { AuthContext } from '../contexts/AuthContext';
 
 // Yup schema validation
 const schema = yup.object({
@@ -27,7 +29,8 @@ export default function Login() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
-  const [showPassword, setShowPassword] = useState(false); // State cho hiển thị mật khẩu
+  const [showPassword, setShowPassword] = useState(false);
+  const { login } = useContext(AuthContext);
 
   const onSubmit = async (data: LoginForm) => {
     setLoading(true);
@@ -40,9 +43,7 @@ export default function Login() {
         },
         body: JSON.stringify(data),
       });
-      console.log("reponse", response);
 
-      // Kiểm tra phản hồi có phải JSON không
       const contentType = response.headers.get('content-type');
       if (!contentType || !contentType.includes('application/json')) {
         throw new Error('Phản hồi từ server không hợp lệ!');
@@ -54,12 +55,8 @@ export default function Login() {
         throw new Error(result.message || 'Đăng nhập thất bại!');
       }
 
-      console.log('Dữ liệu phản hồi:', result);
+      login(result.token); // Gọi hàm login từ AuthContext
       alert('✅ Đăng nhập thành công!');
-      // Lưu token (nếu có) - Cảnh báo: localStorage không an toàn cho môi trường production
-      if (result.token) {
-        localStorage.setItem('token', result.token);
-      }
       navigate('/');
     } catch (error: any) {
       console.error('Lỗi:', error);
@@ -69,7 +66,6 @@ export default function Login() {
     }
   };
 
-  // Xử lý đăng nhập qua Gmail (giả lập, cần tích hợp OAuth thực tế)
   const handleGoogleLogin = () => {
     setLoading(true);
     setApiError(null);
@@ -85,20 +81,14 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex flex-col bg-cover bg-center bg-[#E7E7E7] overflow-hidden">
-
-      {/* Main Content */}
       <div className="flex-1 flex items-center justify-center w-full">
         <div className="bg-white rounded-3xl border-4 border-[#EADCCF] max-w-6xl w-full min-h-[500px] flex shadow-lg bg-gradient-to-br from-white to-gray-100 overflow-hidden animate-scaleIn">
-          {/* Left Section (image) */}
           <div
             className="hidden md:block w-1/2 bg-cover bg-center"
             style={{ backgroundImage: `url(${LeftImage})` }}
           ></div>
-
-          {/* Right Section (form) */}
           <div className="w-full md:w-1/2 p-6 flex flex-col justify-center items-center">
             <h2 className="text-center text-2xl font-bold text-gray-800 mb-6">ĐĂNG NHẬP</h2>
-
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 w-full max-w-md">
               <div>
                 <input
@@ -111,7 +101,6 @@ export default function Login() {
                   <span className="text-red-500 text-sm block mt-1">{errors.email.message}</span>
                 )}
               </div>
-
               <div>
                 <input
                   type={showPassword ? 'text' : 'password'}
@@ -123,7 +112,6 @@ export default function Login() {
                   <span className="text-red-500 text-sm block mt-1">{errors.password.message}</span>
                 )}
               </div>
-
               <div className="flex justify-between items-center text-sm text-gray-600">
                 <label className="flex items-center">
                   <input
@@ -142,12 +130,9 @@ export default function Login() {
                   </Link>
                 </div>
               </div>
-
-              {/* Hiển thị lỗi từ API nếu có */}
               {apiError && (
                 <div className="text-red-500 text-sm text-center">{apiError}</div>
               )}
-
               <button
                 type="submit"
                 disabled={loading}
@@ -155,14 +140,13 @@ export default function Login() {
               >
                 {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
               </button>
-
               <button
                 type="button"
                 onClick={handleGoogleLogin}
                 disabled={loading}
                 className="w-full bg-red-600 text-white py-3 rounded-full hover:bg-red-700 transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? 'Đăng nhập bằng SĐT' : 'Đăng nhập bằng SĐT'}
+                {loading ? 'Đang đăng nhập bằng SĐT' : 'Đăng nhập bằng SĐT'}
               </button>
             </form>
           </div>

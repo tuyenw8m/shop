@@ -1,9 +1,11 @@
+// src/pages/Register.tsx
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Link } from 'react-router-dom';
 import { type FormDataTypeRegister } from 'src/utils/rulesValidate';
 import { schema } from 'src/utils/rulesValidate';
 import LeftImage from '../leftimages/leftre.jpg';
+import { useState } from 'react';
 
 export default function Register() {
   const {
@@ -13,10 +15,11 @@ export default function Register() {
   } = useForm<FormDataTypeRegister>({
     resolver: yupResolver(schema),
   });
+  const [apiError, setApiError] = useState<string | null>(null);
 
   const onSubmit = async (data: FormDataTypeRegister) => {
-    console.log('Dữ liệu gửi đi:', data); // Thêm log để kiểm tra
-    // Lọc dữ liệu, bỏ qua confirm_password trước khi gửi
+    setApiError(null);
+    console.log('Dữ liệu gửi đi:', data);
     const { confirm_password, ...dataToSend } = data;
     try {
       const response = await fetch('http://localhost:8888/shop/api/v1/auth/register', {
@@ -33,16 +36,17 @@ export default function Register() {
       }
 
       const result = await response.json();
+      console.log('Phản hồi từ server:', result); // Log toàn bộ phản hồi
 
       if (!response.ok) {
-        throw new Error(result.message || 'Đăng ký thất bại!');
+        throw new Error(result.message || result.error || 'Đăng ký thất bại!');
       }
 
-      console.log('Dữ liệu phản hồi:', result);
+      console.log('Dữ liệu phản hồi thành công:', result);
       alert('✅ Đăng ký thành công!');
     } catch (error: any) {
-      console.error('Lỗi:', error);
-      alert(error.message || 'Có lỗi xảy ra khi đăng ký!');
+      console.error('Lỗi chi tiết:', error);
+      setApiError(error.message || 'Có lỗi xảy ra khi đăng ký!');
     }
   };
 
@@ -56,16 +60,19 @@ export default function Register() {
           ></div>
           <div className="w-full md:w-1/2 p-6 flex flex-col justify-center items-center">
             <h2 className="text-center text-2xl font-bold text-gray-800 mb-6">ĐĂNG KÝ</h2>
+            {apiError && (
+              <div className="text-red-500 text-sm text-center mb-4">{apiError}</div>
+            )}
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 w-full max-w-md" noValidate>
               <div>
                 <input
                   type="text"
-                  placeholder="Username"
+                  placeholder="Name"
                   className="w-full px-5 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-teal-500 bg-gray-50 text-gray-700 placeholder-gray-400 transition-all duration-200"
-                  {...register('username')}
+                  {...register('name')}
                 />
-                {errors?.username && (
-                  <span className="text-red-500 text-sm block mt-1">{errors.username.message}</span>
+                {errors?.name && (
+                  <span className="text-red-500 text-sm block mt-1">{errors.name.message}</span>
                 )}
               </div>
               <div>
