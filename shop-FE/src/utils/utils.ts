@@ -1,5 +1,5 @@
 export function formatPrices(price: number) {
-  return new Intl.NumberFormat('de-DE').format(price)
+  return new Intl.NumberFormat('vi-VN').format(price)
 }
 
 export function formatNumberToSocialStyle(value: number) {
@@ -23,8 +23,6 @@ export function getCategoryStyle(index: number) {
   }
 }
 
-export function originalPrice(price: number) {
-  const randomSale = [0.1, 0.12, 0.15, 0.2, 0.3]
-  const randomPrice = randomSale[Math.floor(Math.random() * randomSale.length)]
-  return Math.round(price / (1 - randomPrice))
+export function salePercent(priceOriginal: number, price: number) {
+  return Math.round(((priceOriginal - price) / priceOriginal) * 100)
 }

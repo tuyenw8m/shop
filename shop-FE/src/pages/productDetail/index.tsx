@@ -1,3 +1,3 @@
-import productDetail from './productDetail'
+import productDetail from './ProductDetail'
 
 export default productDetail

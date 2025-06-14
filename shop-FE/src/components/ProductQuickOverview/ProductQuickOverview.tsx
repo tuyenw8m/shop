@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useId } from 'react'
 import { createPortal } from 'react-dom'
 import type { Product } from 'src/types/product.type'
 import { formatPrices } from 'src/utils/utils'
+import RatingProduct from '../RatingProduct/RatingProduct'
 
 interface Props {
   product: Product
@@ -11,6 +12,7 @@ interface Props {
 export default function ProductQuickOverview({ product, onClose }: Props) {
   const [quantity, setQuantity] = useState(1)
   const [mounted, setMounted] = useState(false)
+  const [selectedImage, setSelectedImage] = useState(0)
   const modalRef = useRef<HTMLDivElement>(null)
   const idElement = useId()
 
@@ -82,7 +84,11 @@ export default function ProductQuickOverview({ product, onClose }: Props) {
         <div className='grid md:grid-cols-2 gap-6 p-6'>
           <div className='space-y-4'>
             <div className='aspect-square bg-gray-100 rounded-lg flex items-center justify-center'>
-              <img src={product.image_url[0]} alt={product.name} className='max-h-full max-w-full object-contain' />
+              <img
+                src={product.image_url[selectedImage]}
+                alt={product.name}
+                className='max-h-full max-w-full object-contain'
+              />
             </div>
             <div className='flex space-x-2 overflow-x-auto py-2'>
               {product.image_url.slice(0, 4).map((img, index) => (
@@ -90,7 +96,12 @@ export default function ProductQuickOverview({ product, onClose }: Props) {
                   key={index}
                   className='flex-shrink-0 w-16 h-16 border rounded overflow-hidden cursor-pointer hover:border-blue-500 transition-colors'
                 >
-                  <img src={img} alt={`${product.name} ${index}`} className='w-full h-full object-cover' />
+                  <img
+                    src={img}
+                    alt={`${product.name} ${index}`}
+                    onClick={() => setSelectedImage(index)}
+                    className='w-full h-full object-cover'
+                  />
                 </div>
               ))}
             </div>
@@ -98,7 +109,9 @@ export default function ProductQuickOverview({ product, onClose }: Props) {
 
           <div>
             <div className='mb-4'>
-              <span className='text-sm text-gray-500'>{product.category_name[0]}</span>
+              <span className='text-sm text-gray-500'>
+                {product.parent_category_name}/{product.branch_name}
+              </span>
               <h1 className='text-xl font-bold mt-1 line-clamp-2'>{product.name}</h1>
               <div className='flex items-center mt-2'>
                 <span className='text-sm text-gray-500'>{product.highlight_specs}</span>
@@ -107,22 +120,22 @@ export default function ProductQuickOverview({ product, onClose }: Props) {
 
             <div className='flex items-center mb-4'>
               <div className='flex text-yellow-400 mr-2'>
-                {[...Array(5)].map((_, i) => (
-                  <span key={i}>{i < Math.floor(product.stock) ? '★' : '☆'}</span>
-                ))}
+                <RatingProduct ratingValue={product.rating} />
               </div>
-              <span className='text-sm text-gray-600'>({product.stock} đánh giá)</span>
+              <span className='text-sm text-gray-600'>({product.sold} đã bán)</span>
             </div>
 
             {/* Price */}
             <div className='mb-6'>
               <div className='flex items-baseline space-x-2'>
                 <span className='text-2xl font-bold text-red-600'>{formatPrices(product.price)}đ</span>
-                <span className='text-lg text-gray-500 line-through'>{formatPrices(product.price * 0.2)}đ</span>
-                <span className='bg-red-100 text-red-800 px-2 py-1 rounded text-sm font-bold'>- 36%</span>
+                <span className='text-lg text-gray-500 line-through'>{formatPrices(product.original_price)}đ</span>
+                <span className='bg-green-100 text-white px-2 py-1 rounded text-sm font-bold'>
+                  {1 - (product.original_price - product.price) * 100} %
+                </span>
               </div>
               <div className='text-green-600 font-medium mt-1'>
-                Tiết kiệm: {new Intl.NumberFormat('vi-VN').format(product.price - product.price)}đ
+                Tiết kiệm: {formatPrices(product.price - product.price)}đ
               </div>
             </div>
 
