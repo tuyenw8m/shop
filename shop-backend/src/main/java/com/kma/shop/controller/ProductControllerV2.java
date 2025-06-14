@@ -2,10 +2,7 @@ package com.kma.shop.controller;
 
 import com.kma.shop.dto.ApiResponse;
 import com.kma.shop.dto.request.ProductCreationRequest;
-import com.kma.shop.dto.response.PageResponse;
-import com.kma.shop.dto.response.ProductAdminResponse;
-import com.kma.shop.dto.response.ProductResponse;
-import com.kma.shop.dto.response.ProductResponseV2;
+import com.kma.shop.dto.response.*;
 import com.kma.shop.exception.AppException;
 import com.kma.shop.service.interfaces.ProductService;
 import com.kma.shop.service.interfaces.ProductServiceV2;
@@ -83,9 +80,17 @@ public class ProductControllerV2 {
 
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/disable/{id}")
-    public ApiResponse<ProductAdminResponse> disableProduct(@PathVariable String id) throws AppException {
-        return ApiResponse.<ProductAdminResponse>builder()
+    public ApiResponse<ProductAdminResponseV2> disableProduct(@PathVariable String id) throws AppException {
+        return ApiResponse.<ProductAdminResponseV2>builder()
                 .data(productServiceV2.disableProduct(id))
+                .build();
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/enable/{id}")
+    public ApiResponse<ProductAdminResponseV2> enableProduct(@PathVariable String id) throws AppException {
+        return ApiResponse.<ProductAdminResponseV2>builder()
+                .data(productServiceV2.enableProduct(id))
                 .build();
     }
 

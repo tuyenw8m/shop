@@ -111,6 +111,7 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.PUT,"/products/v2/*").hasRole("ADMIN")
                                 .requestMatchers(HttpMethod.DELETE,"/products/v2/*").hasRole("ADMIN")
                                 .requestMatchers(HttpMethod.PUT,"/products/v2/disable/*").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.PUT,"/products/v2/enable/*").hasRole("ADMIN")
 
                                 // Đảm bảo bất kỳ request nào khác đều phải được xác thực
                                 .anyRequest().authenticated());

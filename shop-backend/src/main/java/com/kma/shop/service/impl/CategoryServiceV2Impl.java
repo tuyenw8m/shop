@@ -189,10 +189,24 @@ public class CategoryServiceV2Impl  implements CategoryServiceV2 {
     }
 
     @Override
+    public ParentCategoryEntity findParentByChildId(String id) throws AppException {
+        if(id == null || id.trim().isEmpty()) return null;
+        ChildCategoryEntity childCategory = findChildById(id);
+        if(childCategory == null) return null;
+        return childCategory.getParent();
+    }
+
+    @Override
     public ParentCategoryEntity getParentByChild(String name) throws AppException {
         if(name == null || name.isEmpty()) return null;
 
         return findChildByName(name).getParent();
+    }
+
+    @Override
+    public ParentCategoryEntity getByChildId(String id) throws AppException {
+        if(id == null || id.isEmpty()) return null;
+        return findChildById(id).getParent();
     }
 
     @Override
