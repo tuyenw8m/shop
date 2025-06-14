@@ -14,14 +14,22 @@ export default function useRouterElement() {
   const routeElements = useRoutes([
     {
       path: '/',
-      element: user ? (
+      element: (
         <DefaultLayout>
           <Home />
         </DefaultLayout>
-      ) : (
-        <Navigate to='/login' />
       )
     },
+    //  {
+    //   path: '/',
+    //   element: user ? (
+    //     <DefaultLayout>
+    //       <Home />
+    //     </DefaultLayout>
+    //   ) : (
+    //     <Navigate to='/login' />
+    //   )
+    // },
     {
       path: '/login',
       element: !user ? (
