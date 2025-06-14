@@ -59,6 +59,7 @@ public class SecurityConfig {
                                         "/auth/register",
                                         "/authentication",
                                         "/logoutt",
+                                        HttpMethod.GET.name(), "/branches",
                                         HttpMethod.GET.name(), "/products",
                                         HttpMethod.GET.name(), "/products/*",
                                         HttpMethod.GET.name(), "/categories",
@@ -74,6 +75,10 @@ public class SecurityConfig {
                                 // --- End: Các đường dẫn cho phép truy cập công khai (permitAll) ---
 
                                 // --- Start: Các đường dẫn yêu cầu xác thực và quyền cụ thể ---
+                                .requestMatchers(HttpMethod.PUT, "/branches/*").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.DELETE, "/branches/*").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.POST, "/branches").hasRole("ADMIN")
+
                                 .requestMatchers("/users/me").hasRole("USER")
                                 .requestMatchers(HttpMethod.GET, "/users").hasRole("ADMIN")
 

@@ -12,6 +12,7 @@ import com.kma.shop.service.interfaces.ProductServiceV2;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.query.Page;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -27,6 +28,14 @@ public class ProductControllerV2 {
 
     public ProductControllerV2(@Qualifier("productServiceV2Impl") ProductServiceV2 productServiceV2) {
         this.productServiceV2 = productServiceV2;
+    }
+
+    @GetMapping("/top")
+    public ApiResponse<PageResponse<ProductResponseV2>> getTopSold(@RequestParam(required = false, defaultValue = "1") int page,
+                                                           @RequestParam(required = false, defaultValue = "10") int limit) {
+        return ApiResponse.<PageResponse<ProductResponseV2>>builder()
+                .data(productServiceV2.getTopSold(page, limit))
+                .build();
     }
 
     @PreAuthorize("hasRole('ADMIN')")

@@ -9,6 +9,7 @@ import com.kma.shop.exception.ErrorCode;
 import com.kma.shop.mapping.CategoryMapping;
 import com.kma.shop.repo.ChildCategoryRepo;
 import com.kma.shop.repo.ParentCategoryRepo;
+import com.kma.shop.repo.ProductRepo;
 import com.kma.shop.service.interfaces.BranchService;
 import com.kma.shop.service.interfaces.CategoryServiceV2;
 import lombok.AccessLevel;
@@ -16,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -27,6 +29,7 @@ public class CategoryServiceV2Impl  implements CategoryServiceV2 {
     ChildCategoryRepo childRepo;
     CategoryMapping categoryMapping;
     BranchService branchService;
+    private final ProductRepo productRepo;
 
     @Override
     public List<CategoryResponse> getAll(){
@@ -35,19 +38,27 @@ public class CategoryServiceV2Impl  implements CategoryServiceV2 {
     }
 
     @Override
-    public CategoryResponse createParent(CategoryCreationRequest request){
+    public CategoryResponse createParent(CategoryCreationRequest request) throws AppException {
         if(request == null) return null;
+        if(parentRepo.existsByName(request.getName())) throw new AppException(ErrorCode.CATEGORY_EXISTED);
         ParentCategoryEntity categoryEntity = categoryMapping.toParentCategoryEntity(request);
-
         return categoryMapping.toParentCategoryResponse(parentRepo.save(categoryEntity));
     }
 
 
     @Override
-    public CategoryResponse createChild(CategoryCreationRequest request, String parentId) throws AppException {
-        ParentCategoryEntity parent = parentRepo.findById(parentId)
+    public CategoryResponse createChild(CategoryCreationRequest request, String id) throws AppException {
+        if(request == null || id == null || id.isEmpty())
+            throw new AppException(ErrorCode.INVALID_INPUT);
+
+        ParentCategoryEntity parent = parentRepo.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
+
         ChildCategoryEntity childCategoryEntity = categoryMapping.toChildCategoryEntity(request, parent);
+
+        if(!branchService.existsAllByName(request.getBranch_names()))
+            throw new AppException(ErrorCode.INVALID_INPUT);
+
         childCategoryEntity.setBranches(branchService.findByNames(request.getBranch_names()));
         return categoryMapping.toChildCategoryResponse(childRepo.save(childCategoryEntity));
     }
@@ -58,6 +69,9 @@ public class CategoryServiceV2Impl  implements CategoryServiceV2 {
                 .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
         child.setName(request.getName());
         child.setDescription(request.getDescription());
+        if(!branchService.existsAllByName(request.getBranch_names()))
+            throw new AppException(ErrorCode.INVALID_INPUT);
+
         child.setBranches(branchService.findByNames(request.getBranch_names()));
 
         return categoryMapping.toChildCategoryResponse(childRepo.save(child));
@@ -73,14 +87,19 @@ public class CategoryServiceV2Impl  implements CategoryServiceV2 {
     }
 
     @Override
-    public void deleteChildById(String id){
-        if(id == null || id.isEmpty()) return;
+    public void deleteChildById(String id) throws AppException {
+        if(id == null || id.isEmpty()) throw new AppException(ErrorCode.INVALID_INPUT);
         childRepo.deleteById(id);
     }
 
     @Override
-    public void deleteParentById(String id){
-        if(id == null || id.isEmpty()) return;
+    public void deleteParentById(String id) throws AppException {
+        if(id == null || id.isEmpty()) throw new AppException(ErrorCode.INVALID_INPUT);
+        ParentCategoryEntity parentCategory = findParentById(id);
+        if( parentCategory.getChildCategories() != null && parentCategory.getProducts() != null
+            && !parentCategory.getChildCategories().isEmpty() && !parentCategory.getProducts().isEmpty()){
+            throw new AppException(ErrorCode.CATEGORY_CANNOT_DELETE);
+        }
         parentRepo.deleteById(id);
     }
 
@@ -177,14 +196,23 @@ public class CategoryServiceV2Impl  implements CategoryServiceV2 {
     }
 
     @Override
-    public boolean isSameParent(List<String> childNames) throws AppException {
-        if(childNames == null || childNames.isEmpty())  throw new AppException(ErrorCode.INVALID_INPUT);
-        List<ChildCategoryEntity> childCategories = findChildByNames(childNames);
+    public boolean isSameParent(List<String> childIds) throws AppException {
+        if(childIds == null || childIds.isEmpty())  throw new AppException(ErrorCode.INVALID_INPUT);
+        List<ChildCategoryEntity> childCategories = findChildByIds(childIds);
         String parentId = childCategories.getFirst().getParent().getId();
         for(ChildCategoryEntity childCategoryEntity : childCategories) {
             if(!parentId.equals(childCategoryEntity.getParent().getId())) return false;
         }
         return true;
+    }
+
+    @Override
+    public List<ChildCategoryEntity> findChildByIds(List<String> ids) throws AppException {
+        List<ChildCategoryEntity> childCategoryEntities = new ArrayList<>();
+        for(String id : ids){
+            childCategoryEntities.add(findChildById(id));
+        }
+        return childCategoryEntities;
     }
 
     @Override

@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 
 public class BranchMapping {
     public BranchEntity toBranchEntity(BranchCreationRequest request){
+        if(request == null) return null;
         return BranchEntity.builder()
                 .name(request.getName())
                 .description(request.getDescription())
@@ -19,10 +20,12 @@ public class BranchMapping {
     }
 
     public List<BranchEntity> toBranchEntities(List<BranchCreationRequest> requests){
+        if(requests == null || requests.isEmpty()) return null;
         return requests.stream().map(this::toBranchEntity).collect(Collectors.toList());
     }
 
     public BranchResponse toBranchResponse(BranchEntity entity){
+        if(entity == null) return null;
         return BranchResponse.builder()
                 .id(entity.getId())
                 .name(entity.getName())
@@ -31,6 +34,7 @@ public class BranchMapping {
     }
 
     public List<BranchResponse> toBranchResponses(List<BranchEntity> entities){
+        if(entities == null || entities.isEmpty()) return null;
         return entities.stream().map(this::toBranchResponse).collect(Collectors.toList());
     }
 }

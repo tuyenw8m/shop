@@ -18,10 +18,6 @@ public class CustomFilter implements Filter {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         String path = httpRequest.getRequestURI();
         System.err.println(path);
-        if (path.startsWith("/shop/api/v1/swagger-ui") || path.startsWith("/shop/api/v1/v3/api-docs")) {
-            chain.doFilter(request, response); // Bỏ qua xác thực
-            return;
-        }
         // Logic xác thực khác
         chain.doFilter(request, response);
     }
