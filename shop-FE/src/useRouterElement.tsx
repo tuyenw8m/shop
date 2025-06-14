@@ -1,15 +1,17 @@
 // src/useRouterElement.tsx
-import { useRoutes, Navigate } from 'react-router-dom';
-import { useAuth } from './pages/contexts/AuthContext'; // Import useAuth
-import Login from './pages/Login';
-import Register from './pages/Register';
-import ProductDetail from './pages/productDetail/productDetail';
-import DefaultLayout from './layouts/DefaultLayout/DefaultLayout';
-import AccountLayout from './layouts/AccountLayout/AccountLayout';
-import Home from './pages/Home';
+import { useRoutes, Navigate } from 'react-router-dom'
+import Login from './pages/Login'
+import Register from './pages/Register'
+import ProductDetail from './pages/productDetail/productDetail'
+import DefaultLayout from './layouts/DefaultLayout/DefaultLayout'
+import AccountLayout from './layouts/AccountLayout/AccountLayout'
+import Home from './pages/Home'
+import { useContext } from 'react'
+import { AuthContext } from './pages/contexts/AuthContext'
 
 export default function useRouterElement() {
-  const { user } = useAuth() || { user: null }; // Lấy thông tin user từ AuthContext
+  const { user } = useContext(AuthContext)
+  // const { user } = useAuth() || { user: null }; // Lấy thông tin user từ AuthContext
 
   const routeElements = useRoutes([
     {
@@ -19,8 +21,8 @@ export default function useRouterElement() {
           <Home />
         </DefaultLayout>
       ) : (
-        <Navigate to="/login" />
-      ),
+        <Navigate to='/login' />
+      )
     },
     {
       path: '/login',
@@ -29,8 +31,8 @@ export default function useRouterElement() {
           <Login />
         </AccountLayout>
       ) : (
-        <Navigate to="/" />
-      ),
+        <Navigate to='/' />
+      )
     },
     {
       path: '/register',
@@ -39,8 +41,8 @@ export default function useRouterElement() {
           <Register />
         </AccountLayout>
       ) : (
-        <Navigate to="/" />
-      ),
+        <Navigate to='/' />
+      )
     },
     {
       path: '/product/:id',
@@ -49,9 +51,9 @@ export default function useRouterElement() {
           <ProductDetail />
         </DefaultLayout>
       ) : (
-        <Navigate to="/login" />
-      ),
-    },
-  ]);
-  return routeElements;
+        <Navigate to='/login' />
+      )
+    }
+  ])
+  return routeElements
 }
