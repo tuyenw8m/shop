@@ -14,7 +14,8 @@ export default function ProductDetail() {
     enabled: Boolean(id) // tránh gọi khi id rỗng
   })
 
-  const product = data?.data as Product | undefined
+  console.log(data?.data?.data)
+  const product = data?.data?.data as Product
 
   const [rating, setRating] = useState(0)
   const [selectedImage, setSelectedImage] = useState(0)
@@ -40,36 +41,40 @@ export default function ProductDetail() {
     <div className='max-w-7xl mx-auto px-4 py-6'>
       <div className='grid lg:grid-cols-2 gap-8'>
         <div className='space-y-4'>
-          <div className='relative'>
-            <div className='absolute top-4 left-4 bg-red-600 text-white px-3 py-1 rounded text-sm font-bold z-10'>
-              GIẢM {salePercent(product.original_price, product.price)}%
-            </div>
-            <div className='aspect-square bg-gray-100 rounded-lg overflow-hidden relative'>
-              <img
-                src={product?.image_url[selectedImage]}
-                alt={product.name}
-                className='h-full w-full object-contain'
-              />
-            </div>
-          </div>
-
-          <div className='flex space-x-2'>
-            {product.image_url.map((img, i) => (
-              <div
-                key={i}
-                onClick={() => setSelectedImage(i)}
-                className={`w-16 h-16 border-2 rounded overflow-hidden cursor-pointer ${
-                  selectedImage === i ? 'border-red-500' : 'border-gray-200'
-                }`}
-              >
-                <img src={img} alt={`${product.name} ${i + 1}`} className='w-full h-full object-cover' />
+          {product.image_url && product.image_url.length > 0 && (
+            <div className='relative'>
+              <div className='absolute top-4 left-4 bg-red-600 text-white px-3 py-1 rounded text-sm font-bold z-10'>
+                GIẢM {salePercent(product.original_price, product.price)}%
               </div>
-            ))}
-          </div>
+              <div className='aspect-square bg-gray-100 rounded-lg overflow-hidden relative'>
+                <img
+                  src={product.image_url[selectedImage]}
+                  alt={product.name}
+                  className='h-full w-full object-contain'
+                />
+              </div>
+            </div>
+          )}
 
-          <div className='bg-gray-50 p-4 rounded-lg'>
-            <h3 className='font-semibold mb-2 text-gray-800'> ƯU ĐÃI ĐẶC BIỆT</h3>
-            <ul className='text-sm space-y-1 text-gray-700'>{product.promotions}</ul>
+          {product.image_url && product.image_url.length > 0 && (
+            <div className='flex space-x-2'>
+              {product.image_url.map((img, i) => (
+                <div
+                  key={i}
+                  onClick={() => setSelectedImage(i)}
+                  className={`w-16 h-16 border-2 rounded overflow-hidden cursor-pointer ${
+                    selectedImage === i ? 'border-red-500' : 'border-gray-200'
+                  }`}
+                >
+                  <img src={img} alt={`${product.name} ${i + 1}`} className='w-full h-full object-cover' />
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className='bg-gray-50 p-4  rounded-lg'>
+            <h3 className='flex items-center font-semibold mb-2 text-gray-800'>🎁 ƯU ĐÃI ĐẶC BIỆT</h3>
+            <ul className='ml-4 text-sm space-y-1 text-gray-700'>🔹 {product.promotions}</ul>
           </div>
         </div>
 
@@ -135,9 +140,7 @@ export default function ProductDetail() {
           <div className='bg-blue-50 border border-blue-200 p-4 rounded-lg'>
             <h3 className='font-bold mb-3 text-blue-800'>📋 THÔNG TIN SẢN PHẨM</h3>
             <div className='text-sm space-y-2 text-blue-700'>
-              {product.highlight_specs.split(',').map((spec, i) => (
-                <p key={i}>🔹 {spec}</p>
-              ))}
+              {product.highlight_specs && product.highlight_specs.split(',').map((spec, i) => <p key={i}>🔹 {spec}</p>)}
             </div>
           </div>
         </div>
@@ -150,12 +153,13 @@ export default function ProductDetail() {
             <h3 className='text-lg font-bold mb-4 text-gray-800 bg-gray-100 p-3 rounded'>THÔNG SỐ KỸ THUẬT</h3>
             <div className='bg-white border border-gray-200 rounded-lg overflow-hidden'>
               <div className='divide-y divide-gray-200'>
-                {product.technical_specs.split(',').map((spec, i) => (
-                  <div key={i} className='flex justify-between py-3 px-4 hover:bg-gray-50'>
-                    <span className='text-gray-600 font-medium'>{spec}</span>
-                    <span className='text-gray-900 text-right max-w-xs'>{spec}</span>
-                  </div>
-                ))}
+                {product.technical_specs &&
+                  product.technical_specs.split(',').map((spec, i) => (
+                    <div key={i} className='flex justify-between py-3 px-4 hover:bg-gray-50'>
+                      <span className='text-gray-600 font-medium'>{spec}</span>
+                      <span className='text-gray-900 text-right max-w-xs'>{spec}</span>
+                    </div>
+                  ))}
               </div>
             </div>
           </div>
@@ -163,21 +167,22 @@ export default function ProductDetail() {
           <div>
             <h3 className='text-lg font-bold mb-4 text-gray-800 bg-gray-100 p-3 rounded'>TÍNH NĂNG NỔI BẬT</h3>
             <div className='space-y-4'>
-              {product.features.split('').map((feature, i) => (
-                <div
-                  key={i}
-                  className='border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer'
-                >
-                  <div className='flex space-x-4'>
-                    <div className='w-16 h-12 bg-gray-100 rounded flex items-center justify-center text-2xl'>
-                      {i === 0 ? '⚡' : i === 1 ? '🔧' : '🚀'}
-                    </div>
-                    <div className='flex-1'>
-                      <h4 className='font-medium text-sm mb-1 text-gray-900'>{feature}</h4>
+              {product.features &&
+                product.features.split(',').map((feature, i) => (
+                  <div
+                    key={i}
+                    className='border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer'
+                  >
+                    <div className='flex space-x-4'>
+                      <div className='w-16 h-12 bg-gray-100 rounded flex items-center justify-center text-2xl'>
+                        {i === 0 ? '⚡' : i === 1 ? '🔧' : '🚀'}
+                      </div>
+                      <div className='flex-1'>
+                        <h4 className='font-medium text-sm mb-1 text-gray-900'>{feature}</h4>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
             </div>
           </div>
         </div>
