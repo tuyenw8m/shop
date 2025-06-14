@@ -1,4 +1,3 @@
-// src/useRouterElement.tsx
 import { useRoutes, Navigate } from 'react-router-dom'
 import Login from './pages/Login'
 import Register from './pages/Register'
@@ -11,19 +10,26 @@ import { AuthContext } from './pages/contexts/AuthContext'
 
 export default function useRouterElement() {
   const { user } = useContext(AuthContext)
-  // const { user } = useAuth() || { user: null }; // Lấy thông tin user từ AuthContext
 
   const routeElements = useRoutes([
     {
       path: '/',
-      element: user ? (
+      element: (
         <DefaultLayout>
           <Home />
         </DefaultLayout>
-      ) : (
-        <Navigate to='/login' />
       )
     },
+    //  {
+    //   path: '/',
+    //   element: user ? (
+    //     <DefaultLayout>
+    //       <Home />
+    //     </DefaultLayout>
+    //   ) : (
+    //     <Navigate to='/login' />
+    //   )
+    // },
     {
       path: '/login',
       element: !user ? (
