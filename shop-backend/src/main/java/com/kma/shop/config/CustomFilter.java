@@ -6,29 +6,23 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
-@Configuration
+@Component
 public class CustomFilter implements Filter {
-    private static final Logger logger = LoggerFactory.getLogger(CustomFilter.class);
-
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
-        HttpServletRequest req = (HttpServletRequest) request;
-        HttpServletResponse res = (HttpServletResponse) response;
-
-        logger.info("📌 Incoming request: [{}] {}", req.getMethod(), req.getRequestURI());
-
-        try {
-            chain.doFilter(request, response);
-        } catch (Exception e) {
-            logger.error("❌ Error processing request: [{}] {} | Status: {}",
-                    req.getMethod(), req.getRequestURI(), res.getStatus(), e);
+        HttpServletRequest httpRequest = (HttpServletRequest) request;
+        String path = httpRequest.getRequestURI();
+        System.err.println(path);
+        if (path.startsWith("/shop/api/v1/swagger-ui") || path.startsWith("/shop/api/v1/v3/api-docs")) {
+            chain.doFilter(request, response); // Bỏ qua xác thực
+            return;
         }
-
-        logger.info("✅ Completed request: [{}] {} | Status: {}",
-                req.getMethod(), req.getRequestURI(), res.getStatus());
+        // Logic xác thực khác
+        chain.doFilter(request, response);
     }
 }

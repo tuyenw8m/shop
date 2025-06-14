@@ -20,7 +20,7 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @EnableMethodSecurity
 @EnableWebSecurity
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class SecurityConfig  {
+public class SecurityConfig {
     CustomJwtDecoder customJwtDecoder;
     JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
@@ -29,39 +29,59 @@ public class SecurityConfig  {
         this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
     }
 
-    //khi server khởi chạy, spring security sẽ tìm 1 Bean có kiểu là SecurityFilterChain trong ApplicationContext
-    //nếu không tìm thấy Bean đó thì nó sẽ tự tạo với cấu hình mặc định
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         System.err.println("Secuity filterchain");
         httpSecurity
-                .oauth2ResourceServer(oauth2->
+                .oauth2ResourceServer(oauth2 ->
                         oauth2.jwt(jwtConfigurer -> jwtConfigurer
-                                .decoder(customJwtDecoder) //decode bằng custom decoder
-                                .jwtAuthenticationConverter(jwtAuthenticationConverter())) //use converter
-                                .authenticationEntryPoint(jwtAuthenticationEntryPoint)) // config handle error when authentication
+                                        .decoder(customJwtDecoder)
+                                        .jwtAuthenticationConverter(jwtAuthenticationConverter()))
+                                .authenticationEntryPoint(jwtAuthenticationEntryPoint))
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(withDefaults());
 
         httpSecurity
                 .authorizeHttpRequests(request ->
                         request
-                                .requestMatchers("/auth/login").permitAll()
-                                .requestMatchers("/auth/register").permitAll()
+                                .requestMatchers("/v3/api-docs/**").anonymous()
+                                // --- Start: Các đường dẫn cho phép truy cập công khai (permitAll) ---
+                                .requestMatchers(
+                                        // Các đường dẫn Swagger/OpenAPI
+                                        "/v3/api-docs/**",
+                                        "/swagger-ui/**",
+                                        "/swagger-ui.html",
+                                        "/swagger-resources/**",
+                                        "/webjars/**",
+
+                                        // Các đường dẫn API công khai khác
+                                        "/auth/login",
+                                        "/auth/register",
+                                        "/authentication",
+                                        "/logoutt",
+                                        HttpMethod.GET.name(), "/products",
+                                        HttpMethod.GET.name(), "/products/*",
+                                        HttpMethod.GET.name(), "/categories",
+                                        HttpMethod.GET.name(), "/categories/*",
+                                        HttpMethod.GET.name(), "/products/*/reviews",
+                                        HttpMethod.GET.name(), "/categories/v2",
+                                        HttpMethod.GET.name(), "/categories/v2/parent/*",
+                                        HttpMethod.GET.name(), "/categories/v2/child/*",
+                                        HttpMethod.GET.name(), "/products/v2",
+                                        HttpMethod.GET.name(), "/products/v2/*",
+                                        HttpMethod.GET.name(), "/coupons"
+                                ).permitAll()
+                                // --- End: Các đường dẫn cho phép truy cập công khai (permitAll) ---
+
+                                // --- Start: Các đường dẫn yêu cầu xác thực và quyền cụ thể ---
                                 .requestMatchers("/users/me").hasRole("USER")
-                                .requestMatchers("/authentication").permitAll()
-                                .requestMatchers("/logoutt").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/users").hasRole("ADMIN")
 
-                                .requestMatchers(HttpMethod.GET, "/products").permitAll()
-                                .requestMatchers(HttpMethod.GET,"/products/*").permitAll()
                                 .requestMatchers(HttpMethod.POST,"/products/add").hasRole("ADMIN")
                                 .requestMatchers(HttpMethod.PUT,"/products/*").hasRole("ADMIN")
                                 .requestMatchers(HttpMethod.DELETE,"/products/*").hasRole("ADMIN")
                                 .requestMatchers(HttpMethod.PUT,"/products/disable/*").hasRole("ADMIN")
 
-                                .requestMatchers(HttpMethod.GET,"/categories").permitAll()
-                                .requestMatchers(HttpMethod.GET,"/categories/*").permitAll()
                                 .requestMatchers(HttpMethod.POST,"/categories").hasRole("ADMIN")
                                 .requestMatchers(HttpMethod.PUT,"/categories/*").hasRole("ADMIN")
                                 .requestMatchers(HttpMethod.DELETE,"/categories/*").hasRole("ADMIN")
@@ -77,35 +97,22 @@ public class SecurityConfig  {
                                 .requestMatchers(HttpMethod.PUT,"/orders/*").hasRole("ADMIN")
                                 .requestMatchers(HttpMethod.DELETE,"/orders/*").hasRole("USER")
 
-                                .requestMatchers(HttpMethod.GET,"/products/*/reviews").permitAll()
                                 .requestMatchers(HttpMethod.POST,"/products/*/reviews").hasRole("USER")
                                 .requestMatchers(HttpMethod.DELETE,"/reviews/*").hasRole("USER")
                                 .requestMatchers(HttpMethod.PUT,"/products/*/reviews").hasRole("USER")
                                 .requestMatchers(HttpMethod.PUT,"/reviews/*").hasRole("USER")
 
-
-                                .requestMatchers(HttpMethod.GET,"/categories/v2").permitAll()
-                                .requestMatchers(HttpMethod.GET,"/categories/v2/parent/*").permitAll()
-                                .requestMatchers(HttpMethod.GET,"/categories/v2/child/*").permitAll()
-
-
-
-
-                                .requestMatchers(HttpMethod.GET, "/products/v2").permitAll()
-                                .requestMatchers(HttpMethod.GET,"/products/v2/*").permitAll()
                                 .requestMatchers(HttpMethod.POST,"/products/v2/add").hasRole("ADMIN")
                                 .requestMatchers(HttpMethod.PUT,"/products/v2/*").hasRole("ADMIN")
                                 .requestMatchers(HttpMethod.DELETE,"/products/v2/*").hasRole("ADMIN")
                                 .requestMatchers(HttpMethod.PUT,"/products/v2/disable/*").hasRole("ADMIN")
 
-                                .requestMatchers(HttpMethod.GET,"/coupons").permitAll()
-//                                .requestMatchers(HttpMethod.POST,"/products/*/reviews").hasRole("ADMIN")
-//                                .requestMatchers(HttpMethod.POST,"/reviews/apply").hasRole("USER")
-
+                                // Đảm bảo bất kỳ request nào khác đều phải được xác thực
                                 .anyRequest().authenticated());
+        // --- End: Các đường dẫn yêu cầu xác thực và quyền cụ thể ---
+
         return httpSecurity.build();
     }
-
 
     @Bean
     JwtAuthenticationConverter jwtAuthenticationConverter(){
@@ -113,7 +120,6 @@ public class SecurityConfig  {
         jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(new CustomJwtAuthenticationConverter());
         return jwtAuthenticationConverter;
     }
-
 
     @Bean
     PasswordEncoder passwordEncoder() {

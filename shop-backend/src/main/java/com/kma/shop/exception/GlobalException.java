@@ -1,6 +1,7 @@
 package com.kma.shop.exception;
 
 import com.kma.shop.dto.ApiResponse;
+import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -8,6 +9,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import java.text.ParseException;
 
 @ControllerAdvice
+@Hidden
 public class GlobalException {
     @ExceptionHandler(value = ParseException.class)
     ResponseEntity<ApiResponse> handleParseException(final ParseException  e){
