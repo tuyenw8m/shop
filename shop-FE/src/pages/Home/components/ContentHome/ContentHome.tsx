@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import productApi from 'src/apis/ProductService.api'
 import HeroSlide from 'src/components/HeroSlide/SlideShow'
 import useQueryParams from 'src/hooks/useQueryParams'
@@ -12,7 +12,8 @@ export default function ContentHome() {
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['products', queryParamsUrl],
-    queryFn: () => productApi.getAllProducts(queryParamsUrl)
+    queryFn: () => productApi.getAllProducts(queryParamsUrl),
+    placeholderData: keepPreviousData
   })
 
   if (isLoading) return <div>Đang tải...</div>
@@ -22,7 +23,7 @@ export default function ContentHome() {
 
   const listSuggest: ProductList = {
     ...products,
-    content: products.content?.filter((product) => product.stock < 2) || []
+    content: products.content?.filter((product) => product.stock < 20) || []
   }
 
   return (
