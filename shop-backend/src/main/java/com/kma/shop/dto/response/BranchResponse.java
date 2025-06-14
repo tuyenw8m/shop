@@ -3,18 +3,14 @@ package com.kma.shop.dto.response;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.util.List;
-
 @Builder
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CategoryResponse {
+public class BranchResponse {
     String name;
-    String description;
     String id;
-    List<CategoryResponse> children;
-    List<String> branch_name;
+    String description;
 }

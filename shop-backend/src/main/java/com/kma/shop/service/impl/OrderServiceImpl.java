@@ -18,6 +18,7 @@ import com.kma.shop.specification.OrderSpecification;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -31,13 +32,20 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class OrderServiceImpl implements OrderService {
     OrderRepo orderRepo;
     UserService userService;
     ProductService productService;
     OrderMapping orderMapping;
+
+    public OrderServiceImpl(OrderRepo orderRepo, UserService userService,
+                            @Qualifier("productServiceImpl") ProductService productService, OrderMapping orderMapping) {
+        this.orderRepo = orderRepo;
+        this.userService = userService;
+        this.productService = productService;
+        this.orderMapping = orderMapping;
+    }
 
     @Override
     public boolean isOrderedProduct(String productId){

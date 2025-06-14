@@ -1,9 +1,7 @@
 package com.kma.shop.entity;
 
 import jakarta.persistence.*;
-import jakarta.websocket.OnError;
 import lombok.*;
-import lombok.experimental.FieldDefaults;
 
 import java.util.List;
 
@@ -17,9 +15,14 @@ import java.util.List;
 public class ProductEntity extends FormEntity{
     private String name;
     private float price;
+    private float original_price;
+    private String features;
     private String description;
     private String technical_specs;
     private String highlight_specs;
+    private String promotions;
+    private int sold = 0;
+    private int rating = 0;
     private int stock;
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ImageEntity> imageV1;
@@ -35,4 +38,12 @@ public class ProductEntity extends FormEntity{
     private List<EventProductEntity> eventProducts;
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderEntity> orders;
+
+    @ManyToOne
+    private ParentCategoryEntity parentCategory;
+    @ManyToMany(mappedBy = "products")
+    private List<ChildCategoryEntity> childCategories;
+
+    @ManyToOne
+    private BranchEntity branch;
 }

@@ -21,6 +21,11 @@ public enum ErrorCode{
     PRODUCT_OUT_OF_STOCK(409, "Product out of stock", HttpStatus.CONFLICT),
     PRODUCT_EXISTED(400, "Product already exists", HttpStatus.BAD_REQUEST),
 
+    // ===== CATEGORY =====
+    CATEGORY_NOT_FOUND(404, "Category not found", HttpStatus.NOT_FOUND),
+    CATEGORY_OUT_OF_STOCK(409, "Category out of stock", HttpStatus.CONFLICT),
+    CATEGORY_EXISTED(400, "Category already exists", HttpStatus.BAD_REQUEST),
+
     // ===== ORDER =====
     ORDER_NOT_FOUND(404, "Order not found", HttpStatus.NOT_FOUND),
     ORDER_INVALID_STATUS(400, "Order status invalid for this operation", HttpStatus.BAD_REQUEST),

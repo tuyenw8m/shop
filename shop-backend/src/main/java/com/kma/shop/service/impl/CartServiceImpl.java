@@ -17,6 +17,7 @@ import com.kma.shop.service.interfaces.UserService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -24,13 +25,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE,  makeFinal = true)
 public class CartServiceImpl implements CartService {
     CartRepo cartRepo;
     UserService userService;
     ProductService productService;
     CartItemRepo cartItemRepo;
+
+    public CartServiceImpl(CartRepo cartRepo, UserService userService,
+                           @Qualifier("productServiceImpl") ProductService productService, CartItemRepo cartItemRepo) {
+        this.cartRepo = cartRepo;
+        this.userService = userService;
+        this.productService = productService;
+        this.cartItemRepo = cartItemRepo;
+    }
 
     @Override
     public CartItemResponse toCartItemResponse(CartItemEntity cart) {
