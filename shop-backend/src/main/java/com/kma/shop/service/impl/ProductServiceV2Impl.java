@@ -2,7 +2,7 @@ package com.kma.shop.service.impl;
 
 import com.kma.shop.dto.request.ProductCreationRequest;
 import com.kma.shop.dto.response.PageResponse;
-import com.kma.shop.dto.response.ProductAdminResponse;
+import com.kma.shop.dto.response.ProductAdminResponseV2;
 import com.kma.shop.dto.response.ProductResponseV2;
 import com.kma.shop.entity.*;
 import com.kma.shop.enums.EntityStatus;
@@ -23,6 +23,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -59,7 +60,7 @@ public class ProductServiceV2Impl implements ProductServiceV2 {
 
         //get product have status is created or updated
         ProductEntity response = repo.findByIdAndEntityStatusIn(id, entityStatus)
-                .orElseThrow(() -> new AppException(ErrorCode.CONFLICT));
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
         return productMappingV2.toProductResponseV2(response);
     }
 
@@ -115,17 +116,32 @@ public class ProductServiceV2Impl implements ProductServiceV2 {
                     .filter(a -> childCategories.contains(a.getName())).toList();
         }
 
+
+
+        boolean isAdmin = SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
         //If admin pass null and spec will get all, or not pass created and updated for user get
+//        Specification<ProductEntity> spec = Specification
+//                .where(ProductSpecification.hasName(search))
+//                .and(ProductSpecification.hasPriceBetween(min_price, max_price))
+//                .and(ProductSpecification.hasCategory(category))
+//                .and(ProductSpecification.hasEntityStatus(isAdmin ? null : entityStatus));
+//        Page<ProductEntity> response = repo.findAll(spec, pageRequest);
+
         Specification<ProductEntity> spec = Specification
                 .where(ProductSpecification.hasName(search))
                 .and(ProductSpecification.hasPriceBetween(min_price, max_price))
                 .and(ProductSpecification.hasParentCategory(category))
-//                .and(ProductSpecification.hasChildren(childCategoryEntities))
-                .and(ProductSpecification.hasEntityStatus(entityStatus));
-        Page<ProductEntity> response = repo.findAll(spec, pageRequest);
+                .and(ProductSpecification.hasAllChildren(childCategoryEntities))
+                .and(ProductSpecification.hasEntityStatus(isAdmin ? null : entityStatus));
 
+        Page<ProductEntity> response = repo.findAll(spec, pageRequest);
         //build response depend on roles
-        List<T> mappedContent = response.getContent().stream()
+        List<T> mappedContent = isAdmin
+                ? response.getContent().stream()
+                .map(p -> (T) productMappingV2.toProductAdminResponseV2(p)).toList()
+                : response.getContent().stream()
                 .map(p -> (T) productMappingV2.toProductResponseV2(p)).toList();
 
         return PageResponse.<T>builder()
@@ -150,11 +166,18 @@ public class ProductServiceV2Impl implements ProductServiceV2 {
                 .build();
     }
 
+    @Override
+    public boolean existsByName(String name){
+        return repo.existsByName(name);
+    }
+
     //Only ADMIN can add new product
     @PreAuthorize("hasRole('ADMIN')")
     @Override
+    @Transactional
     public ProductResponseV2 create(ProductCreationRequest request) throws AppException {
         if(request == null ) throw new AppException(ErrorCode.INVALID_INPUT);
+        if(existsByName(request.getName())) throw new AppException(ErrorCode.PRODUCT_EXISTED);
         if(!categoryServiceV2.isSameParent(request.getChildren_categories_id())) throw new AppException(ErrorCode.INVALID_INPUT);
 
         ProductEntity entity = ProductEntity.builder()
@@ -166,8 +189,8 @@ public class ProductServiceV2Impl implements ProductServiceV2 {
                 .technical_specs(request.getTechnical_specs())
                 .promotions(request.getPromotions())
                 .branch(branchService.findByName(request.getBranch_name()))
-                .parentCategory(categoryServiceV2.getParentByChild(request.getChildren_categories_id().getFirst()))
-                .childCategories(categoryServiceV2.findChildByNames(request.getChildren_categories_id()))
+                .parentCategory(categoryServiceV2.getByChildId(request.getChildren_categories_id().getFirst()))
+                .childCategories(categoryServiceV2.findChildByIds(request.getChildren_categories_id()))
                 .build();
 
         //Save image
@@ -177,8 +200,12 @@ public class ProductServiceV2Impl implements ProductServiceV2 {
         }
         entity.setImages(productImageEntities);
 
-        repo.save(entity);
-        return productMappingV2.toProductResponseV2(entity);
+        return productMappingV2.toProductResponseV2(repo.save(entity));
+    }
+
+    @Override
+    public boolean existsById(String id){
+        return repo.existsById(id);
     }
 
     //Only ADMIN can update info of product
@@ -189,9 +216,15 @@ public class ProductServiceV2Impl implements ProductServiceV2 {
         //check in put
         if(id == null || id.isEmpty())  throw new AppException(ErrorCode.INVALID_INPUT);
         if(request == null)  throw new AppException(ErrorCode.INVALID_INPUT);
-        if(!categoryServiceV2.isSameParent(request.getChildren_categories_id())) throw new AppException(ErrorCode.INVALID_INPUT);
+
+        if(!existsById(id)) throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
+        if(existsByName(request.getName())) throw new AppException(ErrorCode.PRODUCT_EXISTED);
+
+        if(!categoryServiceV2.isSameParent(request.getChildren_categories_id()))
+            throw new AppException(ErrorCode.INVALID_INPUT);
+
         //Get current product
-        ProductEntity entity = repo.findById(id).orElseThrow(() -> new AppException(ErrorCode.CONFLICT));
+        ProductEntity entity = findById(id);
 
         //Set new info for product
         entity.setName(request.getName());
@@ -203,8 +236,8 @@ public class ProductServiceV2Impl implements ProductServiceV2 {
         entity.setTechnical_specs(request.getTechnical_specs());
         entity.setBranch(branchService.findByName(request.getBranch_name()));
         entity.setEntityStatus(EntityStatus.UPDATED);
-        entity.setParentCategory(categoryServiceV2.getParentByChild(request.getChildren_categories_id().getFirst()));
-        entity.setChildCategories(categoryServiceV2.findChildByNames(request.getChildren_categories_id()));
+        entity.setParentCategory(categoryServiceV2.findParentByChildId(request.getChildren_categories_id().getFirst()));
+        entity.setChildCategories(categoryServiceV2.findChildByIds(request.getChildren_categories_id()));
         //Delete old image and add new image
         entity.getImages().clear();
         //Save image
@@ -212,17 +245,13 @@ public class ProductServiceV2Impl implements ProductServiceV2 {
         productImageEntities.forEach(img -> img.setProduct(entity));
         entity.getImages().addAll(productImageEntities);
 
-        //category
-
-
-        //return value
         return productMappingV2.toProductResponseV2(repo.save(entity));
     }
 
 
     @PreAuthorize("hasRole('ADMIN')")
     @Override
-    public ProductAdminResponse disableProduct(String id) throws AppException {
+    public ProductAdminResponseV2 disableProduct(String id) throws AppException {
         //check input
         if(id == null || id.isEmpty())  throw new AppException(ErrorCode.INVALID_INPUT);
 
@@ -234,7 +263,24 @@ public class ProductServiceV2Impl implements ProductServiceV2 {
         product.setEntityStatus(EntityStatus.DELETED);
         product.setDeleteDate(LocalDateTime.now());
         repo.save(product);
-        return productMappingV2.toProductAdminResponse(product);
+        return productMappingV2.toProductAdminResponseV2(product);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @Override
+    public ProductAdminResponseV2 enableProduct(String id) throws AppException {
+        //check input
+        if(id == null || id.isEmpty())  throw new AppException(ErrorCode.INVALID_INPUT);
+
+        //Get product
+        ProductEntity product = repo.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        //Set entity status for product is DELETED
+        product.setEntityStatus(EntityStatus.UPDATED);
+        product.setDeleteDate(LocalDateTime.now());
+        repo.save(product);
+        return productMappingV2.toProductAdminResponseV2(product);
     }
 
     //Only admin can delete product, so we can set it is deleted make it invisible from user, but admin can see it
@@ -264,12 +310,12 @@ public class ProductServiceV2Impl implements ProductServiceV2 {
         return Math.toIntExact(repo.count());
     }
     @Override
-    public PageResponse<ProductResponseV2> findV2(String name, String parent_category_name, List<String> children_category_name,
-                                                  String branch_name, float min_price, float max_price,
-                                                  int Page, int limit, String sort_by, String sort_type) throws AppException {
+    public <T> PageResponse<T> findV2(String name, String parent_category_name, List<String> children_category_name,
+                                      String branch_name, float min_price, float max_price,
+                                      int Page, int limit, String sort_by, String sort_type) throws AppException {
 
         // Kiểm tra input
-        if (max_price < 0) return PageResponse.<ProductResponseV2>builder()
+        if (max_price < 0) return PageResponse.<T>builder()
                 .content(List.of())
                 .totalElements(0)
                 .totalPages(0)
@@ -328,22 +374,26 @@ public class ProductServiceV2Impl implements ProductServiceV2 {
             if (branchEntity == null) return emptyResult(Page, limit); // Không tìm thấy branch
         }
 
-        // Tạo specification
+
+        boolean isAdmin = SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+
         Specification<ProductEntity> spec = Specification
                 .where(ProductSpecification.hasName(name))
                 .and(ProductSpecification.hasPriceBetween(min_price, max_price))
                 .and(ProductSpecification.hasParentCategory(category))
-                .and(ProductSpecification.hasBranch(branchEntity))
                 .and(ProductSpecification.hasAllChildren(childCategoryEntities))
-                .and(ProductSpecification.hasEntityStatus(entityStatus));
+                .and(ProductSpecification.hasEntityStatus(isAdmin ? null : entityStatus));
 
         Page<ProductEntity> response = repo.findAll(spec, pageRequest);
-
-        List<ProductResponseV2> mappedContent = response.getContent().stream()
-                .map(productMappingV2::toProductResponseV2)
-                .toList();
-
-        return PageResponse.<ProductResponseV2>builder()
+        //build response depend on roles
+        List<T> mappedContent = isAdmin
+                ? response.getContent().stream()
+                .map(p -> (T) productMappingV2.toProductAdminResponseV2(p)).toList()
+                : response.getContent().stream()
+                .map(p -> (T) productMappingV2.toProductResponseV2(p)).toList();
+        return PageResponse.<T>builder()
                 .content(mappedContent)
                 .totalElements(response.getTotalElements())
                 .totalPages(response.getTotalPages())
@@ -351,8 +401,8 @@ public class ProductServiceV2Impl implements ProductServiceV2 {
                 .pageNumber(response.getNumber())
                 .build();
     }
-    private PageResponse<ProductResponseV2> emptyResult(int page, int size) {
-        return PageResponse.<ProductResponseV2>builder()
+    private <T> PageResponse<T> emptyResult(int page, int size) {
+        return PageResponse.<T>builder()
                 .content(List.of())
                 .totalElements(0)
                 .totalPages(0)

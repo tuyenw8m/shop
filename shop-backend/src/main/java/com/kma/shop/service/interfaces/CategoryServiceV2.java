@@ -39,7 +39,11 @@ public interface CategoryServiceV2 {
 
     List<ChildCategoryEntity> findChildByNames(List<String> names) throws AppException;
 
+    ParentCategoryEntity findParentByChildId(String id) throws AppException;
+
     ParentCategoryEntity getParentByChild(String name) throws AppException;
+
+    ParentCategoryEntity getByChildId(String id) throws AppException;
 
     boolean isSameParent(List<String> childId) throws AppException;
 

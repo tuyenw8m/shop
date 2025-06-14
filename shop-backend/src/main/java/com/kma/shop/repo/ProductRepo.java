@@ -14,4 +14,5 @@ public interface ProductRepo extends JpaRepository<ProductEntity, String>, JpaSp
     Optional<ProductEntity> findByName(String name);
     Optional<ProductEntity> findByIdAndEntityStatusIn(String id, List<EntityStatus> status);
     Optional<ProductEntity> findByNameAndEntityStatusIn(String name, List<EntityStatus> status);
+    boolean existsByName(String name);
 }

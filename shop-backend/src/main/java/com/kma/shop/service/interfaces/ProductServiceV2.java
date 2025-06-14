@@ -2,7 +2,7 @@ package com.kma.shop.service.interfaces;
 
 import com.kma.shop.dto.request.ProductCreationRequest;
 import com.kma.shop.dto.response.PageResponse;
-import com.kma.shop.dto.response.ProductAdminResponse;
+import com.kma.shop.dto.response.ProductAdminResponseV2;
 import com.kma.shop.dto.response.ProductResponseV2;
 import com.kma.shop.entity.ProductEntity;
 import com.kma.shop.exception.AppException;
@@ -28,9 +28,13 @@ public interface ProductServiceV2 {
 
     PageResponse<ProductResponseV2> getTopSold(int page, int limit);
 
+    boolean existsByName(String name);
+
     //Only ADMIN can add new product
     @PreAuthorize("hasRole('ADMIN')")
     ProductResponseV2 create(ProductCreationRequest request) throws AppException;
+
+    boolean existsById(String id);
 
     //Only ADMIN can update info of product
     @PreAuthorize("hasRole('ADMIN')")
@@ -38,7 +42,10 @@ public interface ProductServiceV2 {
     ProductResponseV2 update(String id, ProductCreationRequest request) throws AppException;
 
     @PreAuthorize("hasRole('ADMIN')")
-    ProductAdminResponse disableProduct(String id) throws AppException;
+    ProductAdminResponseV2 disableProduct(String id) throws AppException;
+
+    @PreAuthorize("hasRole('ADMIN')")
+    ProductAdminResponseV2 enableProduct(String id) throws AppException;
 
     //Only admin can delete product, so we can set it is deleted make it invisible from user, but admin can see it
     @PreAuthorize("hasRole('ADMIN')")
@@ -52,7 +59,8 @@ public interface ProductServiceV2 {
 
     int count();
 
-    PageResponse<ProductResponseV2> findV2(String name, String parent_category_name, List<String> children_category_name,
-                                           String branch_name, float min_price, float max_price,
-                                           int page, int limit, String sort_by, String sort_type) throws AppException;
+
+    <T> PageResponse<T> findV2(String name, String parent_category_name, List<String> children_category_name,
+                               String branch_name, float min_price, float max_price,
+                               int Page, int limit, String sort_by, String sort_type) throws AppException;
 }
