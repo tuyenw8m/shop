@@ -1,10 +1,10 @@
-import type { Product, ProductList, ProductQueryParams } from 'src/types/product.type'
+import type { Product, ProductList, ProductSearchParams } from 'src/types/product.type'
 import type { SuccessResponse } from 'src/types/utils.type'
 import http from 'src/utils/http'
 
-const pathURL = '/products'
+const pathURL = '/products/v2'
 const productApi = {
-  getAllProducts(params: ProductQueryParams) {
+  getAllProducts(params: ProductSearchParams) {
     return http.get<SuccessResponse<ProductList>>(pathURL, {
       params
     })

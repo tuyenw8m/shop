@@ -1,79 +1,30 @@
+import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
+import { useParams } from 'react-router-dom'
+import productApi from 'src/apis/ProductService.api'
+import type { Product } from 'src/types/product.type'
+import { formatPrices, salePercent } from 'src/utils/utils'
 
-interface ProductData {
-  id: string
-  name: string
-  price: number
-  original_price: number
-  discount: number
-  description: string
-  technical_specs: Array<{ label: string; value: string }>
-  highlight_specs: string[]
-  stock: number
-  sold: number
-  rating: number
-  review_count: number
-  images: string[]
-  promotions: string[]
-  features: string[]
-  category_name: string[]
-}
+export default function ProductDetail() {
+  const { id = '' } = useParams()
 
-export default function ProductPage() {
-  const initialProduct: ProductData = {
-    id: '0017faec-a7d9-4e84-a9c6-a938f1e4624d',
-    name: 'PC i12 Gen 8K',
-    price: 3090000.0,
-    original_price: 3590000.0,
-    discount: 14,
-    description: 'PC mạnh nhất mọi thời đại siiiuuuuu !!!',
-    technical_specs: [
-      {
-        label: 'Dung lượng',
-        value: '1TB'
-      },
-      {
-        label: 'Chuẩn kết nối',
-        value: 'M.2 NVMe PCIe Gen3 x4'
-      },
-      {
-        label: 'Tốc độ đọc',
-        value: '3500MB/s'
-      },
-      {
-        label: 'Tốc độ ghi',
-        value: '3000MB/s'
-      },
-      {
-        label: 'Độ bền',
-        value: '600TBW'
-      }
-    ],
-    highlight_specs: ['Hiệu năng cao cho gaming và đồ họa', 'Tương thích với hầu hết mainboard', 'Bảo hành 5 năm'],
-    stock: 47,
-    sold: 125,
-    rating: 4.5,
-    review_count: 24,
-    images: [
-      'https://tinhocanhphat.vn/media/product/19304_dq802508.jpg',
-      'https://cdn2.fptshop.com.vn/unsafe/1920x0/filters:format(webp):quality(75)/2022_1_21_637783762740907156_untitled-1.png',
-      'https://www.messoanuovo.it/cdn/shop/articles/PC-gaming-scaled.jpg?v=1707413030'
-    ],
-    promotions: ['Miễn phí vận chuyển', 'Bảo hành chính hãng'],
-    features: ['Hỗ trợ TRIM', 'Tương thích LDPC ECC', 'Công nghệ SLC Caching'],
-    category_name: ['Ổ cứng SSD', 'Linh kiện máy tính']
-  }
+  const { data } = useQuery({
+    queryKey: ['product', id],
+    queryFn: () => productApi.getProductDetail(id),
+    enabled: Boolean(id) // tránh gọi khi id rỗng
+  })
 
-  const [product, setProduct] = useState<ProductData | null>(initialProduct)
-  const [selectedImage, setSelectedImage] = useState(0)
+  const product = data?.data as Product | undefined
+
   const [rating, setRating] = useState(0)
+  const [selectedImage, setSelectedImage] = useState(0)
   const [review, setReview] = useState({
     name: '',
     content: ''
   })
 
   if (!product) {
-    return <div className='text-center py-10'>Đang tải sản phẩm...</div>
+    return <div className='text-center py-10'>404. Sản phẩm không tồn tại...</div>
   }
 
   const handleAddToCart = () => {
@@ -90,18 +41,20 @@ export default function ProductPage() {
       <div className='grid lg:grid-cols-2 gap-8'>
         <div className='space-y-4'>
           <div className='relative'>
-            {product.discount > 0 && (
-              <div className='absolute top-4 left-4 bg-red-600 text-white px-3 py-1 rounded text-sm font-bold z-10'>
-                GIẢM {product.discount}%
-              </div>
-            )}
+            <div className='absolute top-4 left-4 bg-red-600 text-white px-3 py-1 rounded text-sm font-bold z-10'>
+              GIẢM {salePercent(product.original_price, product.price)}%
+            </div>
             <div className='aspect-square bg-gray-100 rounded-lg overflow-hidden relative'>
-              <img src={product.images[selectedImage]} alt={product.name} className='w-full h-full object-contain' />
+              <img
+                src={product?.image_url[selectedImage]}
+                alt={product.name}
+                className='h-full w-full object-contain'
+              />
             </div>
           </div>
 
           <div className='flex space-x-2'>
-            {product.images.map((img, i) => (
+            {product.image_url.map((img, i) => (
               <div
                 key={i}
                 onClick={() => setSelectedImage(i)}
@@ -116,11 +69,7 @@ export default function ProductPage() {
 
           <div className='bg-gray-50 p-4 rounded-lg'>
             <h3 className='font-semibold mb-2 text-gray-800'> ƯU ĐÃI ĐẶC BIỆT</h3>
-            <ul className='text-sm space-y-1 text-gray-700'>
-              {product.promotions.map((promo, i) => (
-                <li key={i}>✅ {promo}</li>
-              ))}
-            </ul>
+            <ul className='text-sm space-y-1 text-gray-700'>{product.promotions}</ul>
           </div>
         </div>
 
@@ -130,9 +79,9 @@ export default function ProductPage() {
 
             <div className='flex items-center space-x-4 mb-4'>
               <div className='flex items-center'>
-                <span className='ml-2 text-sm text-gray-600'>({product.review_count} đánh giá)</span>
+                <span className='ml-2 text-sm text-gray-600'>({product.rating} đánh giá)</span>
               </div>
-              <span className='text-sm text-gray-600'>| Đã bán: {product.sold}</span>
+              <span className='text-sm text-gray-600'> | Đã bán: {product.sold}</span>
             </div>
 
             <div className='flex items-center space-x-2 mb-6'>
@@ -143,16 +92,12 @@ export default function ProductPage() {
 
           <div className='space-y-4'>
             <div className='flex items-baseline space-x-4'>
-              <span className='text-4xl font-bold text-red-600'>
-                {new Intl.NumberFormat('vi-VN').format(product.price)}₫
-              </span>
-              {product.original_price > product.price && (
+              <span className='text-4xl font-bold text-red-600'>{formatPrices(product.price)}₫</span>
+              {product.original_price >= product.price && (
                 <>
-                  <span className='text-lg text-gray-500 line-through'>
-                    {new Intl.NumberFormat('vi-VN').format(product.original_price)}₫
-                  </span>
+                  <span className='text-lg text-gray-500 line-through'>{formatPrices(product.original_price)}₫</span>
                   <span className='bg-red-100 text-red-800 px-2 py-1 rounded text-sm font-bold'>
-                    -{product.discount}%
+                    -{salePercent(product.original_price, product.price)}%
                   </span>
                 </>
               )}
@@ -160,9 +105,7 @@ export default function ProductPage() {
 
             <div className='text-right'>
               <span className='text-sm text-gray-600'>Giá trả góp từ:</span>
-              <span className='font-bold text-lg ml-1'>
-                {new Intl.NumberFormat('vi-VN').format(Math.round(product.price / 12))}₫/tháng
-              </span>
+              <span className='font-bold text-lg ml-1'>{formatPrices(Math.round(product.price / 12))}₫/tháng</span>
             </div>
           </div>
 
@@ -192,7 +135,7 @@ export default function ProductPage() {
           <div className='bg-blue-50 border border-blue-200 p-4 rounded-lg'>
             <h3 className='font-bold mb-3 text-blue-800'>📋 THÔNG TIN SẢN PHẨM</h3>
             <div className='text-sm space-y-2 text-blue-700'>
-              {product.highlight_specs.map((spec, i) => (
+              {product.highlight_specs.split(',').map((spec, i) => (
                 <p key={i}>🔹 {spec}</p>
               ))}
             </div>
@@ -207,10 +150,10 @@ export default function ProductPage() {
             <h3 className='text-lg font-bold mb-4 text-gray-800 bg-gray-100 p-3 rounded'>THÔNG SỐ KỸ THUẬT</h3>
             <div className='bg-white border border-gray-200 rounded-lg overflow-hidden'>
               <div className='divide-y divide-gray-200'>
-                {product.technical_specs.map((spec, i) => (
+                {product.technical_specs.split(',').map((spec, i) => (
                   <div key={i} className='flex justify-between py-3 px-4 hover:bg-gray-50'>
-                    <span className='text-gray-600 font-medium'>{spec.label}</span>
-                    <span className='text-gray-900 text-right max-w-xs'>{spec.value}</span>
+                    <span className='text-gray-600 font-medium'>{spec}</span>
+                    <span className='text-gray-900 text-right max-w-xs'>{spec}</span>
                   </div>
                 ))}
               </div>
@@ -220,7 +163,7 @@ export default function ProductPage() {
           <div>
             <h3 className='text-lg font-bold mb-4 text-gray-800 bg-gray-100 p-3 rounded'>TÍNH NĂNG NỔI BẬT</h3>
             <div className='space-y-4'>
-              {product.features.map((feature, i) => (
+              {product.features.split('').map((feature, i) => (
                 <div
                   key={i}
                   className='border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer'

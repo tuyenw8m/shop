@@ -1,7 +1,7 @@
 import { useRoutes, Navigate } from 'react-router-dom'
 import Login from './pages/Login'
 import Register from './pages/Register'
-import ProductDetail from './pages/productDetail/productDetail'
+import ProductDetail from './pages/ProductDetail/ProductDetail'
 import DefaultLayout from './layouts/DefaultLayout/DefaultLayout'
 import AccountLayout from './layouts/AccountLayout/AccountLayout'
 import Home from './pages/Home'
@@ -52,12 +52,10 @@ export default function useRouterElement() {
     },
     {
       path: '/product/:id',
-      element: user ? (
+      element: (
         <DefaultLayout>
           <ProductDetail />
         </DefaultLayout>
-      ) : (
-        <Navigate to='/login' />
       )
     }
   ])
