@@ -17,7 +17,6 @@ public class WebConfig {
         corsConfiguration.addAllowedOrigin("http://localhost:5173");
         corsConfiguration.addAllowedOrigin("http://localhost:5176");
         corsConfiguration.addAllowedOrigin("http://localhost:3000");
-        corsConfiguration.setAllowedOrigins(List.of("*")); // Hoặc chỉ định origin cụ thể
         corsConfiguration.addAllowedMethod("*");
         corsConfiguration.addAllowedHeader("*");
         corsConfiguration.setAllowCredentials(true);
