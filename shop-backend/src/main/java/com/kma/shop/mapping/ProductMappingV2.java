@@ -2,8 +2,9 @@ package com.kma.shop.mapping;
 
 import com.kma.shop.dto.response.ProductAdminResponse;
 import com.kma.shop.dto.response.ProductResponse;
+import com.kma.shop.dto.response.ProductResponseV2;
 import com.kma.shop.entity.CategoryEntity;
-import com.kma.shop.entity.ImageEntity;
+import com.kma.shop.entity.ChildCategoryEntity;
 import com.kma.shop.entity.ProductEntity;
 import com.kma.shop.entity.ProductImageEntity;
 import lombok.RequiredArgsConstructor;
@@ -14,25 +15,34 @@ import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
-public class ProductMapping {
+public class ProductMappingV2  {
 
-    public List<ProductResponse> toProductResponses(List<ProductEntity> entityList){
+    public List<ProductResponseV2> toProductResponsesV2(List<ProductEntity> entityList){
         if(entityList == null || entityList.isEmpty()) return List.of();
-        return entityList.stream().map(this::toProductResponse).collect(Collectors.toList());
+        return entityList.stream().map(this::toProductResponseV2).collect(Collectors.toList());
     }
 
-    public ProductResponse toProductResponse(ProductEntity response) {
+    public ProductResponseV2 toProductResponseV2(ProductEntity response) {
         if(response == null) return null;
-        return ProductResponse.builder()
+        return ProductResponseV2.builder()
                 .id(response.getId())
+                .rating(response.getRating())
                 .highlight_specs(response.getHighlight_specs())
                 .technical_specs(response.getTechnical_specs())
                 .image_url(response.getImages().stream().map(ProductImageEntity::getUrl).toList())
                 .price(response.getPrice())
                 .name(response.getName())
+                .promotions(response.getPromotions())
                 .stock(response.getStock())
                 .description(response.getDescription())
                 .category_name(response.getCategories().stream().map(CategoryEntity::getName).toList())
+                .sold(response.getSold())
+                .features(response.getFeatures())
+                .original_price(response.getOriginal_price())
+                .branch_name(response.getBranch() == null ? null : response.getBranch().getName())
+                .parent_category_name(response.getParentCategory() == null ? null : response.getParentCategory().getName())
+                .children_category_name(
+                        response.getChildCategories() == null ? null : response.getChildCategories().stream().map(ChildCategoryEntity::getName).toList())
                 .build();
     }
 

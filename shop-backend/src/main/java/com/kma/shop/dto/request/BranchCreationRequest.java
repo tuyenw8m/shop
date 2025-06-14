@@ -6,14 +6,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
-import java.util.List;
-
 @Getter
 @Setter
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CategoryCreationRequest {
+public class BranchCreationRequest {
     String name;
     String description;
-    List<String> branch_names;
 }

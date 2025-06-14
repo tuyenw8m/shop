@@ -14,6 +14,7 @@ import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -26,7 +27,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ReviewServiceImpl implements ReviewService{
     ReviewRepo repo;
@@ -34,7 +34,17 @@ public class ReviewServiceImpl implements ReviewService{
     ImageService imageService;
     ProductService productService;
     OrderService orderService;
-    private final ProductMapping productMapping;
+    ProductMapping productMapping;
+
+    public ReviewServiceImpl(ReviewRepo repo, UserService userService, ImageService imageService,
+                             @Qualifier("productServiceImpl")ProductService productService, OrderService orderService, ProductMapping productMapping) {
+        this.repo = repo;
+        this.userService = userService;
+        this.imageService = imageService;
+        this.productService = productService;
+        this.orderService = orderService;
+        this.productMapping = productMapping;
+    }
 
     //create review for product is ordered
     @Override
