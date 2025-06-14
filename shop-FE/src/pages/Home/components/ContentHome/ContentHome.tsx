@@ -22,7 +22,7 @@ export default function ContentHome() {
 
   const listSuggest: ProductList = {
     ...products,
-    content: products.content?.filter((product) => product.category_name.length < 2) || []
+    content: products.content?.filter((product) => product.stock < 2) || []
   }
 
   return (
