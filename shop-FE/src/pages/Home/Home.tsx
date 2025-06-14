@@ -3,7 +3,6 @@ import CategorySidebar from './components/CategorySidebar'
 import ContentHome from './components/ContentHome'
 import { SidebarContext } from 'src/layouts/DefaultLayout/DefaultLayout'
 
-
 export default function Home() {
   const { sidebarOpen, setSidebarOpen } = useContext(SidebarContext)
 
