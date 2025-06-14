@@ -52,10 +52,10 @@ public class CategoryControllerV2 {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/child/{parentId}")
-    public ApiResponse<CategoryResponse> createChild(@RequestBody CategoryCreationRequest category,@PathVariable String parentId) throws AppException {
+    @PostMapping("/child/{id}")
+    public ApiResponse<CategoryResponse> createChild(@RequestBody CategoryCreationRequest category,@PathVariable String id) throws AppException {
         return ApiResponse.<CategoryResponse>builder()
-                .data(categoryServiceV2.createChild(category, parentId))
+                .data(categoryServiceV2.createChild(category, id))
                 .build();
     }
 
@@ -77,7 +77,7 @@ public class CategoryControllerV2 {
 
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/child/{id}")
-    public ApiResponse<Void> deleteChild(@PathVariable String id)   {
+    public ApiResponse<Void> deleteChild(@PathVariable String id) throws AppException {
         categoryServiceV2.deleteChildById(id);
         return ApiResponse.<Void>builder()
                 .data(null)
@@ -86,7 +86,7 @@ public class CategoryControllerV2 {
 
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/parent/{id}")
-    public ApiResponse<Void> deleteParent(@PathVariable String id)  {
+    public ApiResponse<Void> deleteParent(@PathVariable String id) throws AppException {
         categoryServiceV2.deleteParentById(id);
         return ApiResponse.<Void>builder()
                 .data(null)

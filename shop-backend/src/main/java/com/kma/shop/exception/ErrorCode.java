@@ -21,7 +21,14 @@ public enum ErrorCode{
     PRODUCT_OUT_OF_STOCK(409, "Product out of stock", HttpStatus.CONFLICT),
     PRODUCT_EXISTED(400, "Product already exists", HttpStatus.BAD_REQUEST),
 
+    // ===== PRODUCT =====
+    BRANCH_CANNOT_DELETE(404, "Branch can't delete", HttpStatus.NOT_FOUND),
+    BRANCH_NOT_FOUND(404, "Branch not found", HttpStatus.NOT_FOUND),
+    BRANCH_OUT_OF_STOCK(409, "Branch out of stock", HttpStatus.CONFLICT),
+    BRANCH_EXISTED(400, "Branch already exists", HttpStatus.BAD_REQUEST),
+
     // ===== CATEGORY =====
+    CATEGORY_CANNOT_DELETE(404, "Category cannot delete", HttpStatus.BAD_REQUEST),
     CATEGORY_NOT_FOUND(404, "Category not found", HttpStatus.NOT_FOUND),
     CATEGORY_OUT_OF_STOCK(409, "Category out of stock", HttpStatus.CONFLICT),
     CATEGORY_EXISTED(400, "Category already exists", HttpStatus.BAD_REQUEST),

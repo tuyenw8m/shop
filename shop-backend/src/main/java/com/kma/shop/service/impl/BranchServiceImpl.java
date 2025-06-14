@@ -3,16 +3,20 @@ package com.kma.shop.service.impl;
 import com.kma.shop.dto.request.BranchCreationRequest;
 import com.kma.shop.dto.response.BranchResponse;
 import com.kma.shop.entity.BranchEntity;
+import com.kma.shop.exception.AppException;
+import com.kma.shop.exception.ErrorCode;
 import com.kma.shop.mapping.BranchMapping;
 import com.kma.shop.repo.BranchRepo;
 import com.kma.shop.service.interfaces.BranchService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE,  makeFinal = true)
@@ -20,6 +24,14 @@ import java.util.stream.Collectors;
 public class BranchServiceImpl implements BranchService {
     BranchRepo branchRepo;
     BranchMapping branchMapping;
+
+    @Override
+    public boolean existsAllByName(List<String> names){
+        for(String name : names){
+            if(!branchRepo.existsByName(name)) return false;
+        }
+        return true;
+    }
 
     @Override
     public int count(){
@@ -47,9 +59,26 @@ public class BranchServiceImpl implements BranchService {
     }
 
     @Override
-    public void deleteByName(String name){
-        branchRepo.deleteByName(name);
+    @Transactional
+    public void deleteByName(String name) throws AppException {
+        BranchEntity branch = branchRepo.findByName(name).orElseThrow(
+                () ->  new AppException(ErrorCode.BRANCH_NOT_FOUND)
+        );
+        if (branch == null) {
+            throw new AppException(ErrorCode.BRANCH_NOT_FOUND);
+        }
+
+        if (branch.getCategories() != null && !branch.getCategories().isEmpty()) {
+            throw new AppException(ErrorCode.BRANCH_CANNOT_DELETE);
+        }
+
+        if (branch.getProduct() != null && !branch.getProduct().isEmpty()) {
+            throw new AppException(ErrorCode.BRANCH_CANNOT_DELETE);
+        }
+
+        branchRepo.delete(branch);
     }
+
 
     @Override
     public void deleteAllByName(List<String> names){
@@ -57,8 +86,10 @@ public class BranchServiceImpl implements BranchService {
     }
 
     @Override
-    public BranchResponse create(BranchCreationRequest request){
+    public BranchResponse create(BranchCreationRequest request) throws AppException {
         if(request == null) return null;
+        if(branchRepo.existsByName(request.getName()))
+            throw new AppException(ErrorCode.BRANCH_EXISTED);
         return branchMapping.toBranchResponse(save(branchMapping.toBranchEntity(request)));
     }
 
@@ -69,9 +100,9 @@ public class BranchServiceImpl implements BranchService {
     }
 
     @Override
-    public BranchEntity findByName(String name){
+    public BranchEntity findByName(String name) throws AppException {
         if(name == null) return null;
-        return branchRepo.findByName(name);
+        return branchRepo.findByName(name).orElseThrow(() -> new AppException(ErrorCode.BRANCH_NOT_FOUND));
     }
 
     @Override
@@ -81,20 +112,35 @@ public class BranchServiceImpl implements BranchService {
     }
 
     @Override
-    public BranchResponse getByName(String name){
+    public BranchResponse getByName(String name) throws AppException {
         if(name == null) return null;
         return branchMapping.toBranchResponse(findByName(name));
     }
 
     @Override
-    public BranchResponse update(BranchCreationRequest request, String name){
+    public BranchResponse update(BranchCreationRequest request, String name) throws AppException {
         if(request == null) return null;
         if(name == null) return null;
 
-        BranchEntity branchEntity = findById(name);
-        branchEntity.setName(name);
+        BranchEntity branchEntity = findByName(name);
+        if(branchEntity == null) {
+            throw  new AppException(ErrorCode.BRANCH_NOT_FOUND);
+        }
+
+        branchEntity.setName(request.getName());
         branchEntity.setDescription(request.getDescription());
+
         return branchMapping.toBranchResponse(branchRepo.save(branchEntity));
+    }
+
+    @Override
+    public List<BranchResponse> getByNames(List<String> names) throws AppException {
+        if(names == null || names.isEmpty()) return branchMapping.toBranchResponses(branchRepo.findAll());
+        List<BranchEntity> entities = new ArrayList<>();
+        for(String name : names){
+            entities.add(findByName(name));
+        }
+        return branchMapping.toBranchResponses(entities);
     }
 
     @Override
@@ -102,8 +148,14 @@ public class BranchServiceImpl implements BranchService {
         return branchRepo.findAll();
     }
 
+    @SneakyThrows
     @Override
     public List<BranchEntity> findByNames(List<String> names){
-        return names.stream().map(branchRepo::findByName).collect(Collectors.toList());
+        if(names == null || names.isEmpty()) return List.of();
+        List<BranchEntity> entities = new ArrayList<>();
+        for(String name : names){
+            entities.add(findByName(name));
+        }
+        return entities;
     }
 }

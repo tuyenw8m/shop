@@ -137,12 +137,25 @@ public class ProductServiceV2Impl implements ProductServiceV2 {
                 .build();
     }
 
+    @Override
+    public PageResponse<ProductResponseV2> getTopSold(int page, int limit){
+        PageRequest pageRequest = PageRequest.of(page, limit, Sort.Direction.DESC, "sold");
+        Page<ProductEntity> result = repo.findAll(pageRequest);
+        return PageResponse.<ProductResponseV2>builder()
+                .totalElements(result.getTotalElements())
+                .totalPages(result.getTotalPages())
+                .pageSize(result.getSize())
+                .pageNumber(result.getNumber())
+                .content(result.getContent().stream().map(productMappingV2::toProductResponseV2).toList())
+                .build();
+    }
+
     //Only ADMIN can add new product
     @PreAuthorize("hasRole('ADMIN')")
     @Override
     public ProductResponseV2 create(ProductCreationRequest request) throws AppException {
         if(request == null ) throw new AppException(ErrorCode.INVALID_INPUT);
-        if(!categoryServiceV2.isSameParent(request.getChildren_categories())) throw new AppException(ErrorCode.INVALID_INPUT);
+        if(!categoryServiceV2.isSameParent(request.getChildren_categories_id())) throw new AppException(ErrorCode.INVALID_INPUT);
 
         ProductEntity entity = ProductEntity.builder()
                 .name(request.getName())
@@ -153,8 +166,8 @@ public class ProductServiceV2Impl implements ProductServiceV2 {
                 .technical_specs(request.getTechnical_specs())
                 .promotions(request.getPromotions())
                 .branch(branchService.findByName(request.getBranch_name()))
-                .parentCategory(categoryServiceV2.getParentByChild(request.getChildren_categories().getFirst()))
-                .childCategories(categoryServiceV2.findChildByNames(request.getChildren_categories()))
+                .parentCategory(categoryServiceV2.getParentByChild(request.getChildren_categories_id().getFirst()))
+                .childCategories(categoryServiceV2.findChildByNames(request.getChildren_categories_id()))
                 .build();
 
         //Save image
@@ -176,7 +189,7 @@ public class ProductServiceV2Impl implements ProductServiceV2 {
         //check in put
         if(id == null || id.isEmpty())  throw new AppException(ErrorCode.INVALID_INPUT);
         if(request == null)  throw new AppException(ErrorCode.INVALID_INPUT);
-        if(!categoryServiceV2.isSameParent(request.getChildren_categories())) throw new AppException(ErrorCode.INVALID_INPUT);
+        if(!categoryServiceV2.isSameParent(request.getChildren_categories_id())) throw new AppException(ErrorCode.INVALID_INPUT);
         //Get current product
         ProductEntity entity = repo.findById(id).orElseThrow(() -> new AppException(ErrorCode.CONFLICT));
 
@@ -190,8 +203,8 @@ public class ProductServiceV2Impl implements ProductServiceV2 {
         entity.setTechnical_specs(request.getTechnical_specs());
         entity.setBranch(branchService.findByName(request.getBranch_name()));
         entity.setEntityStatus(EntityStatus.UPDATED);
-        entity.setParentCategory(categoryServiceV2.getParentByChild(request.getChildren_categories().getFirst()));
-        entity.setChildCategories(categoryServiceV2.findChildByNames(request.getChildren_categories()));
+        entity.setParentCategory(categoryServiceV2.getParentByChild(request.getChildren_categories_id().getFirst()));
+        entity.setChildCategories(categoryServiceV2.findChildByNames(request.getChildren_categories_id()));
         //Delete old image and add new image
         entity.getImages().clear();
         //Save image

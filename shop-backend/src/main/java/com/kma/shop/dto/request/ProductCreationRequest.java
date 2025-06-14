@@ -24,7 +24,7 @@ public class ProductCreationRequest {
     private String promotions;
     private List<MultipartFile> image;
     private List<String> category_name;
-    private String parent_category;
-    private List<String> children_categories;
+    private String parent_category_id;
+    private List<String> children_categories_id;
     private String branch_name;
 }

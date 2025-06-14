@@ -18,8 +18,8 @@ public class BranchEntity extends  FormEntity{
     String name;
     String description;
 
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.ALL)
     List<ChildCategoryEntity> categories;
-    @OneToMany(mappedBy = "branch")
+    @OneToMany(mappedBy = "branch", cascade = CascadeType.ALL, orphanRemoval = true)
     List<ProductEntity> product;
 }

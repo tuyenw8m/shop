@@ -26,6 +26,8 @@ public interface ProductServiceV2 {
                              float min_price, float max_price,
                              Integer Page, Integer limit, String sort_by) throws AppException;
 
+    PageResponse<ProductResponseV2> getTopSold(int page, int limit);
+
     //Only ADMIN can add new product
     @PreAuthorize("hasRole('ADMIN')")
     ProductResponseV2 create(ProductCreationRequest request) throws AppException;
