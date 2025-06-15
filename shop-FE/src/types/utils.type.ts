@@ -9,3 +9,9 @@ export interface ErrorResponse<Data> {
   message: string | null
   data?: Data
 }
+
+export interface ApiResponse<T> {
+  status: number
+  message: string | null
+  data: T
+}

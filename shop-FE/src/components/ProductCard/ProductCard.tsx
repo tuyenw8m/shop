@@ -126,7 +126,7 @@ export function ProductCard({ product }: ProductType) {
               Liên Hệ Đặt Hàng
             </button>
           ) : (
-            <button className='w-full bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-md py-2 transition-colors'>
+            <button className='w-full bg-teal-600 hover:bg-teal-700 text-white text-sm rounded-md py-2 transition-colors'>
               Thêm vào giỏ
             </button>
           )}
