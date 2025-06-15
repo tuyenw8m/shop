@@ -1,17 +1,17 @@
-import type { SuccessResponse } from './utils.type'
-
 export interface Category {
+  id: string
   name: string
   description: string
-  id: string
-  children: {
-    name: string
-    description: string
-    id: string
-    children: null
-    branch_name: string[]
-  }[]
-  branch_name: null
+  slug: string
+  children?: ChildCategory[] | null
+  branch_name?: string[] | null
 }
 
-export type CategoriesList = SuccessResponse<Category[]>
+export interface ChildCategory {
+  id: string
+  name: string
+  description: string
+  slug: string
+  children?: ChildCategory[] | null
+  branch_name?: string[] | null
+}
