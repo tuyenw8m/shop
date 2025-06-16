@@ -7,6 +7,7 @@ import AccountLayout from './layouts/AccountLayout/AccountLayout'
 import Home from './pages/Home'
 import { useContext } from 'react'
 import { AuthContext } from './pages/contexts/AuthContext'
+import Category from './pages/Category'
 
 export default function useRouterElement() {
   const { user } = useContext(AuthContext)
@@ -14,6 +15,7 @@ export default function useRouterElement() {
   const routeElements = useRoutes([
     {
       path: '/',
+      index: true,
       element: (
         <DefaultLayout>
           <Home />
@@ -55,6 +57,14 @@ export default function useRouterElement() {
       element: (
         <DefaultLayout>
           <ProductDetail />
+        </DefaultLayout>
+      )
+    },
+    {
+      path: '/categories/:id',
+      element: (
+        <DefaultLayout>
+          <Category />
         </DefaultLayout>
       )
     }
