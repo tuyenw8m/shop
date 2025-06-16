@@ -10,13 +10,19 @@ import java.util.List;
 
 public interface OrderService {
 
-    boolean isOrderedProduct(String productId);
 
-    boolean isOrdered(String id);
+    boolean isOrderedProductByProductId(String productId);
+
+    boolean existById(String id);
 
     OrderResponse update(String orderId, String state) throws AppException;
 
     PageResponse<OrderResponse> getMyOrders(String status, String search, int page, int limit) throws AppException;
+
+
+    OrderResponse userUpdateQuantityeOrder(String orderId, int quantity) throws AppException;
+
+    OrderResponse userUpdateStateOrder(String orderId, String state) throws AppException;
 
     OrderResponse create(OrderRequest request) throws AppException;
 

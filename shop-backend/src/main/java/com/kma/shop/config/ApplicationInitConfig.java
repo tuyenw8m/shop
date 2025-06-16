@@ -1,18 +1,16 @@
 package com.kma.shop.config;
 
 
-import com.kma.shop.controller.DataSeeder;
 import com.kma.shop.entity.Authority;
 import com.kma.shop.entity.RoleEntity;
 import com.kma.shop.entity.UserEntity;
 import com.kma.shop.exception.AppException;
 import com.kma.shop.repo.AuthorityRepo;
-import com.kma.shop.repo.ProductRepo;
 import com.kma.shop.repo.RoleRepo;
 import com.kma.shop.repo.UserRepo;
-import com.kma.shop.utils.GenerateBranchData;
-import com.kma.shop.utils.GenerateCommonData;
-import com.kma.shop.utils.GenerateProductData;
+import com.kma.shop.utils.generatedata.GenerateBranchData;
+import com.kma.shop.utils.generatedata.GenerateCommonData;
+import com.kma.shop.utils.generatedata.GenerateProductData;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -21,9 +19,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Configuration

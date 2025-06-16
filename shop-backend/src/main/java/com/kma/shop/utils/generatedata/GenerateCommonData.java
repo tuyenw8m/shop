@@ -1,4 +1,4 @@
-package com.kma.shop.utils;
+package com.kma.shop.utils.generatedata;
 
 import com.kma.shop.entity.BranchEntity;
 import com.kma.shop.entity.ChildCategoryEntity;
@@ -91,7 +91,7 @@ public class GenerateCommonData {
     private BranchEntity buildBranch(ChildCategoryEntity child) {
         String parentName = child.getParent().getName();
         String childName = child.getName();
-        String name = generateBranchName(parentName, childName);
+        String name = generateProductName(parentName, childName);
         String description = generateBranchDescription(parentName, childName);
 
         return BranchEntity.builder()
@@ -101,7 +101,7 @@ public class GenerateCommonData {
                 .build();
     }
 
-    private String generateBranchName(String parentName, String childName) {
+    private String generateProductName(String parentName, String childName) {
         List<String> brandPrefixes = Arrays.asList("Tech", "Vision", "Power", "Core", "Elite", "Pro", "Innovate", "Future", "Smart");
         List<String> brandSuffixes = Arrays.asList("Electronics", "Solutions", "Gear", "Tech", "Systems", "Innovations");
 
