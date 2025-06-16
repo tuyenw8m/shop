@@ -41,6 +41,8 @@ public class OrderMapping {
                 .quantity(request.getQuantity())
                 .product(product)
                 .user(user)
+                .soldPrice(request.getQuantity() * product.getPrice()) // need update after discount
+                .primaryPrice(product.getPrice() * request.getQuantity())
                 .status(Status.PENDING)
                 .build();
     }

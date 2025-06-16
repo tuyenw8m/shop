@@ -12,7 +12,6 @@ import com.kma.shop.service.interfaces.*;
 import com.kma.shop.specification.ReviewSpecification;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
@@ -22,7 +21,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -32,18 +30,16 @@ public class ReviewServiceImpl implements ReviewService{
     ReviewRepo repo;
     UserService userService;
     ImageService imageService;
-    ProductService productService;
+    ProductServiceV2 productServiceV2;
     OrderService orderService;
-    ProductMapping productMapping;
 
     public ReviewServiceImpl(ReviewRepo repo, UserService userService, ImageService imageService,
-                             @Qualifier("productServiceImpl")ProductService productService, OrderService orderService, ProductMapping productMapping) {
+                             ProductServiceV2 productServiceV2, OrderService orderService) {
         this.repo = repo;
         this.userService = userService;
         this.imageService = imageService;
-        this.productService = productService;
+        this.productServiceV2 = productServiceV2;
         this.orderService = orderService;
-        this.productMapping = productMapping;
     }
 
     //create review for product is ordered
@@ -56,13 +52,15 @@ public class ReviewServiceImpl implements ReviewService{
         }
 
         //just ordered product is commented
-        if(!orderService.isOrderedProduct(productId)) {
+        if(!orderService.isOrderedProductByProductId(productId)) {
             throw  new AppException(ErrorCode.PRODUCT_NOT_FOUND);
         }
 
         //get user and product
         UserEntity user = userService.getCurrentUser();
-        ProductEntity product = productService.findById(productId);
+        ProductEntity product = productServiceV2.findById(productId);
+        int rating = product.getRating();
+        product.setRating((rating * product.getReviews().size() + request.getRating())/(product.getReviews().size() + 1));
         ReviewEntity reviewEntity = ReviewEntity.builder()
                 .comment(request.getComment())
                 .rating(request.getRating())
@@ -72,11 +70,13 @@ public class ReviewServiceImpl implements ReviewService{
 
         //upload image and add review entity for image entity
         //Save image
-        List<ReviewImageEntity> newImage = imageService.createReviewImageEntities(request.getImages());
-        for(ReviewImageEntity imageEntity : newImage) {
-            imageEntity.setReview(reviewEntity);
+        if(request.getImages() != null && !request.getImages().isEmpty()) {
+            List<ReviewImageEntity> newImage = imageService.createReviewImageEntities(request.getImages());
+            for(ReviewImageEntity imageEntity : newImage) {
+                imageEntity.setReview(reviewEntity);
+            }
+            reviewEntity.getImages().addAll(newImage);
         }
-        reviewEntity.getImages().addAll(newImage);
 
         //return after update
         return toResponse(repo.save(reviewEntity));
@@ -88,6 +88,7 @@ public class ReviewServiceImpl implements ReviewService{
         if (reviewId == null || reviewId.isEmpty()) {
             throw new AppException(ErrorCode.INVALID_INPUT);
         }
+        if(request == null ) throw new AppException(ErrorCode.INVALID_INPUT);
 
         // Fetch review with images to avoid lazy loading issues
         ReviewEntity reviewEntity = repo.findById(reviewId)
@@ -104,13 +105,16 @@ public class ReviewServiceImpl implements ReviewService{
             throw new AppException(ErrorCode.INVALID_INPUT);
         }
 
+        if(request.getRating() != reviewEntity.getRating()) {
+            ProductEntity product = reviewEntity.getProduct();
+            int rating = (product.getRating() * product.getReviews().size() + request.getRating() - reviewEntity.getRating())
+                    /product.getReviews().size();
+            product.setRating(rating);
+            productServiceV2.save(product);
+        }
 
         // Xóa ảnh cũ (orphanRemoval sẽ lo phần còn lại)
         reviewEntity.getImages().clear();
-
-//        if (reviewEntity.getImages() != null) {
-//            reviewEntity.getImages().clear(); // hoặc imageRepository.deleteAllByReview(reviewEntity)
-//        }
 
         //Save image
         List<ReviewImageEntity> newImage = imageService.createReviewImageEntities(
@@ -126,6 +130,7 @@ public class ReviewServiceImpl implements ReviewService{
         ReviewEntity savedEntity = repo.save(reviewEntity);
         return toResponse(savedEntity);
     }
+
     @Override
     public void delete(String reviewId) throws AppException {
         if(reviewId == null || reviewId.isEmpty()) {
@@ -134,6 +139,10 @@ public class ReviewServiceImpl implements ReviewService{
         String userId = SecurityContextHolder.getContext().getAuthentication().getName();
         UserEntity user = userService.findUserById(userId);
         ReviewEntity reviewEntity = repo.findById(reviewId).orElseThrow(() ->new AppException(ErrorCode.CONFLICT));
+        ProductEntity product = reviewEntity.getProduct();
+        int rating = (product.getRating() * product.getReviews().size()  - reviewEntity.getRating())
+                /(product.getReviews().size() - 1);
+        product.setRating(rating);
         if(reviewEntity.getUser() != user) {
             throw  new AppException(ErrorCode.NOT_AUTHENTICATION);
         }

@@ -28,4 +28,7 @@ public class OrderEntity extends FormEntity{
     int quantity;
     String comment;
     Status status = Status.PENDING;
+    float soldPrice;
+    float primaryPrice;
+
 }
