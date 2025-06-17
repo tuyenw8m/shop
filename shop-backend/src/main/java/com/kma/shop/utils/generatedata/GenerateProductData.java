@@ -142,12 +142,12 @@ public class GenerateProductData {
 
 
     private ProductEntity buildProduct(ParentCategoryEntity parent, List<ChildCategoryEntity> childCategories, BranchEntity branch) {
-        String name = generateProductName(parent.getName(), childCategories.get(0).getName()); // Use first child for naming
+        String name = generateProductName(parent.getName(), childCategories.getFirst().getName()); // Use first child for naming
         float price = generatePrice(parent.getName());
-        String description = generateDescription(parent.getName(), childCategories.get(0).getName());
-        String features = generateFeatures(parent.getName(), childCategories.get(0).getName());
-        String technicalSpecs = generateTechnicalSpecs(parent.getName(), childCategories.get(0).getName());
-        String highlightSpecs = generateHighlightSpecs(parent.getName(), childCategories.get(0).getName());
+        String description = generateDescription(parent.getName(), childCategories.getFirst().getName());
+        String features = generateFeatures(parent.getName(), childCategories.getFirst().getName());
+        String technicalSpecs = generateTechnicalSpecs(parent.getName(), childCategories.getFirst().getName());
+        String highlightSpecs = generateHighlightSpecs(parent.getName(), childCategories.getFirst().getName());
         String promotions = generatePromotions();
         int sold = random.nextInt(500);
         int rating = random.nextInt(3) + 3; // 3-5 stars
@@ -195,19 +195,9 @@ public class GenerateProductData {
         // --- ĐÂY LÀ PHẦN QUAN TRỌNG: THIẾT LẬP CHIỀU NGƯỢC LẠI CỦA MỐI QUAN HỆ ---
         // Đối với OneToMany (từ ProductImageEntity tới ProductEntity)
         // Mỗi ProductImageEntity cần biết nó thuộc về ProductEntity nào
-        if (productImageEntities != null) {
-            for (ProductImageEntity image : productImageEntities) {
-                image.setProduct(newProduct); // Thiết lập mối quan hệ ngược
-            }
+        for (ProductImageEntity image : productImageEntities) {
+            image.setProduct(newProduct); // Thiết lập mối quan hệ ngược
         }
-        // Tương tự cho ImageEntity nếu bạn sử dụng imageV1
-        // newProduct.getImageV1().forEach(image -> image.setProduct(newProduct));
-
-        // Đối với ManyToMany (từ ChildCategoryEntity tới ProductEntity)
-        // Mặc dù ProductEntity đã có danh sách childCategories,
-        // ChildCategoryEntity (bên sở hữu) cũng cần được cập nhật.
-        // Sẽ được xử lý trong `generateProductsForParentCategory` trước khi lưu.
-
         return newProduct;
     }
 
