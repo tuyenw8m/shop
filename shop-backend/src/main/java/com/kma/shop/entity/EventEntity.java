@@ -6,6 +6,7 @@ import jakarta.persistence.OneToMany;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Entity
@@ -18,9 +19,11 @@ import java.util.List;
 public class EventEntity extends FormEntity{
     String title;
     String content;
-    @OneToMany
-    List<ImageEntity> images;
+    LocalDate startDate;
+    LocalDate endDate;
+    float promotionPercent;
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
-    List<EventProductEntity> eventProducts;
-
+    List<EventImageEntity> images;
+    @OneToMany(mappedBy = "event")
+    List<ProductEntity> eventProducts;
 }
