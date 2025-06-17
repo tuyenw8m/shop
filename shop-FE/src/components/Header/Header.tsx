@@ -10,6 +10,7 @@ export  function Header() {
   const [showCategoryMenu, setShowCategoryMenu] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const { user, logout } = useContext(AuthContext);
+  console.log('Header user:', user);
   const navigate = useNavigate();
   const profileRef = useRef<HTMLDivElement>(null);
 
@@ -17,6 +18,7 @@ export  function Header() {
     e.preventDefault();
     console.log('Searching for:', searchQuery);
   };
+
 
   const handleLogout = () => {
     logout();
