@@ -1,5 +1,6 @@
 package com.kma.shop.entity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
 import lombok.*;
@@ -19,6 +20,7 @@ public class EventEntity extends FormEntity{
     String content;
     @OneToMany
     List<ImageEntity> images;
-    @OneToMany(mappedBy = "event")
+    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
     List<EventProductEntity> eventProducts;
+
 }

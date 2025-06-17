@@ -5,6 +5,8 @@ import jakarta.persistence.ManyToOne;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDate;
+
 @Entity
 @Getter
 @Setter
@@ -13,6 +15,8 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
 public class EventProductEntity extends FormEntity{
+    LocalDate startDate;
+    LocalDate endDate;
     @ManyToOne
     ProductEntity product;
     @ManyToOne
