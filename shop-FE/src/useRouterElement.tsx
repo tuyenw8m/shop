@@ -1,15 +1,16 @@
-import { useRoutes, Navigate } from 'react-router-dom'
-import Login from './pages/Login'
-import Register from './pages/Register'
-import ProductDetail from './pages/ProductDetail/ProductDetail'
-import DefaultLayout from './layouts/DefaultLayout/DefaultLayout'
-import AccountLayout from './layouts/AccountLayout/AccountLayout'
-import Home from './pages/Home'
-import { useContext } from 'react'
-import { AuthContext } from './pages/contexts/AuthContext'
+import { useRoutes, Navigate } from 'react-router-dom';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import ProductDetail from './pages/productDetail/productDetail';
+import DefaultLayout from './layouts/DefaultLayout/DefaultLayout';
+import AccountLayout from './layouts/AccountLayout/AccountLayout';
+import Home from './pages/Home';
+import Profile from './pages/Profile/Profile';
+import { useContext } from 'react';
+import { AuthContext } from './pages/contexts/AuthContext';
 
 export default function useRouterElement() {
-  const { user } = useContext(AuthContext)
+  const { user } = useContext(AuthContext);
 
   const routeElements = useRoutes([
     {
@@ -18,18 +19,8 @@ export default function useRouterElement() {
         <DefaultLayout>
           <Home />
         </DefaultLayout>
-      )
+      ),
     },
-    //  {
-    //   path: '/',
-    //   element: user ? (
-    //     <DefaultLayout>
-    //       <Home />
-    //     </DefaultLayout>
-    //   ) : (
-    //     <Navigate to='/login' />
-    //   )
-    // },
     {
       path: '/login',
       element: !user ? (
@@ -37,8 +28,8 @@ export default function useRouterElement() {
           <Login />
         </AccountLayout>
       ) : (
-        <Navigate to='/' />
-      )
+        <Navigate to="/" />
+      ),
     },
     {
       path: '/register',
@@ -47,8 +38,8 @@ export default function useRouterElement() {
           <Register />
         </AccountLayout>
       ) : (
-        <Navigate to='/' />
-      )
+        <Navigate to="/" />
+      ),
     },
     {
       path: '/product/:id',
@@ -56,8 +47,18 @@ export default function useRouterElement() {
         <DefaultLayout>
           <ProductDetail />
         </DefaultLayout>
-      )
-    }
-  ])
-  return routeElements
+      ),
+    },
+    {
+      path: '/profile',
+      element: user ? (
+        <DefaultLayout>
+          <Profile />
+        </DefaultLayout>
+      ) : (
+        <Navigate to="/" />
+      ),
+    },
+  ]);
+  return routeElements;
 }

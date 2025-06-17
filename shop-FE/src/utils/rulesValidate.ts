@@ -24,10 +24,8 @@ export const schema = yup.object({
     .min(6, 'Tối thiểu 6 ký tự')
     .max(160, 'Tối đa 160 ký tự')
     .oneOf([yup.ref('password')], 'Mật khẩu không khớp, kiểm tra lại !'),
-  
 });
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const loginSchema = schema.omit(['confirm_password', 'name', ]);
+export const loginSchema = schema.omit(['confirm_password', 'name']);
 export type FormDataTypeLogin = yup.InferType<typeof loginSchema>;
 export type FormDataTypeRegister = yup.InferType<typeof schema>;
