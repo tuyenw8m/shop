@@ -88,7 +88,6 @@ export  function Header() {
               >
                 <CircleUserRound size={20} />
                 
-                
               </button>
               {user && showProfileMenu && (
                 <div className="absolute top-full right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-xl z-50">

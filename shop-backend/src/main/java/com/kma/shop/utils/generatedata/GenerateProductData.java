@@ -1,4 +1,4 @@
-package com.kma.shop.utils;
+package com.kma.shop.utils.generatedata;
 
 import com.kma.shop.entity.*;
 import com.kma.shop.exception.AppException;
@@ -142,19 +142,33 @@ public class GenerateProductData {
 
 
     private ProductEntity buildProduct(ParentCategoryEntity parent, List<ChildCategoryEntity> childCategories, BranchEntity branch) {
-        String name = generateProductName(parent.getName(), childCategories.get(0).getName()); // Use first child for naming
+        String name = generateProductName(parent.getName(), childCategories.getFirst().getName()); // Use first child for naming
         float price = generatePrice(parent.getName());
-        String description = generateDescription(parent.getName(), childCategories.get(0).getName());
-        String features = generateFeatures(parent.getName(), childCategories.get(0).getName());
-        String technicalSpecs = generateTechnicalSpecs(parent.getName(), childCategories.get(0).getName());
-        String highlightSpecs = generateHighlightSpecs(parent.getName(), childCategories.get(0).getName());
+        String description = generateDescription(parent.getName(), childCategories.getFirst().getName());
+        String features = generateFeatures(parent.getName(), childCategories.getFirst().getName());
+        String technicalSpecs = generateTechnicalSpecs(parent.getName(), childCategories.getFirst().getName());
+        String highlightSpecs = generateHighlightSpecs(parent.getName(), childCategories.getFirst().getName());
         String promotions = generatePromotions();
         int sold = random.nextInt(500);
         int rating = random.nextInt(3) + 3; // 3-5 stars
         int stock = random.nextInt(50) + 10; // 10-59 units
 
-        List<ProductImageEntity> productImageEntities =
-                new ArrayList<>(List.of(buildProductImageEntity(generateImageLink()), buildProductImageEntity(generateImageLink())));
+        List<ProductImageEntity> productImageEntities = new ArrayList<>();
+        if(parent.getName().equalsIgnoreCase("camera")){
+            productImageEntities.add(buildProductImageEntity(generateCameraLink()));
+            productImageEntities.add(buildProductImageEntity(generateCameraLink()));
+            productImageEntities.add(buildProductImageEntity(generateCameraLink()));
+        }
+        else if(parent.getName().equalsIgnoreCase("máy tính")){
+            productImageEntities.add(buildProductImageEntity(generateComputerLink()));
+            productImageEntities.add(buildProductImageEntity(generateComputerLink()));
+            productImageEntities.add(buildProductImageEntity(generateComputerLink()));
+        }
+        else{
+            productImageEntities.add(buildProductImageEntity(generateComputerComponentLink()));
+            productImageEntities.add(buildProductImageEntity(generateComputerComponentLink()));
+            productImageEntities.add(buildProductImageEntity(generateComputerComponentLink()));
+        }
 
         // Tạo ProductEntity. Lombok's @Builder giúp tạo đối tượng dễ dàng.
         // Tuy nhiên, bạn cần đảm bảo các field khác như `id` được handle bởi FormEntity
@@ -181,19 +195,9 @@ public class GenerateProductData {
         // --- ĐÂY LÀ PHẦN QUAN TRỌNG: THIẾT LẬP CHIỀU NGƯỢC LẠI CỦA MỐI QUAN HỆ ---
         // Đối với OneToMany (từ ProductImageEntity tới ProductEntity)
         // Mỗi ProductImageEntity cần biết nó thuộc về ProductEntity nào
-        if (productImageEntities != null) {
-            for (ProductImageEntity image : productImageEntities) {
-                image.setProduct(newProduct); // Thiết lập mối quan hệ ngược
-            }
+        for (ProductImageEntity image : productImageEntities) {
+            image.setProduct(newProduct); // Thiết lập mối quan hệ ngược
         }
-        // Tương tự cho ImageEntity nếu bạn sử dụng imageV1
-        // newProduct.getImageV1().forEach(image -> image.setProduct(newProduct));
-
-        // Đối với ManyToMany (từ ChildCategoryEntity tới ProductEntity)
-        // Mặc dù ProductEntity đã có danh sách childCategories,
-        // ChildCategoryEntity (bên sở hữu) cũng cần được cập nhật.
-        // Sẽ được xử lý trong `generateProductsForParentCategory` trước khi lưu.
-
         return newProduct;
     }
 
@@ -254,23 +258,64 @@ public class GenerateProductData {
         };
     }
 
-    private String generateImageLink() {
+    private String generateComputerComponentLink() {
         List<String> links = Arrays.asList(
-                "https://images.unsplash.com/photo-1562408590-e32931084e23?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-                "https://images.unsplash.com/photo-1527097779402-4a4b213307fc?q=80&w=2096&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-                "https://images.unsplash.com/photo-1555617766-c94804975da3?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-                "https://images.unsplash.com/photo-1520549233664-03f65c1d1327?q=80&w=1887&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-                "https://images.unsplash.com/photo-1495707902641-75cac588d2e9?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-                "https://images.unsplash.com/photo-1515519128511-cbd81859fa91?q=80&w=1964&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-                "https://plus.unsplash.com/premium_photo-1711136677946-27ffc2a8cf7b?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-                "https://images.unsplash.com/photo-1542445372-960567a27047?q=80&w=2069&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-                "https://plus.unsplash.com/premium_photo-1676760960755-bb03532a8ca3?q=80&w=2022&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-                "https://images.unsplash.com/photo-1611633235555-45e252fe48c8?q=80&w=1887&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-                "https://plus.unsplash.com/premium_photo-1675371421686-d092d62b75d7?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-                "https://plus.unsplash.com/premium_photo-1676760960755-bb03532a8ca3?q=80&w=2022&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                "https://i.pinimg.com/736x/e4/9d/1e/e49d1ecba3edd1840bd21f06a9d490bd.jpg",
+                "https://i.pinimg.com/736x/c7/8a/62/c78a6279adeac77cfcce91b9f630b115.jpg",
+                "https://i.pinimg.com/736x/d8/61/59/d861596e77d84dd2333181493ab928b5.jpg",
+                "https://i.pinimg.com/736x/61/f3/2f/61f32fb5acb8053cb190a8ef13776bcb.jpg",
+                "https://i.pinimg.com/736x/e5/c8/cc/e5c8ccb8ca0f44f83d1a954192cae95b.jpg",
+                "https://i.pinimg.com/736x/a4/2e/a2/a42ea25adf6fff5411e93f49706cd8cc.jpg",
+                "https://i.pinimg.com/736x/c1/49/cc/c149cc58609cb728b2913d09ed3fba8e.jpg",
+                "https://i.pinimg.com/736x/26/b1/e0/26b1e064d3e10ca1fc2b482dc59a5781.jpg",
+                "https://i.pinimg.com/736x/04/1d/74/041d740b3281021f6a46fc4dcbc036fb.jpg",
+                "https://i.pinimg.com/736x/55/3b/f2/553bf202c42cd40d7b8bc225997c27bd.jpg",
+                "https://i.pinimg.com/736x/a7/f8/71/a7f871bde9ec7e98d183ee7fe45d84b8.jpg",
+                "https://i.pinimg.com/736x/d5/be/ec/d5beec7121ed55ccdecf71b59f52ec24.jpg",
+                "https://i.pinimg.com/736x/d9/de/70/d9de70384cbc67fb1ad56980a6dbba64.jpg"
         );
         return links.get(random.nextInt(links.size()));
     }
+
+    private String generateCameraLink() {
+        List<String> links = Arrays.asList(
+                "https://i.pinimg.com/736x/0c/90/c4/0c90c47f3a8dde3ad0044f41c74ca142.jpg",
+                "https://i.pinimg.com/736x/5e/b3/bd/5eb3bdfd021b18af76f873e4c0c2cf65.jpg",
+                "https://i.pinimg.com/736x/0a/97/2d/0a972d0ca32875ff20d216c17b8f6587.jpg",
+                "https://i.pinimg.com/736x/57/23/56/572356f77cb0e0e7449da32255774ee0.jpg",
+                "https://i.pinimg.com/736x/1b/94/fa/1b94fab3fa13d5b3b95d10c625db757c.jpg",
+                "https://i.pinimg.com/736x/9f/70/09/9f70095c043895b8724c4a00f3dc59d9.jpg",
+                "https://i.pinimg.com/736x/e9/94/80/e994800a695f4b1e6ffa780acf3658f5.jpg",
+                "https://i.pinimg.com/736x/a3/c2/26/a3c22683af61aa14e0bfdc86978ac642.jpg",
+                "https://i.pinimg.com/736x/d2/1f/d0/d21fd0cef9e152c5cea8966967d63b1e.jpg",
+                "https://i.pinimg.com/736x/12/f6/c4/12f6c42bb0e65253cc6323baf3585f2a.jpg",
+                "https://i.pinimg.com/736x/e2/a7/d4/e2a7d48d4a65b0064323c191da82464a.jpg",
+                "https://i.pinimg.com/736x/26/e6/1c/26e61ccd14becf2e9fc0a39e420b89fd.jpg"
+        );
+        return links.get(random.nextInt(links.size()));
+    }
+
+    private String generateComputerLink() {
+        List<String> links = Arrays.asList(
+                "https://i.pinimg.com/736x/af/b0/4d/afb04de7b01f843c45abbc9ee08dc58e.jpg",
+                "https://i.pinimg.com/736x/55/64/48/5564485f2f78ecbff2374b9ebeadeb4a.jpg",
+                "https://i.pinimg.com/736x/b6/14/28/b614286ef52de836895c9855796e3e84.jpg",
+                "https://i.pinimg.com/736x/0a/4c/fc/0a4cfca4a2b7650effb12444f5b7b8f4.jpg",
+                "https://i.pinimg.com/736x/5c/82/1e/5c821e55c5fa0f73f6194a1416a8ccbd.jpg",
+                "https://i.pinimg.com/736x/e2/5b/8c/e25b8cc2108e29e17e9deeebc31242a3.jpg",
+                "https://i.pinimg.com/736x/c2/56/29/c2562961b1e81fc60e748f9f0f2f0769.jpg",
+                "https://i.pinimg.com/736x/81/42/a5/8142a59c8128ab47a838d81a03aedf71.jpg",
+                "https://i.pinimg.com/736x/94/ce/4e/94ce4ed0f49d59f829cfb3195b6403a9.jpg",
+                "https://i.pinimg.com/736x/28/91/eb/2891ebd512688a0dd1b056a1375c3367.jpg",
+                "https://i.pinimg.com/736x/8c/30/3d/8c303de9ece18fb1de2d91879306f988.jpg",
+                "https://i.pinimg.com/736x/29/f3/99/29f399aec2699d49113314f1e96d5063.jpg",
+                "https://unsplash.com/photos/macbook-pro-JO_S6ewBqAk",
+                "https://unsplash.com/photos/person-using-black-laptop-computer-on-brown-wooden-table-8pb7Hq539Zw",
+                "https://unsplash.com/photos/a-laptop-computer-sitting-on-top-of-a-wooden-table-6RqSDGaNJ5c"
+        );
+        return links.get(random.nextInt(links.size()));
+    }
+
 
     private String generateDescription(String parentName, String childName) {
         List<String> descriptors = Arrays.asList(

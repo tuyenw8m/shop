@@ -16,19 +16,17 @@ import com.kma.shop.service.interfaces.ProductService;
 import com.kma.shop.service.interfaces.UserService;
 import com.kma.shop.specification.OrderSpecification;
 import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -48,18 +46,19 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public boolean isOrderedProduct(String productId){
+    public boolean isOrderedProductByProductId(String productId){
         UserEntity user = userService.getCurrentUser();
         return user.getOrders().stream()
                 .anyMatch(order -> order.getProduct().getId().equals(productId));
     }
 
     @Override
-    public boolean isOrdered(String id){
+    public boolean existById(String id){
         return orderRepo.existsById(id);
     }
 
     @Override
+    @PreAuthorize("hasRole('ADMIN')")
     public OrderResponse update(String orderId, String state) throws AppException {
         Status status = Status.valueOf(state);
         OrderEntity orderEntity = orderRepo.findById(orderId)
@@ -67,8 +66,6 @@ public class OrderServiceImpl implements OrderService {
         orderEntity.setStatus(status);
         return orderMapping.toOrderResponse(orderRepo.save(orderEntity));
     }
-
-
 
     @Override
     public PageResponse<OrderResponse> getMyOrders(String status, String search, int page, int limit)   {
@@ -90,6 +87,76 @@ public class OrderServiceImpl implements OrderService {
                 .totalPages(result.getTotalPages())
                 .build();
     }
+
+    @Override
+    public OrderResponse userUpdateQuantityeOrder(String orderId, int quantity) throws AppException {
+        if(quantity <= 0) throw new AppException(ErrorCode.INVALID_INPUT);
+        if(orderId == null | orderId.trim().isEmpty()) throw new AppException(ErrorCode.INVALID_INPUT);
+
+        OrderEntity orderEntity = orderRepo.findById(orderId)
+                .orElseThrow(() -> new AppException(ErrorCode.INVALID_INPUT));
+
+        // Giả định bạn có CustomUserPrincipal
+        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        if (!userId.equals(orderEntity.getUser().getId())) {
+            throw new AppException(ErrorCode.NOT_AUTHORIZATION);
+        }
+
+        // Optional: check current status logic
+        if (orderEntity.getStatus() == Status.SHIPPED || orderEntity.getStatus() == Status.DELIVERED) {
+            throw new AppException(ErrorCode.ORDER_ALREADY_PROCESSED);
+        }
+
+        orderEntity.setQuantity(quantity);
+        OrderEntity updated = orderRepo.save(orderEntity);
+
+        return orderMapping.toOrderResponse(updated);
+    }
+
+    @Override
+    public OrderResponse userUpdateStateOrder(String orderId, String state) throws AppException {
+        validateInput(orderId, state);
+
+        Status status;
+        try {
+            status = Status.valueOf(state.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new AppException(ErrorCode.INVALID_INPUT);
+        }
+
+        Set<Status> allowedStatuses = EnumSet.of(Status.CANCELLED, Status.SHIPPED);
+        if (!allowedStatuses.contains(status)) {
+            throw new AppException(ErrorCode.INVALID_INPUT);
+        }
+
+        OrderEntity orderEntity = orderRepo.findById(orderId)
+                .orElseThrow(() -> new AppException(ErrorCode.INVALID_INPUT));
+
+        // Giả định bạn có CustomUserPrincipal
+        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        if (!userId.equals(orderEntity.getUser().getId())) {
+            throw new AppException(ErrorCode.NOT_AUTHORIZATION);
+        }
+
+        // Optional: check current status logic
+        if (orderEntity.getStatus() == Status.SHIPPED) {
+            throw new AppException(ErrorCode.ORDER_ALREADY_PROCESSED);
+        }
+
+        orderEntity.setStatus(status);
+        OrderEntity updated = orderRepo.save(orderEntity);
+
+        return orderMapping.toOrderResponse(updated);
+    }
+
+    private void validateInput(String orderId, String state) throws AppException {
+        if (orderId == null || orderId.isEmpty() || state == null || state.isEmpty()) {
+            throw new AppException(ErrorCode.INVALID_INPUT);
+        }
+    }
+
 
     @Override
     public OrderResponse create(OrderRequest request) throws AppException {

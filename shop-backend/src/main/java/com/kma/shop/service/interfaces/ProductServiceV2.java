@@ -4,6 +4,7 @@ import com.kma.shop.dto.request.ProductCreationRequest;
 import com.kma.shop.dto.response.PageResponse;
 import com.kma.shop.dto.response.ProductAdminResponseV2;
 import com.kma.shop.dto.response.ProductResponseV2;
+import com.kma.shop.dto.response.TopProductSoldInWeekResponse;
 import com.kma.shop.entity.ProductEntity;
 import com.kma.shop.exception.AppException;
 import jakarta.transaction.Transactional;
@@ -12,6 +13,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import java.util.List;
 
 public interface ProductServiceV2 {
+    List<TopProductSoldInWeekResponse> getTopSoldInWeek(List<String> childCategories, String parentCategory, String search, float min_price, float max_price,
+                                                        Integer Page, Integer limit, String sort_by) throws AppException;
+
     //get product response by product id
     ProductResponseV2 getById(String id) throws AppException;
 
