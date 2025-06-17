@@ -163,7 +163,7 @@ export default function CategoryMenu({ isOpen, onClose, isDesktop = false }: Cat
                     <div className='flex items-center space-x-3'>
                       <span className='text-gray-500'>{getCategoryIcon(index)}</span>
                       <Link
-                        to={`/category/${category.slug}`}
+                        to={`/categories/${category.id}`}
                         className='font-medium text-gray-800 hover:text-teal-600'
                         onClick={onClose}
                       >
