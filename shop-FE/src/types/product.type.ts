@@ -9,7 +9,7 @@ export interface Product {
   image_url: string[]
   parent_category_name: string
   children_category_name: string[]
-  category_name: never[]
+  category_name: string | null
   sold: number
   original_price: number
   promotions: string

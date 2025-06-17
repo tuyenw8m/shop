@@ -2,7 +2,7 @@ import React from 'react'
 
 function Footer() {
   return (
-    <footer className='px-4 sm:px-6 py-8 bg-[#027d73] text-gray-200'>
+    <footer className='px-4 sm:px-6 py-8 bg-gradient-to-r from-teal-500 to-emerald-600 text-gray-200'>
       <div className='max-w-screen-xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-6'>
         <div>
           <h3 className='font-bold text-white mb-3'>Hỗ trợ - dịch vụ</h3>

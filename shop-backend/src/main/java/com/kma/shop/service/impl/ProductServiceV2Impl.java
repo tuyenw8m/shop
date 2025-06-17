@@ -33,7 +33,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
+
 
 @Service("productServiceV2Impl")
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
