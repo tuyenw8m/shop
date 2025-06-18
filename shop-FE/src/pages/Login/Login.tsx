@@ -6,7 +6,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useState, useContext } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
 import LeftImage from '../leftimages/leftimages.jpg';
-import type { AuthContextType, User } from '../contexts/auth.types';
+import type { AuthContextType } from '../contexts/AuthContext'; // ✅ Đúng
+
 
 const schema = yup.object({
   email: yup.string().required('Vui lòng nhập email'),
@@ -67,7 +68,7 @@ export default function Login() {
 
     login(token, user);
     alert('✅ Đăng nhập thành công!');
-    navigate('/profile'); // hoặc navigate('/') nếu bạn muốn về trang chủ
+    navigate('/'); // hoặc navigate('/') nếu bạn muốn về trang chủ
   } catch (error: unknown) {
     console.error('Lỗi:', error);
     setApiError(error instanceof Error ? error.message : 'Lỗi xảy ra khi đăng nhập!');
@@ -137,7 +138,7 @@ export default function Login() {
 
               <button
                 type="button"
-                onClick={handleGoogleLogin}
+               
                 disabled={loading}
                 className="w-full bg-red-600 text-white py-3 rounded-full hover:bg-red-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >

@@ -1,9 +1,9 @@
-import { useContext, useState, useEffect } from 'react';
-import { AuthContext } from '../contexts/AuthContext';
+import { useState, useEffect } from 'react';
+import { useAuth } from '../contexts/AuthContext'; // Sử dụng useAuth
 import type { User } from '../contexts/auth.types';
 
 export default function Profile() {
-  const { user } = useContext(AuthContext);
+  const { user } = useAuth(); // Sử dụng useAuth thay vì useContext
   const [profileData, setProfileData] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -24,7 +24,6 @@ export default function Profile() {
     avatar: null,
   });
 
-  // Định nghĩa interface Purchase
   interface Purchase {
     id: string;
     date: string;
@@ -37,43 +36,44 @@ export default function Profile() {
     image: string;
   }
 
-  // Định nghĩa type cho purchases
   type Purchases = {
     [key in 'purchase' | 'waitingPayment' | 'shipping' | 'waitingDelivery' | 'completed' | 'cancelled' | 'returned']: Purchase[];
   };
 
   useEffect(() => {
     const fetchProfile = async () => {
-      if (user?.token) {
-        try {
-          const response = await fetch('http://localhost:8888/shop/api/v1/users/me', {
-            headers: {
-              'Authorization': `Bearer ${user.token}`,
-              'Content-Type': 'application/json',
-            },
-          });
-          if (!response.ok) {
-            throw new Error(`Lỗi khi tải thông tin: ${response.statusText}`);
-          }
-          const data = await response.json();
-          if (data.status === 0 && data.data) {
-            setProfileData(data.data as User);
-            setEditData({
-              name: data.data.name || '',
-              email: data.data.email || '',
-              gender: data.data.gender || '',
-              birthDate: data.data.birthDate || '',
-              avatar: null,
-            });
-          } else {
-            throw new Error('Dữ liệu người dùng không hợp lệ');
-          }
-        } catch (err) {
-          setError(err instanceof Error ? err.message : 'Đã xảy ra lỗi không xác định');
-        } finally {
-          setLoading(false);
+      if (!user?.token) {
+        setLoading(false);
+        return;
+      }
+      try {
+        console.log('Fetching profile with token:', user.token);
+        const response = await fetch('http://localhost:8888/shop/api/v1/users/me', {
+          headers: {
+            'Authorization': `Bearer ${user.token}`, // Sửa cú pháp string template
+            'Content-Type': 'application/json',
+          },
+        });
+        if (!response.ok) {
+          throw new Error(`Lỗi khi tải thông tin: ${response.statusText}`);
         }
-      } else {
+        const data = await response.json();
+        console.log('Profile API response:', data);
+        if (data.status === 0 && data.data) {
+          setProfileData(data.data as User);
+          setEditData({
+            name: data.data.name || '',
+            email: data.data.email || '',
+            gender: data.data.gender || '',
+            birthDate: data.data.birthDate || '',
+            avatar: null,
+          });
+        } else {
+          throw new Error('Dữ liệu người dùng không hợp lệ');
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Đã xảy ra lỗi không xác định');
+      } finally {
         setLoading(false);
       }
     };
@@ -82,14 +82,13 @@ export default function Profile() {
 
   if (loading) return <div>Đang tải...</div>;
   if (error) return <div>{error}</div>;
-  if (!user) return <div>Bạn cần đăng nhập để xem thông tin hồ sơ.</div>;
+  if (!user) return <div>Bạn cần đăng nhập để xem thông tin hồ sơ. <a href="/login">Đăng nhập</a></div>;
 
   const notifications = [
     { id: 1, message: 'Bạn có đơn hàng mới vào 03:00 PM, 17/06/2025', read: false },
     { id: 2, message: 'Đơn hàng #12345 đã được giao', read: true },
   ];
 
-  // Gán type cho purchases
   const purchases: Purchases = {
     purchase: [
       {
@@ -102,39 +101,6 @@ export default function Profile() {
         status: 'Đã giao',
         shop: '5TECH Store',
         image: '/path-to-gaming-keyboard.jpg',
-      },
-      {
-        id: '12346',
-        date: '17/06/2025',
-        product: 'Tai nghe không dây',
-        originalPrice: '1,200,000 đ',
-        price: '999,000 đ',
-        totalPrice: '999,000 đ',
-        status: 'Chờ thanh toán',
-        shop: '5TECH Store',
-        image: '/path-to-headphones.jpg',
-      },
-      {
-        id: '12347',
-        date: '16/06/2025',
-        product: 'Máy chơi game',
-        originalPrice: '15,000,000 đ',
-        price: '13,500,000 đ',
-        totalPrice: '13,500,000 đ',
-        status: 'Đang vận chuyển',
-        shop: '5TECH Store',
-        image: '/path-to-game-console.jpg',
-      },
-      {
-        id: '12348',
-        date: '17/06/2025',
-        product: 'Sách học lập trình',
-        originalPrice: '200,000 đ',
-        price: '180,000 đ',
-        totalPrice: '180,000 đ',
-        status: 'Chờ giao hàng',
-        shop: 'BookShop',
-        image: '/path-to-book.jpg',
       },
     ],
     waitingPayment: [
@@ -181,7 +147,6 @@ export default function Profile() {
     returned: [],
   };
 
-  // Gán type cho activePurchases
   const activePurchases: Purchase[] = purchases[activeTab as keyof Purchases] || [];
 
   const handleSave = () => {
@@ -200,17 +165,17 @@ export default function Profile() {
         <div className="w-1/5 bg-white p-4 rounded-lg shadow mr-4">
           <div className="flex flex-col items-center mb-6">
             <img
-              src="/path-to-avatar.jpg"
+              src={profileData?.avatar_url || user?.user?.avatar_url || '/path-to-avatar.jpg'}
               alt="Avatar"
               className="w-16 h-16 rounded-full mb-2 object-cover"
             />
-            <span className="text-sm font-semibold text-gray-800 text-center">{profileData?.name || 'Người dùng'}</span>
+            <span className="text-sm font-semibold text-gray-800 text-center">{profileData?.name || user?.user?.name || 'Người dùng'}</span>
           </div>
           <ul className="space-y-4 text-sm">
             <li>
               <button
                 onClick={() => setActiveTab('notifications')}
-                className={`flex items-center space-x-2 text-red-500 hover:text-red-700 ${activeTab === 'notifications' ? 'font-bold' : ''}`}
+                className={`flex items-center space-x-2 text-red-500 hover:text-red-700 ${activeTab === 'notifications' ? 'font-bold' : ''}`} // Sửa cú pháp className
               >
                 <span>🔔</span>
                 <span>Thông Báo</span>
@@ -219,7 +184,7 @@ export default function Profile() {
             <li>
               <button
                 onClick={() => setActiveTab('account')}
-                className={`flex items-center space-x-2 text-blue-500 hover:text-blue-700 ${activeTab === 'account' ? 'font-bold' : ''}`}
+                className={`flex items-center space-x-2 text-blue-500 hover:text-blue-700 ${activeTab === 'account' ? 'font-bold' : ''}`} // Sửa cú pháp className
               >
                 <span>👤</span>
                 <span>Tài Khoản Của Tôi</span>
@@ -228,7 +193,7 @@ export default function Profile() {
             <li>
               <button
                 onClick={() => setActiveTab('purchase')}
-                className={`flex items-center space-x-2 text-blue-500 hover:text-blue-700 ${activeTab === 'purchase' ? 'font-bold' : ''}`}
+                className={`flex items-center space-x-2 text-blue-500 hover:text-blue-700 ${activeTab === 'purchase' ? 'font-bold' : ''}`} // Sửa cú pháp className
               >
                 <span>📋</span>
                 <span>Đơn Mua</span>
@@ -373,7 +338,7 @@ export default function Profile() {
                       activeTab === key
                         ? 'text-orange-500 border-b-2 border-orange-500 bg-orange-100'
                         : 'text-gray-600 hover:bg-gray-100 hover:text-gray-800'
-                    }`}
+                    }`} // Sửa cú pháp className
                   >
                     {label}
                   </button>
@@ -426,7 +391,6 @@ export default function Profile() {
           )}
         </div>
       </div>
-      
     </div>
   );
 }
