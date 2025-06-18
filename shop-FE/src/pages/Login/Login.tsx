@@ -55,7 +55,7 @@ export default function Login() {
         throw new Error(result.message || 'Đăng nhập thất bại!');
       }
 
-      login(result.token); // Gọi hàm login từ AuthContext
+      login(result.data.token, result.data.user); // Gọi hàm login từ AuthContext
       alert('✅ Đăng nhập thành công!');
       navigate('/');
     } catch (error: any) {

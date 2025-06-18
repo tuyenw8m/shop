@@ -18,13 +18,22 @@ public class ProductEntity extends FormEntity{
     private float price;
     private float original_price;
     private float promotionPercent = 0;
+    @Column(columnDefinition = "TEXT")
+    @Lob
     private String features;
+    @Column(columnDefinition = "TEXT")
+    @Lob
     private String description;
+    @Column(columnDefinition = "TEXT")
+    @Lob
+    private String technical_specs;
+    @Column(columnDefinition = "TEXT")
+    @Lob
+    private String highlight_specs;
+    @Column(columnDefinition = "TEXT")
+    private String promotions;
     private LocalDate endEvent = LocalDate.now().minusDays(1);
     private LocalDate startEvent = LocalDate.now().minusDays(1);
-    private String technical_specs;
-    private String highlight_specs;
-    private String promotions;
     private int sold = 0;
     private int rating = 0;
     private int stock;

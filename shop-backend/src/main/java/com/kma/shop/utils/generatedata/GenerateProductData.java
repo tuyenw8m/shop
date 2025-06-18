@@ -170,9 +170,6 @@ public class GenerateProductData {
             productImageEntities.add(buildProductImageEntity(generateComputerComponentLink()));
         }
 
-        // Tạo ProductEntity. Lombok's @Builder giúp tạo đối tượng dễ dàng.
-        // Tuy nhiên, bạn cần đảm bảo các field khác như `id` được handle bởi FormEntity
-        // hoặc ProductEntity có `@Id` và `@GeneratedValue`
         ProductEntity newProduct = ProductEntity.builder()
                 .name(name)
                 .price(price)
@@ -317,116 +314,191 @@ public class GenerateProductData {
     }
 
 
-    private String generateDescription(String parentName, String childName) {
-        List<String> descriptors = Arrays.asList(
-                "Thiết kế hiện đại, hiệu suất vượt trội, phù hợp cho mọi nhu cầu.",
-                "Sản phẩm chất lượng cao, bền bỉ và đáng tin cậy.",
-                "Tối ưu hóa cho hiệu suất, mang lại trải nghiệm mượt mà.",
-                "Công nghệ tiên tiến, đáp ứng tốt các tác vụ chuyên sâu.",
-                "Lý tưởng cho cả công việc và giải trí."
-        );
-        return descriptors.get(random.nextInt(descriptors.size())) + " Dành cho " + childName + " trong danh mục " + parentName + ".";
-    }
+        public String generateDescription(String parentName, String childName) {
+            String baseDescription;
 
-    private String generateFeatures(String parentName, String childName) {
+            switch (parentName) {
+                case "Camera":
+                    switch (childName) {
+                        case "Camera hành động":
+                            baseDescription = "Với thiết kế chắc chắn và khả năng chống chịu mọi điều kiện, đây là lựa chọn hoàn hảo để ghi lại mọi khoảnh khắc phiêu lưu của bạn ở chất lượng 4K đỉnh cao. Tích hợp nhiều tính năng thông minh giúp bạn dễ dàng sáng tạo nội dung độc đáo.";
+                            break;
+                        case "Camera chuyên nghiệp":
+                            baseDescription = "Dành cho những nhà sáng tạo nội dung và nhiếp ảnh gia chuyên nghiệp, chiếc camera này mang đến hiệu suất vượt trội với cảm biến lớn, khả năng lấy nét cực nhanh và dải ISO rộng, đảm bảo hình ảnh sắc nét và chi tiết ngay cả trong điều kiện ánh sáng khó khăn. Tối ưu hóa cho cả chụp ảnh và quay video chất lượng cao.";
+                            break;
+                        case "Webcam":
+                            baseDescription = "Mang lại chất lượng hình ảnh và âm thanh rõ nét cho mọi cuộc gọi video và livestream. Với độ phân giải cao và micro tích hợp, bạn sẽ luôn xuất hiện chuyên nghiệp và rõ ràng. Thiết kế nhỏ gọn, dễ dàng lắp đặt và sử dụng ngay lập tức.";
+                            break;
+                        case "Camera an ninh/IP":
+                            baseDescription = "Giải pháp giám sát thông minh cho ngôi nhà hoặc doanh nghiệp của bạn. Camera cung cấp hình ảnh Full HD sắc nét ngày lẫn đêm nhờ hồng ngoại, cùng với khả năng phát hiện chuyển động bằng AI và kết nối từ xa qua Wi-Fi, giúp bạn an tâm mọi lúc mọi nơi.";
+                            break;
+                        case "Camera hành trình":
+                            baseDescription = "Người bạn đồng hành không thể thiếu trên mọi cung đường. Camera ghi lại hành trình của bạn với độ phân giải Full HD, tích hợp GPS và cảm biến G để lưu trữ bằng chứng quan trọng khi cần. Đảm bảo an toàn và minh bạch cho mọi chuyến đi.";
+                            break;
+                        default:
+                            baseDescription = "Dòng sản phẩm camera chất lượng cao, dễ sử dụng, mang lại những thước phim và hình ảnh sống động, chân thực.";
+                            break;
+                    }
+                    break;
+                case "Máy tính":
+                    switch (childName) {
+                        case "PC gaming":
+                            baseDescription = "Đắm chìm vào thế giới game với hiệu năng đỉnh cao. Chiếc PC này được trang bị card đồ họa mạnh mẽ, bộ xử lý tiên tiến và hệ thống tản nhiệt tối ưu, đảm bảo trải nghiệm chơi game mượt mà, không giật lag ngay cả với các tựa game đồ họa nặng nhất. Thiết kế hầm hố, phong cách.";
+                            break;
+                        case "PC đồ họa / workstation":
+                            baseDescription = "Sức mạnh vượt trội cho các tác vụ đòi hỏi hiệu năng cao như thiết kế đồ họa, dựng phim 3D, hoặc phân tích dữ liệu. Với CPU đa nhân, dung lượng RAM lớn và ổ cứng tốc độ cao, máy tính này là công cụ lý tưởng cho các chuyên gia sáng tạo và kỹ thuật.";
+                            break;
+                        case "Mini PC":
+                            baseDescription = "Giải pháp máy tính nhỏ gọn nhưng mạnh mẽ, lý tưởng cho không gian làm việc hạn chế hoặc làm trung tâm giải trí đa phương tiện. Tiết kiệm điện năng, vận hành êm ái nhưng vẫn đảm bảo hiệu suất ổn định cho công việc và giải trí hàng ngày.";
+                            break;
+                        case "PC để bàn":
+                            baseDescription = "Cấu hình linh hoạt, dễ dàng nâng cấp và phù hợp với nhiều nhu cầu sử dụng từ văn phòng đến giải trí gia đình. Với hiệu suất ổn định và khả năng tùy biến cao, đây là lựa chọn đáng tin cậy cho mọi người dùng.";
+                            break;
+                        case "Laptop":
+                            baseDescription = "Sự kết hợp hoàn hảo giữa hiệu suất và tính di động. Chiếc laptop này cung cấp đủ sức mạnh để xử lý công việc, học tập và giải trí mọi lúc mọi nơi, với thời lượng pin dài và thiết kế mỏng nhẹ, tiện lợi mang theo.";
+                            break;
+                        default:
+                            baseDescription = "Các dòng máy tính đa dạng, mang lại hiệu suất mạnh mẽ và ổn định, phù hợp với mọi đối tượng người dùng từ cá nhân đến doanh nghiệp.";
+                            break;
+                    }
+                    break;
+                case "Linh kiện":
+                    switch (childName) {
+                        case "Case":
+                            baseDescription = "Bảo vệ các linh kiện bên trong và thể hiện cá tính riêng của bạn. Vỏ case được thiết kế với luồng không khí tối ưu, hỗ trợ nhiều kích thước linh kiện và thường đi kèm với đèn RGB bắt mắt cùng tấm kính cường lực sang trọng để bạn tự tin trưng bày bộ máy.";
+                            break;
+                        case "Tản nhiệt":
+                            baseDescription = "Đảm bảo CPU của bạn luôn hoạt động ở nhiệt độ lý tưởng, ngay cả dưới tải nặng. Các giải pháp tản nhiệt từ khí đến nước giúp kéo dài tuổi thọ linh kiện và duy trì hiệu suất tối đa cho hệ thống của bạn.";
+                            break;
+                        case "PSU":
+                            baseDescription = "Cung cấp nguồn điện ổn định và đáng tin cậy cho toàn bộ hệ thống. Với hiệu suất cao và thiết kế mô-đun, PSU giúp tối ưu hóa việc sử dụng năng lượng và quản lý cáp gọn gàng, bảo vệ các linh kiện quý giá của bạn.";
+                            break;
+                        case "GPU":
+                            baseDescription = "Nâng tầm trải nghiệm hình ảnh của bạn lên một đẳng cấp mới. Card đồ họa này mang lại hiệu suất chơi game mượt mà ở độ phân giải cao, hỗ trợ công nghệ dò tia (Ray Tracing) tiên tiến cho đồ họa siêu thực và khả năng xử lý mạnh mẽ cho các ứng dụng sáng tạo.";
+                            break;
+                        case "Mainboard":
+                            baseDescription = "Nền tảng kết nối mọi linh kiện trong hệ thống, đảm bảo sự tương thích và hiệu suất tối ưu. Bo mạch chủ này hỗ trợ các công nghệ mới nhất về RAM, PCIe và kết nối không dây, cung cấp nền tảng vững chắc cho bất kỳ cấu hình PC nào.";
+                            break;
+                        case "SSD/HDD":
+                            baseDescription = "Giải pháp lưu trữ tốc độ cao và dung lượng lớn cho mọi nhu cầu. SSD mang lại tốc độ khởi động hệ điều hành và tải ứng dụng nhanh chóng, trong khi HDD cung cấp không gian rộng rãi để lưu trữ dữ liệu lớn với chi phí hiệu quả.";
+                            break;
+                        case "RAM":
+                            baseDescription = "Nâng cao khả năng đa nhiệm và tốc độ xử lý của máy tính. Với dung lượng và tốc độ cao, RAM giúp các ứng dụng chạy mượt mà hơn, giảm độ trễ và cải thiện hiệu suất tổng thể, đặc biệt quan trọng cho game thủ và người dùng chuyên nghiệp.";
+                            break;
+                        case "CPU":
+                            baseDescription = "Bộ não của máy tính, quyết định tốc độ và khả năng xử lý của hệ thống. CPU này cung cấp hiệu suất mạnh mẽ cho mọi tác vụ, từ làm việc văn phòng, giải trí đến chơi game và xử lý đồ họa chuyên sâu, với số nhân và luồng được tối ưu.";
+                            break;
+                        default:
+                            baseDescription = "Các linh kiện máy tính chất lượng cao, đảm bảo hiệu suất tối ưu và khả năng tương thích rộng rãi, là nền tảng vững chắc cho mọi cấu hình PC.";
+                            break;
+                    }
+                    break;
+                default:
+                    baseDescription = "Sản phẩm đa dạng, chất lượng cao, đáp ứng mọi nhu cầu và mang lại trải nghiệm sử dụng tuyệt vời.";
+                    break;
+            }
+
+            return baseDescription + " Đây là mô tả dành cho **" + childName + "** trong danh mục **" + parentName + "**.";
+        }
+
+        public String generateFeatures(String parentName, String childName) {
+            return switch (parentName) {
+                case "Camera" -> switch (childName) {
+                    case "Camera hành động" -> "Những chiếc camera này được chế tạo để phục vụ những cuộc phiêu lưu! Các tính năng chính bao gồm khả năng chống nước mạnh mẽ, thường cho phép ngâm dưới nước đến 10 mét (hoặc hơn với vỏ bảo vệ bổ sung). Chúng xuất sắc trong việc quay video 4K ở tốc độ khung hình cao (như 60fps hoặc thậm chí 120fps) cho cảnh quay chuyển động chậm mượt mà, và thường cung cấp góc nhìn siêu rộng 170° để ghi lại những cảnh quan bao la. Nhiều loại cũng bao gồm tính năng ổn định hình ảnh tiên tiến (điện tử hoặc quang học) để đảm bảo cảnh quay ổn định ngay cả trong các hoạt động cường độ cao, và điều khiển bằng giọng nói để vận hành rảnh tay.";
+                    case "Camera chuyên nghiệp" -> "Được thiết kế cho các nhiếp ảnh gia và nhà quay phim nghiêm túc, những chiếc máy này tự hào với cảm biến Full-frame hoặc APS-C lớn cho hiệu suất ánh sáng yếu vượt trội và độ sâu trường ảnh nông. Chúng cung cấp dải ISO rộng lớn (ví dụ: 100-51200) cho tính linh hoạt trong các điều kiện ánh sáng khác nhau, và chụp liên tục tốc độ cao (ví dụ: 10fps trở lên) để ghi lại các đối tượng chuyển động nhanh. Hãy mong đợi các tính năng như hệ thống lấy nét tự động tiên tiến với khả năng theo dõi, ổn định hình ảnh trong thân máy (IBIS), và các định dạng quay video chuyên nghiệp (như hồ sơ LOG) để linh hoạt hậu kỳ rộng rãi.";
+                    case "Webcam" -> "Thiết yếu cho các cuộc gọi video và phát trực tiếp, webcam hiện đại chủ yếu cung cấp độ phân giải 1080p (Full HD) hoặc thậm chí 4K cho hình ảnh sắc nét. Chúng hầu như luôn bao gồm micrô tích hợp với khả năng giảm tiếng ồn cho âm thanh rõ ràng và tự động lấy nét để giữ bạn luôn sắc nét. Nhiều loại cũng có tính năng tự động điều chỉnh ánh sáng để thích ứng với các môi trường ánh sáng khác nhau, và ống kính góc rộng để bao gồm nhiều không gian xung quanh bạn hơn.";
+                    case "Camera an ninh/IP" -> "Những chiếc camera này tập trung vào việc giám sát mọi thứ. Chúng có tính năng nhìn đêm hồng ngoại (IR) cho cảnh quay rõ ràng trong bóng tối hoàn toàn, kết nối Wi-Fi để giám sát từ xa qua ứng dụng điện thoại thông minh, và phát hiện chuyển động được hỗ trợ bởi AI có thể phân biệt giữa người, vật nuôi và phương tiện. Các mẫu nâng cao cung cấp âm thanh hai chiều, tùy chọn lưu trữ đám mây, lưu trữ cục bộ (thẻ SD), và các vùng cảnh báo có thể tùy chỉnh.";
+                    case "Camera hành trình" -> "Quan trọng đối với người lái xe, những chiếc camera này tập trung vào việc ghi hình độ phân giải Full HD (1080p) hoặc cao hơn cho hành trình của bạn. Chúng thường có GPS tích hợp để ghi lại tốc độ và vị trí, góc nhìn rộng 140° (hoặc rộng hơn), và cảm biến G tự động khóa cảnh quay khi va chạm. Ghi hình vòng lặp, giám sát đỗ xe, và Wi-Fi để dễ dàng truyền tệp cũng là những tính năng phổ biến.";
+                    default -> "Nói chung, cung cấp chất lượng hình ảnh cao với giao diện thân thiện với người dùng, giúp chúng dễ tiếp cận để sử dụng hàng ngày.";
+                };
+                case "Máy tính" -> switch (childName) {
+                    case "PC gaming" -> "Những cỗ máy này được thiết kế để đạt hiệu suất chơi game cao nhất. Chúng có các đơn vị GPU chuyên dụng mạnh mẽ như dòng NVIDIA GeForce RTX cho hình ảnh tuyệt đẹp và dò tia, dung lượng RAM tốc độ cao dồi dào 16GB (hoặc hơn) để đa nhiệm mượt mà, và thường là hệ thống tản nhiệt nước tiên tiến (AIO hoặc vòng lặp tùy chỉnh) để duy trì nhiệt độ tối ưu trong các phiên chơi game cường độ cao. Hỗ trợ màn hình tần số quét cao, đèn RGB tùy chỉnh, và lưu trữ SSD nhanh cũng phổ biến.";
+                    case "PC đồ họa / workstation" -> "Được xây dựng cho các tác vụ sáng tạo và chuyên nghiệp đòi hỏi khắt khe. Chúng thường chứa các CPU đa nhân với 12 nhân trở lên (ví dụ: Intel i9, AMD Ryzen 9, Threadripper) cho việc dựng hình nặng và tính toán phức tạp. Chúng được trang bị RAM ECC 32GB (hoặc hơn) đáng kể cho sự ổn định và sửa lỗi, và SSD NVMe 1TB (hoặc lớn hơn) cực nhanh để truy cập tệp và tải ứng dụng nhanh chóng. Các GPU chuyên nghiệp (NVIDIA Quadro, AMD Radeon Pro) và bộ nguồn mạnh mẽ cũng là tiêu chuẩn.";
+                    case "Mini PC" -> "Ưu tiên thiết kế tiết kiệm không gian, chúng cực kỳ nhỏ gọn và tiết kiệm năng lượng, làm cho chúng lý tưởng cho không gian làm việc nhỏ hoặc thiết lập rạp hát gia đình. Mặc dù có kích thước nhỏ, chúng thường đi kèm với 8GB RAM đáng nể và một ổ SSD cho thời gian khởi động nhanh và hiệu suất đáp ứng cho các tác vụ hàng ngày và tiêu thụ đa phương tiện. Nhiều loại cung cấp khả năng tương thích với giá treo VESA.";
+                    case "PC để bàn" -> "Lựa chọn cổ điển cho điện toán nói chung, mang lại hiệu suất ổn định và khả năng nâng cấp tuyệt vời. Chúng thường bao gồm một ổ SSD 512GB cho hệ điều hành và các ứng dụng thường dùng, thường được ghép nối với một ổ HDD lớn hơn để lưu trữ dữ liệu lớn. Thiết kế mô-đun của chúng cho phép dễ dàng thay thế và thêm các thành phần, làm cho chúng trở thành một lựa chọn linh hoạt cho nhiều người dùng.";
+                    case "Laptop" -> "Nhấn mạnh tính di động và chức năng tích hợp. Các tính năng phổ biến bao gồm màn hình Full HD 15.6 inch cho sự cân bằng giữa không gian màn hình và tính di động, pin lâu dài (ví dụ: 8 giờ trở lên) cho năng suất khi di chuyển, và thiết kế nhẹ (thường dưới 2kg) để dễ dàng vận chuyển. Chúng thường tích hợp webcam, micrô và Wi-Fi cho khả năng kết nối toàn diện.";
+                    default -> "Nói chung, cung cấp cấu hình linh hoạt để đáp ứng nhiều nhu cầu người dùng khác nhau và mang lại hiệu suất tổng thể cao cho các tác vụ điện toán nói chung.";
+                };
+                case "Linh kiện" -> switch (childName) {
+                    case "Case" -> "Không chỉ là một vỏ bọc, các vỏ máy tính hiện đại thường có đèn LED RGB sống động để tùy chỉnh thẩm mỹ, hỗ trợ nhiều dạng bo mạch chủ bao gồm ATX, Micro-ATX và Mini-ITX, và thường tích hợp các tấm kính cường lực bên hông để khoe các thành phần bên trong. Chúng cũng tập trung vào việc tối ưu hóa luồng không khí và các giải pháp quản lý cáp.";
+                    case "Tản nhiệt" -> "Quan trọng để duy trì nhiệt độ CPU tối ưu, các giải pháp tản nhiệt tiên tiến bao gồm bộ làm mát chất lỏng 240mm hoặc lớn hơn (AIO) để tản nhiệt vượt trội, và thường tự hào với tốc độ quạt 1200 RPM (hoặc cao hơn) cho luồng không khí hiệu quả với tiếng ồn tối thiểu. Chúng hỗ trợ nhiều loại ổ cắm CPU (Intel LGA, AMD AM) và thường bao gồm đèn RGB tùy chỉnh.";
+                    case "PSU" -> "Trái tim của hệ thống của bạn, một bộ nguồn tốt cung cấp năng lượng ổn định. Các tính năng bao gồm công suất đầu ra cao 650W (hoặc hơn) để hỗ trợ các thành phần mạnh mẽ, xếp hạng hiệu suất 80+ Gold (hoặc cao hơn) để giảm lãng phí năng lượng và nhiệt, và thiết kế mô-đun cho phép người dùng chỉ kết nối các cáp cần thiết, cải thiện luồng không khí và tính thẩm mỹ.";
+                    case "GPU" -> "Động cơ xử lý hình ảnh, các GPU hiện đại đi kèm với 8GB (hoặc hơn) bộ nhớ video GDDR6 (hoặc GDDR6X), cung cấp các tính năng tiên tiến như dò tia (Ray Tracing) cho ánh sáng và bóng đổ chân thực, và được tối ưu hóa cho chơi game 1440p (2K) hoặc 4K. Chúng cũng hỗ trợ nhiều đầu ra hiển thị và các giải pháp tản nhiệt tiên tiến.";
+                    case "Mainboard" -> "Xương sống kết nối tất cả các thành phần. Các tính năng chính bao gồm hỗ trợ RAM DDR4 (hoặc DDR5), các khe cắm PCIe 4.0 (hoặc 5.0) cho GPU và SSD NVMe tốc độ cao, và Wi-Fi 6 (hoặc 6E) tích hợp cho mạng không dây nhanh, đáng tin cậy. Chúng cũng cung cấp nhiều khe cắm M.2, cổng USB 3.2 và VRM mạnh mẽ để cung cấp năng lượng ổn định cho CPU.";
+                    case "SSD/HDD" -> "Các giải pháp lưu trữ khác nhau về tốc độ và dung lượng. SSD (Ổ đĩa trạng thái rắn) cung cấp tốc độ đọc/ghi cực nhanh (ví dụ: 3500MB/s cho NVMe), lý tưởng cho hệ điều hành và các ứng dụng được truy cập thường xuyên. HDD (Ổ đĩa cứng) cung cấp dung lượng lớn (ví dụ: 1TB trở lên) với chi phí mỗi gigabyte thấp hơn, phù hợp cho lưu trữ dữ liệu lớn. SSD có nhiều giao diện khác nhau như NVMe và SATA.";
+                    case "RAM" -> "Quan trọng cho đa nhiệm và hiệu suất ứng dụng. Các tính năng điển hình bao gồm 16GB (hoặc hơn) RAM DDR4 (hoặc DDR5), chạy ở tốc độ cao 3200MHz (hoặc cao hơn), và độ trễ CAS thấp (CL16 hoặc thấp hơn) để phản hồi tốt hơn. Có sẵn với nhiều dung lượng khác nhau và thường có đèn RGB.";
+                    case "CPU" -> "Là 'bộ não' của máy tính. Các CPU hiện đại tự hào với 8 nhân và 16 luồng (hoặc hơn) cho khả năng đa nhiệm và xử lý tuyệt vời, với tốc độ xung nhịp tăng cường 4.5GHz (hoặc cao hơn) cho hiệu suất đơn luồng. Chúng đi kèm với đồ họa tích hợp (trên một số mẫu) và các kích thước bộ nhớ đệm khác nhau.";
+                    default -> "Nói chung, cung cấp hiệu suất cao và khả năng tương thích rộng rãi với các thành phần hệ thống khác, đảm bảo một bản dựng đáng tin cậy.";
+                };
+                default -> "Tính năng đa dạng, phù hợp mọi nhu cầu và mang lại trải nghiệm người dùng tối ưu.";
+            };
+        }
+
+    public String generateTechnicalSpecs(String parentName, String childName) {
         return switch (parentName) {
             case "Camera" -> switch (childName) {
-                case "Camera hành động" -> "Chống nước, quay 4K, góc rộng 170°";
-                case "Camera chuyên nghiệp" -> "Cảm biến Full-frame, ISO 100-51200, 10fps";
-                case "Webcam" -> "1080p, mic tích hợp, tự động lấy nét";
-                case "Camera an ninh/IP" -> "Hồng ngoại ban đêm, kết nối Wi-Fi, AI phát hiện chuyển động";
-                case "Camera hành trình" -> "Ghi hình Full HD, GPS tích hợp, góc 140°";
-                default -> "Chất lượng hình ảnh cao, dễ sử dụng";
+                case "Camera hành động" -> "Thường được trang bị cảm biến hình ảnh 12MP đến 20MP, có khả năng quay video 4K ở 60fps (hoặc cao hơn), và dung lượng pin khoảng 1200mAh đến 1700mAh để sử dụng kéo dài. Khả năng kết nối thường bao gồm Wi-Fi, Bluetooth và USB-C.";
+                case "Camera chuyên nghiệp" -> "Có cảm biến Full-frame hoặc APS-C 24MP đến 60MP, dải ISO rộng từ 100-51200 (có thể mở rộng lên đến 204800), và thường là ổn định hình ảnh trong thân máy 5 trục (IBIS) cung cấp đến 7 stop bù trừ. Chúng hỗ trợ nhiều loại ngàm ống kính (ví dụ: ngàm E, ngàm RF) và cung cấp các codec video chuyên nghiệp như H.264, H.265 và đầu ra video RAW.";
+                case "Webcam" -> "Cung cấp độ phân giải 1080p ở 30fps (hoặc 60fps cho các mẫu cao cấp hơn), kết nối qua USB-C hoặc USB-A, và có góc nhìn điển hình từ 78° đến 90°. Một số mẫu bao gồm micrô đa hướng kép với khả năng khử tiếng ồn.";
+                case "Camera an ninh/IP" -> "Ghi hình ở độ phân giải 1080p đến 4K, thường đi kèm với các tùy chọn đăng ký lưu trữ đám mây và hỗ trợ lưu trữ cục bộ qua thẻ nhớ microSD (lên đến 256GB). Phạm vi nhìn đêm hồng ngoại thường mở rộng từ 10m đến 30m.";
+                case "Camera hành trình" -> "Ghi hình ở độ phân giải Full HD 1080p ở 30fps hoặc 60fps, hỗ trợ thẻ nhớ microSD lên đến 64GB hoặc 128GB, và tích hợp cảm biến G với độ nhạy có thể điều chỉnh. Một số mẫu có màn hình tích hợp để phát lại ngay lập tức.";
+                default -> "Nói chung, bao gồm cảm biến chất lượng cao (ví dụ: 20MP) và khả năng quay video mượt mà (ví dụ: 1080p 60fps).";
             };
             case "Máy tính" -> switch (childName) {
-                case "PC gaming" -> "GPU RTX, 16GB RAM, tản nhiệt nước";
-                case "PC đồ họa / workstation" -> "CPU 12 nhân, 32GB RAM, SSD 1TB";
-                case "Mini PC" -> "Thiết kế nhỏ gọn, tiết kiệm năng lượng, 8GB RAM";
-                case "PC để bàn" -> "Hiệu năng ổn định, dễ nâng cấp, SSD 512GB";
-                case "Laptop" -> "Màn hình 15.6\", pin 8h, trọng lượng nhẹ";
-                default -> "Cấu hình linh hoạt, hiệu suất cao";
+                case "PC gaming" -> "Thường có CPU Intel Core i7 hoặc AMD Ryzen 7, GPU NVIDIA GeForce RTX 3060 (hoặc cao hơn) chuyên dụng, và 16GB RAM DDR4 (hoặc DDR5) chạy ở tốc độ 3200MHz hoặc cao hơn. Lưu trữ thường bao gồm SSD NVMe 500GB-1TB cho game và hệ điều hành, cùng với một ổ HDD lớn hơn cho dữ liệu khác.";
+                case "PC đồ họa / workstation" -> "Được trang bị CPU AMD Ryzen 9 hoặc Intel Core i9/Xeon, đi kèm với 32GB đến 64GB RAM DDR4 ECC, và ít nhất 1TB SSD NVMe cho lưu trữ chính, thường được bổ sung bằng nhiều ổ HDD lớn hoặc SSD bổ sung. Các GPU chuyên nghiệp như NVIDIA Quadro hoặc AMD Radeon Pro là tiêu chuẩn.";
+                case "Mini PC" -> "Thường được trang bị CPU Intel Core i5 hoặc AMD Ryzen 5 tiết kiệm điện, 8GB RAM DDR4 và SSD NVMe 256GB. Khả năng kết nối thường bao gồm nhiều cổng USB 3.0, HDMI, DisplayPort và Gigabit Ethernet.";
+                case "PC để bàn" -> "Nói chung, bao gồm CPU Intel Core i5 hoặc AMD Ryzen 5, 16GB RAM DDR4 và cấu hình lưu trữ 1TB HDD kết hợp với SSD 256GB. Các cổng I/O tiêu chuẩn phổ biến và các khe mở rộng để nâng cấp trong tương lai luôn có sẵn.";
+                case "Laptop" -> "Thường có CPU Intel Core i7 hoặc AMD Ryzen 7, 16GB RAM DDR4 và màn hình IPS Full HD (1920x1080) 14 inch hoặc 15.6 inch. Lưu trữ thường là SSD NVMe 512GB hoặc 1TB. Tuổi thọ pin trung bình khoảng 8-10 giờ khi sử dụng bình thường.";
+                default -> "Nói chung, cung cấp cấu hình mạnh mẽ phù hợp với nhiều ứng dụng, đảm bảo hiệu suất ổn định và đáng tin cậy.";
             };
             case "Linh kiện" -> switch (childName) {
-                case "Case" -> "RGB LED, hỗ trợ ATX, kính cường lực";
-                case "Tản nhiệt" -> "Tản nhiệt nước 240mm, tốc độ quạt 1200RPM";
-                case "PSU" -> "Công suất 650W, 80+ Gold, modular";
-                case "GPU" -> "8GB GDDR6, hỗ trợ Ray Tracing, 1440p";
-                case "Mainboard" -> "Hỗ trợ DDR4, PCIe 4.0, Wi-Fi 6";
-                case "SSD/HDD" -> "1TB, tốc độ đọc 3500MB/s, SATA";
-                case "RAM" -> "16GB DDR4, tốc độ 3200MHz, CL16";
-                case "CPU" -> "8 nhân 16 luồng, xung nhịp 4.5GHz";
-                default -> "Hiệu suất cao, tương thích đa dạng";
+                case "Case" -> "Hỗ trợ các dạng bo mạch chủ ATX, Micro-ATX và Mini-ITX, thường bao gồm 3 quạt 120mm được cài đặt sẵn (hoặc hơn), và có kích thước phù hợp với nhiều kích thước thành phần. Vật liệu thường là thép với các tấm kính cường lực.";
+                case "Tản nhiệt" -> "Tản nhiệt nước AIO 240mm với bộ tản nhiệt bằng nhôm, hỗ trợ các ổ cắm Intel LGA1700/1200/115x và AMD AM5/AM4, và có quạt điều khiển PWM với tốc độ từ 800-2000 RPM.";
+                case "PSU" -> "Công suất đầu ra liên tục 650W, hiệu suất được chứng nhận 80+ Gold (thường là 90% hiệu suất ở 50% tải), thiết kế cáp hoàn toàn mô-đun, và các tính năng bảo vệ khác nhau như OVP, OPP, SCP.";
+                case "GPU" -> "8GB GDDR6 VRAM với giao diện bộ nhớ 256-bit, hỗ trợ PCIe 4.0 x16, có tốc độ xung nhịp tăng cường khoảng 1700-1800 MHz, và có mức tiêu thụ điện năng khoảng 170-220W.";
+                case "Mainboard" -> "Có chipset AMD B550 (hoặc Intel Z690/B660), 4 khe cắm DDR4 DIMM hỗ trợ lên đến 128GB RAM, khe cắm PCIe 4.0 x16, nhiều khe cắm M.2 NVMe (PCIe 4.0 x4), và Wi-Fi 6 tích hợp.";
+                case "SSD/HDD" -> "SSD NVMe M.2 1TB với tốc độ đọc tuần tự lên đến 3500MB/s và tốc độ ghi lên đến 3000MB/s. Đối với HDD, thường có dung lượng 1TB với tốc độ trục quay 7200 RPM và giao diện SATA 6Gb/s.";
+                case "RAM" -> "Bộ kit DDR4 16GB (2x8GB), chạy ở tần số 3200MHz, với độ trễ CAS (CL) là 16, và non-ECC unbuffered.";
+                case "CPU" -> "8 nhân và 16 luồng, được xây dựng trên tiến trình 7nm (hoặc 10nm/Intel 7), với xung nhịp cơ bản 3.8GHz và xung nhịp tăng cường lên đến 4.5GHz, và TDP 65W.";
+                default -> "Nói chung, cung cấp khả năng tương thích cao trên nhiều hệ thống khác nhau và mang lại hiệu suất ổn định cho danh mục của nó.";
             };
-            default -> "Tính năng đa dạng, phù hợp mọi nhu cầu";
+            default -> "Thông số kỹ thuật đa dạng, phù hợp mọi nhu cầu và được tối ưu hóa cho hiệu suất cao.";
         };
     }
 
-    private String generateTechnicalSpecs(String parentName, String childName) {
+    public String generateHighlightSpecs(String parentName, String childName) {
         return switch (parentName) {
             case "Camera" -> switch (childName) {
-                case "Camera hành động" -> "Cảm biến 12MP, quay 4K 60fps, pin 1200mAh";
-                case "Camera chuyên nghiệp" -> "Cảm biến 24MP, ISO 100-51200, 5-axis IBIS";
-                case "Webcam" -> "1080p 30fps, USB-C, góc nhìn 90°";
-                case "Camera an ninh/IP" -> "1080p, lưu trữ đám mây, hồng ngoại 30m";
-                case "Camera hành trình" -> "Full HD, thẻ nhớ 64GB, G-sensor";
-                default -> "Cảm biến chất lượng cao, quay video mượt mà";
+                case "Camera hành động" -> "Điểm bán hàng chính là khả năng **chống nước 10m+** (thường không cần vỏ) và khả năng **quay video 4K tuyệt đẹp**, làm cho chúng hoàn hảo cho các môn thể thao mạo hiểm và du lịch.";
+                case "Camera chuyên nghiệp" -> "Điểm mạnh của chúng là khả năng **lấy nét tự động cực nhanh** để đạt được độ sắc nét quan trọng và **ổn định hình ảnh trong thân máy 5 trục (IBIS)** cho những bức ảnh cực kỳ ổn định, ngay cả khi chụp cầm tay.";
+                case "Webcam" -> "Sự đơn giản của **video 1080p** kết hợp với **thiết lập cắm-và-chạy** đảm bảo trải nghiệm không rắc rối cho các cuộc họp ảo.";
+                case "Camera an ninh/IP" -> "Khả năng **phát hiện chuyển động AI thông minh** và **tầm nhìn hồng ngoại ban đêm mạnh mẽ** là yếu tố quan trọng để giám sát hiệu quả, mang lại sự an tâm ngày đêm.";
+                case "Camera hành trình" -> "Khả năng quay **video Full HD** làm bằng chứng cho các chuyến đi của bạn và **theo dõi GPS tích hợp** cho dữ liệu vị trí và tốc độ là vô giá cho an toàn và bảo hiểm.";
+                default -> "Tập trung vào việc cung cấp **hình ảnh sắc nét, rõ ràng** với **thao tác đơn giản**, giúp nó dễ tiếp cận cho mọi người.";
             };
             case "Máy tính" -> switch (childName) {
-                case "PC gaming" -> "CPU i7, GPU RTX 3060, RAM 16GB";
-                case "PC đồ họa / workstation" -> "CPU Ryzen 9, 32GB RAM, SSD 1TB";
-                case "Mini PC" -> "CPU i5, 8GB RAM, SSD 256GB";
-                case "PC để bàn" -> "CPU i5, 16GB RAM, HDD 1TB";
-                case "Laptop" -> "CPU i7, 16GB RAM, màn hình 14\" FHD";
-                default -> "Cấu hình mạnh mẽ, hiệu suất ổn định";
+                case "PC gaming" -> "Sức hấp dẫn cốt lõi nằm ở **GPU RTX mạnh mẽ** cho đồ họa sống động và hệ thống **tản nhiệt nước hiệu quả** đảm bảo hiệu suất ổn định trong các phiên chơi game cường độ cao.";
+                case "PC đồ họa / workstation" -> "Điểm mạnh của nó là **CPU 12+ nhân** cho sức mạnh xử lý vượt trội và **dung lượng RAM 32GB khổng lồ** để xử lý các tệp và ứng dụng lớn, phức tạp.";
+                case "Mini PC" -> "Điểm nổi bật chính là **kích thước siêu nhỏ gọn** và **tiết kiệm năng lượng**, làm cho nó hoàn hảo cho các thiết lập tối giản hoặc HTPC.";
+                case "PC để bàn" -> "Lợi thế chính là **khả năng nâng cấp dễ dàng** và việc bao gồm một **SSD 512GB nhanh** để hệ thống phản hồi nhanh chóng.";
+                case "Laptop" -> "Điểm nổi bật của nó là **thời lượng pin 8 giờ ấn tượng** cho năng suất cả ngày và **màn hình Full HD sắc nét** mang lại trải nghiệm hình ảnh tuyệt vời khi di chuyển.";
+                default -> "Được biết đến với **hiệu suất cao** và **thiết kế hiện đại**, phù hợp với nhiều nhu cầu người dùng khác nhau.";
             };
             case "Linh kiện" -> switch (childName) {
-                case "Case" -> "Hỗ trợ ATX/micro-ATX, 3 quạt 120mm";
-                case "Tản nhiệt" -> "Tản nhiệt nước, 240mm, hỗ trợ Intel/AMD";
-                case "PSU" -> "650W, 80+ Gold, cáp modular";
-                case "GPU" -> "8GB GDDR6, 256-bit, PCIe 4.0";
-                case "Mainboard" -> "Chipset B550, DDR4, 4 khe RAM";
-                case "SSD/HDD" -> "SSD 1TB, 3500MB/s, NVMe";
-                case "RAM" -> "16GB DDR4, 3200MHz, non-ECC";
-                case "CPU" -> "8 nhân, 16 luồng, 7nm, 65W";
-                default -> "Tương thích cao, hiệu suất tốt";
+                case "Case" -> "Điểm nhấn chính là **đèn LED RGB tùy chỉnh** và **tấm kính cường lực tuyệt đẹp**, hoàn hảo để trưng bày bộ máy của bạn.";
+                case "Tản nhiệt" -> "Điểm mạnh của nó nằm ở **hiệu suất làm mát vượt trội** được cung cấp bởi tản nhiệt nước, đảm bảo CPU của bạn hoạt động hiệu quả ngay cả khi tải nặng.";
+                case "PSU" -> "Điểm thu hút lớn là **chứng nhận hiệu suất 80+ Gold** để tiết kiệm điện và ổn định, kết hợp với **thiết kế hoàn toàn mô-đun** để quản lý cáp gọn gàng hơn.";
+                case "GPU" -> "Các tính năng nổi bật của nó là khả năng **dò tia (Ray Tracing) thời gian thực** cho đồ họa siêu thực và tối ưu hóa cho **chơi game 1440p** mượt mà.";
+                case "Mainboard" -> "Sự tích hợp của **Wi-Fi 6** cho tốc độ không dây tiên tiến và **hỗ trợ PCIe 4.0** cho hiệu suất thành phần thế hệ tiếp theo là những điểm hấp dẫn chính của nó.";
+                case "SSD/HDD" -> "Lợi ích chính là **tốc độ đọc/ghi cực nhanh** của SSD, giảm đáng kể thời gian tải.";
+                case "RAM" -> "Tốc độ **3200MHz cao** và **hiệu suất tối ưu** của nó là rất quan trọng cho đa nhiệm và chơi game mượt mà.";
+                case "CPU" -> "Các điểm nổi bật chính là **tốc độ xung nhịp tăng cường 4.5GHz** cho hiệu suất đơn nhân tuyệt vời và **thiết kế 8 nhân** cho khả năng đa nhiệm mạnh mẽ.";
+                default -> "Điểm mạnh của nó là **hiệu suất tối ưu** và **độ bền bỉ**, làm cho nó trở thành một lựa chọn đáng tin cậy cho bất kỳ bản dựng PC nào.";
             };
-            default -> "Thông số kỹ thuật đa dạng, phù hợp nhu cầu";
+            default -> "Tính năng nổi bật, đáng tin cậy và mang lại giá trị cao cho người dùng.";
         };
     }
-
-    private String generateHighlightSpecs(String parentName, String childName) {
-        return switch (parentName) {
-            case "Camera" -> switch (childName) {
-                case "Camera hành động" -> "Chống nước 10m, quay 4K";
-                case "Camera chuyên nghiệp" -> "Tự động lấy nét nhanh, 5-axis IBIS";
-                case "Webcam" -> "1080p, plug-and-play";
-                case "Camera an ninh/IP" -> "AI phát hiện chuyển động, hồng ngoại";
-                case "Camera hành trình" -> "Ghi hình Full HD, GPS";
-                default -> "Hình ảnh sắc nét, dễ sử dụng";
-            };
-            case "Máy tính" -> switch (childName) {
-                case "PC gaming" -> "GPU RTX, tản nhiệt nước";
-                case "PC đồ họa / workstation" -> "CPU 12 nhân, RAM 32GB";
-                case "Mini PC" -> "Nhỏ gọn, tiết kiệm điện";
-                case "PC để bàn" -> "Dễ nâng cấp, SSD 512GB";
-                case "Laptop" -> "Pin 8h, màn hình FHD";
-                default -> "Hiệu năng cao, thiết kế hiện đại";
-            };
-            case "Linh kiện" -> switch (childName) {
-                case "Case" -> "RGB, kính cường lực";
-                case "Tản nhiệt" -> "Hiệu suất làm mát cao";
-                case "PSU" -> "80+ Gold, ổn định";
-                case "GPU" -> "Ray Tracing, 1440p";
-                case "Mainboard" -> "Wi-Fi 6, PCIe 4.0";
-                case "SSD/HDD" -> "Tốc độ đọc/ghi cao";
-                case "RAM" -> "3200MHz, hiệu suất cao";
-                case "CPU" -> "Xung nhịp 4.5GHz, 8 nhân";
-                default -> "Hiệu suất tối ưu, bền bỉ";
-            };
-            default -> "Tính năng nổi bật, đáng tin cậy";
-        };
-    }
-
     private String generatePromotions() {
         List<String> promotions = Arrays.asList(
                 "Giảm 5% khi mua online",
