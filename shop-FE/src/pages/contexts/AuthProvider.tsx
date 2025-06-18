@@ -1,13 +1,19 @@
+// src/pages/contexts/AuthProvider.tsx
 import React, { useState, useEffect } from 'react';
-import { AuthContext } from '../contexts/AuthContext';
-import type { User } from '../contexts/auth.types';
+import { AuthContext } from './AuthContext';
+import type { User } from './auth.types';
+
+interface AuthState {
+  token: string;
+  user: User;
+}
 
 const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AuthState | null>(null); // Sử dụng AuthState
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    console.log('Restoring session with token:', token);
+    console.log('Token from localStorage:', token);
     if (token) {
       fetch('http://localhost:8888/shop/api/v1/users/me', {
         method: 'GET',
@@ -30,8 +36,8 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         })
         .then((data) => {
           if (data && data.status === 0 && data.data) {
-            console.log('User Response:', data);
-            setUser(data.data);
+            console.log('Fetched user data from API:', data.data);
+            setUser({ token, user: data.data });
           } else {
             console.warn('No valid user data:', data);
             setUser(null);
@@ -42,14 +48,14 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           setUser(null);
         });
     } else {
-      console.log('No token found in localStorage');
+      console.log('No token found');
       setUser(null);
     }
   }, []);
 
-  const login = (token: string, user: User) => {
+  const login = (token: string, userData: User) => {
     localStorage.setItem('token', token);
-    setUser(user);
+    setUser({ token, user: userData });
   };
 
   const logout = () => {

@@ -24,7 +24,6 @@ export default function Profile() {
     avatar: null,
   });
 
-  // Định nghĩa interface Purchase
   interface Purchase {
     id: string;
     date: string;
@@ -45,7 +44,7 @@ export default function Profile() {
     const fetchProfile = async () => {
       if (!user?.token) {
         setLoading(false);
-        return; // Không fetch nếu không có token, để router xử lý
+        return;
       }
       try {
         console.log('Fetching profile with token:', user.token);
@@ -59,7 +58,7 @@ export default function Profile() {
           throw new Error(`Lỗi khi tải thông tin: ${response.statusText}`);
         }
         const data = await response.json();
-        console.log('Profile response:', data);
+        console.log('Profile API response:', data);
         if (data.status === 0 && data.data) {
           setProfileData(data.data as User);
           setEditData({
@@ -103,7 +102,6 @@ export default function Profile() {
         shop: '5TECH Store',
         image: '/path-to-gaming-keyboard.jpg',
       },
-      // ... (các mục khác giữ nguyên)
     ],
     waitingPayment: [
       {
@@ -167,11 +165,11 @@ export default function Profile() {
         <div className="w-1/5 bg-white p-4 rounded-lg shadow mr-4">
           <div className="flex flex-col items-center mb-6">
             <img
-              src={profileData?.avatar_url || '/path-to-avatar.jpg'}
+              src={profileData?.avatar_url || user?.user?.avatar_url || '/path-to-avatar.jpg'}
               alt="Avatar"
               className="w-16 h-16 rounded-full mb-2 object-cover"
             />
-            <span className="text-sm font-semibold text-gray-800 text-center">{profileData?.name || 'Người dùng'}</span>
+            <span className="text-sm font-semibold text-gray-800 text-center">{profileData?.name || user?.user?.name || 'Người dùng'}</span>
           </div>
           <ul className="space-y-4 text-sm">
             <li>
