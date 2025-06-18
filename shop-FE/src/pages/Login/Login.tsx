@@ -32,53 +32,49 @@ export default function Login() {
   const { login } = useContext(AuthContext) as AuthContextType;
 
   const onSubmit = async (data: LoginForm) => {
-    setLoading(true);
-    setApiError(null);
-    try {
-      const response = await fetch('http://localhost:8888/shop/api/v1/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
+  setLoading(true);
+  setApiError(null);
+  try {
+    const response = await fetch('http://localhost:8888/shop/api/v1/auth/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
 
-      const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
-        throw new Error('Phản hồi từ server không hợp lệ!');
-      }
-
-      const result = await response.json();
-      console.log('API Response:', result); // Debug log
-
-      if (!response.ok) {
-        throw new Error(result.message || 'Đăng nhập thất bại!');
-      }
-
-      const token: string = result.data.token;
-      const user: User = {
-        id: result.data.user.id,
-        name: result.data.user.name,
-        email: result.data.user.email,
-        phone: result.data.user.phone,
-        address: result.data.user.address,
-        avatar_url: result.data.user.avatar_url,
-      };
-
-      login(token, user);
-      alert('✅ Đăng nhập thành công!');
-      navigate('/');
-    } catch (error: unknown) {
-      console.error('Lỗi:', error);
-      setApiError(error instanceof Error ? error.message : 'Lỗi xảy ra khi đăng nhập!');
-    } finally {
-      setLoading(false);
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      throw new Error('Phản hồi từ server không hợp lệ!');
     }
-  };
 
-  const handleGoogleLogin = () => {
-    alert('Chức năng đang phát triển!');
-  };
+    const result = await response.json();
+    console.log('API Response:', result);
+
+    if (!response.ok) {
+      throw new Error(result.message || 'Đăng nhập thất bại!');
+    }
+
+    const token: string = result.data.token;
+    const user: User = {
+      id: result.data.user.id,
+      name: result.data.user.name,
+      email: result.data.user.email,
+      phone: result.data.user.phone,
+      address: result.data.user.address,
+      avatar_url: result.data.user.avatar_url,
+    };
+
+    login(token, user);
+    alert('✅ Đăng nhập thành công!');
+    navigate('/profile'); // hoặc navigate('/') nếu bạn muốn về trang chủ
+  } catch (error: unknown) {
+    console.error('Lỗi:', error);
+    setApiError(error instanceof Error ? error.message : 'Lỗi xảy ra khi đăng nhập!');
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen flex bg-[#E7E7E7]">
