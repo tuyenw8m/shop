@@ -309,8 +309,6 @@ public class GenerateProductData {
                 "https://i.pinimg.com/736x/28/91/eb/2891ebd512688a0dd1b056a1375c3367.jpg",
                 "https://i.pinimg.com/736x/8c/30/3d/8c303de9ece18fb1de2d91879306f988.jpg",
                 "https://i.pinimg.com/736x/29/f3/99/29f399aec2699d49113314f1e96d5063.jpg",
-                "https://unsplash.com/photos/macbook-pro-JO_S6ewBqAk",
-                "https://unsplash.com/photos/person-using-black-laptop-computer-on-brown-wooden-table-8pb7Hq539Zw",
                 "https://unsplash.com/photos/a-laptop-computer-sitting-on-top-of-a-wooden-table-6RqSDGaNJ5c"
         );
         return links.get(random.nextInt(links.size()));
