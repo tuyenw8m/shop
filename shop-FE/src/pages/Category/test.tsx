@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react'
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import FilterSidebar from './components/FilterSidebar'
 import ProductCard from 'src/components/ProductCard'
 import type { Product, ProductSearchParams } from 'src/types/product.type'
@@ -8,8 +8,6 @@ import ProductSortDropdown from './components/ProductSortDropdown'
 import productApi from 'src/apis/ProductService.api'
 import useQueryParams from 'src/hooks/useQueryParams'
 import { isUndefined, omitBy } from 'lodash'
-import Pagination from 'src/components/Pagination'
-import { sortType } from 'src/constant/sort.constant'
 
 export function Category() {
   const MAX_PRICE = 200000000
@@ -38,13 +36,10 @@ export function Category() {
     queryKey: ['products', cleannedQueryParams],
     queryFn: () => {
       return productApi.getAllProducts(cleannedQueryParams)
-    },
-    placeholderData: keepPreviousData
+    }
   })
 
-  console.log(data?.data.data)
   const products: Product[] = data?.data?.data.content || []
-  console.log('sau khi render:', data?.data.data)
 
   const categories = useMemo(
     () => [...new Set(products.flatMap((p) => p.children_category_name || []).filter(Boolean))],
@@ -177,24 +172,9 @@ export function Category() {
             <div className='lg:w-3/4'>
               <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6'>
                 <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4'>
-                  <div className='flex items-center flex-wrap gap-2'>
-                    <div className='text-sm text-gray-600'>
-                      Hiển thị <span className='font-medium'>{filteredProducts.length}</span> sản phẩm
-                    </div>
-                    <button
-                      key={1}
-                      className={`h-7 px-2 rounded-sm capitalize text-sm text-center ${queryParamsUrl.sort_type === sortType.asc ? 'bg-teal-400 text-white cursor-not-allowed' : 'bg-gray-200 text-teal-500 hover:bg-gray-100'}`}
-                    >
-                      Cao -&gt; Thấp
-                    </button>
-                    <button
-                      key={1}
-                      className={`h-7 px-2 rounded-sm capitalize text-sm text-center ${queryParamsUrl.sort_type === sortType.desc ? 'bg-teal-400 text-white cursor-not-allowed ' : 'bg-gray-200 text-teal-500 hover:bg-gray-100'}`}
-                    >
-                      Thấp -&gt; Cao
-                    </button>
+                  <div className='text-sm text-gray-600'>
+                    Hiển thị <span className='font-medium'>{filteredProducts.length}</span> sản phẩm
                   </div>
-
                   <div className='flex items-center space-x-2'>
                     <span className='text-sm text-gray-600 whitespace-nowrap'>Sắp xếp theo:</span>
                     <ProductSortDropdown onSortChange={handleSortChange} />
@@ -204,7 +184,14 @@ export function Category() {
 
               <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6'>
                 {filteredProducts.length > 0 ? (
-                  filteredProducts.map((product: Product) => <ProductCard key={product.id} product={product} />)
+                  filteredProducts.map((product: Product) => (
+                    <div
+                      key={product.id}
+                      className='transform hover:scale-103 hover:shadow-xl transition-all duration-300 rounded-lg overflow-hidden'
+                    >
+                      <ProductCard product={product} />
+                    </div>
+                  ))
                 ) : (
                   <div className='col-span-full text-center py-16 bg-gray-50 rounded-lg'>
                     <p className='text-gray-700 text-xl font-semibold mb-4'>
@@ -219,9 +206,6 @@ export function Category() {
                   </div>
                 )}
               </div>
-              {data?.data.data.pageSize && (
-                <Pagination cleanedQueryParams={cleannedQueryParams} totalPage={data.data.data.totalPages} />
-              )}
             </div>
           </div>
         </div>
