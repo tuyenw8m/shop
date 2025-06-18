@@ -20,7 +20,7 @@ export interface Product {
 
 // Kiểu trả về của GetAllProducts
 export interface ProductList {
-  content: Product[]
+  content: Product[] | []
   pageNumber: number
   pageSize: number
   totalElements: number
@@ -39,4 +39,8 @@ export interface ProductSearchParams {
   children_category_name?: string[]
   parent_category_name?: string
   branch_name?: string
+}
+
+export type searchParamsConfig = {
+  [key in keyof ProductSearchParams]: string
 }

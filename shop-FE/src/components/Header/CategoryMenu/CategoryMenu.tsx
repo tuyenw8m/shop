@@ -53,7 +53,7 @@ function SubcategoryPopover({
           subcategory.branch_name.map((brand, i) => (
             <Link
               key={i}
-              to={`/product-category/${brand}`}
+              to={`/categories/search?children_category_name=${subcategory.name}&branch_name=${brand}`}
               className='block px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-teal-600'
               onClick={onClose}
             >
@@ -163,7 +163,7 @@ export default function CategoryMenu({ isOpen, onClose, isDesktop = false }: Cat
                     <div className='flex items-center space-x-3'>
                       <span className='text-gray-500'>{getCategoryIcon(index)}</span>
                       <Link
-                        to={`/categories/${category.id}`}
+                        to={`/categories/${category.name}?parent_category_name=${category.name}`}
                         className='font-medium text-gray-800 hover:text-teal-600'
                         onClick={onClose}
                       >
@@ -186,8 +186,8 @@ export default function CategoryMenu({ isOpen, onClose, isDesktop = false }: Cat
                           onMouseLeave={handleSubcategoryLeave}
                         >
                           <Link
-                            to={`/category/${category.slug}/${subcategory.slug}`}
-                            className='text-sm text-gray-700 hover:text-teal-600 flex-1'
+                            to={`/categories/${category.name}?parent_category_name=${category.name}&children_category_name=${subcategory.name}`}
+                            className='font-medium text-gray-800 hover:text-teal-600'
                             onClick={onClose}
                           >
                             {subcategory.name}
@@ -278,7 +278,7 @@ export default function CategoryMenu({ isOpen, onClose, isDesktop = false }: Cat
                   <div className='flex items-center space-x-2'>
                     <span className='text-gray-500'>{getCategoryIcon(index)}</span>
                     <Link
-                      to={`/category/${category.slug}`}
+                      to={`/categories/${category.name}?parent_category_name=${category.name}`}
                       className='font-medium text-gray-800 hover:text-teal-600'
                       onClick={onClose}
                     >
@@ -297,8 +297,8 @@ export default function CategoryMenu({ isOpen, onClose, isDesktop = false }: Cat
                           onClick={() => toggleSubcategory(subcategory.id)}
                         >
                           <Link
-                            to={`/category/${category.slug}/${subcategory.slug}`}
-                            className='text-sm text-gray-700 hover:text-teal-600'
+                            to={`/categories/${category.name}?parent_category_name=${category.name}&children_category_name=${subcategory.name}`}
+                            className='font-medium text-gray-800 hover:text-teal-600'
                             onClick={onClose}
                           >
                             {subcategory.name}
