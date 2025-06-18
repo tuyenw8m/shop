@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import { AuthContext } from './AuthContext';
 import type { User } from './auth.types';
-
 interface AuthState {
   token: string;
   user: User;

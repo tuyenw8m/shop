@@ -6,7 +6,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useState, useContext } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
 import LeftImage from '../leftimages/leftimages.jpg';
-import type { AuthContextType, User } from '../contexts/auth.types';
+import type { AuthContextType } from '../contexts/AuthContext'; // ✅ Đúng
+
 
 const schema = yup.object({
   email: yup.string().required('Vui lòng nhập email'),

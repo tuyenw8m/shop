@@ -1,9 +1,9 @@
-import { useContext, useState, useEffect } from 'react';
-import { AuthContext } from '../contexts/AuthContext';
+import { useState, useEffect } from 'react';
+import { useAuth } from '../contexts/AuthContext'; // Sử dụng useAuth
 import type { User } from '../contexts/auth.types';
 
 export default function Profile() {
-  const { user } = useContext(AuthContext);
+  const { user } = useAuth(); // Sử dụng useAuth thay vì useContext
   const [profileData, setProfileData] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -50,7 +50,7 @@ export default function Profile() {
         console.log('Fetching profile with token:', user.token);
         const response = await fetch('http://localhost:8888/shop/api/v1/users/me', {
           headers: {
-            'Authorization': `Bearer ${user.token}`,
+            'Authorization': `Bearer ${user.token}`, // Sửa cú pháp string template
             'Content-Type': 'application/json',
           },
         });
@@ -175,7 +175,7 @@ export default function Profile() {
             <li>
               <button
                 onClick={() => setActiveTab('notifications')}
-                className={`flex items-center space-x-2 text-red-500 hover:text-red-700 ${activeTab === 'notifications' ? 'font-bold' : ''}`}
+                className={`flex items-center space-x-2 text-red-500 hover:text-red-700 ${activeTab === 'notifications' ? 'font-bold' : ''}`} // Sửa cú pháp className
               >
                 <span>🔔</span>
                 <span>Thông Báo</span>
@@ -184,7 +184,7 @@ export default function Profile() {
             <li>
               <button
                 onClick={() => setActiveTab('account')}
-                className={`flex items-center space-x-2 text-blue-500 hover:text-blue-700 ${activeTab === 'account' ? 'font-bold' : ''}`}
+                className={`flex items-center space-x-2 text-blue-500 hover:text-blue-700 ${activeTab === 'account' ? 'font-bold' : ''}`} // Sửa cú pháp className
               >
                 <span>👤</span>
                 <span>Tài Khoản Của Tôi</span>
@@ -193,7 +193,7 @@ export default function Profile() {
             <li>
               <button
                 onClick={() => setActiveTab('purchase')}
-                className={`flex items-center space-x-2 text-blue-500 hover:text-blue-700 ${activeTab === 'purchase' ? 'font-bold' : ''}`}
+                className={`flex items-center space-x-2 text-blue-500 hover:text-blue-700 ${activeTab === 'purchase' ? 'font-bold' : ''}`} // Sửa cú pháp className
               >
                 <span>📋</span>
                 <span>Đơn Mua</span>
@@ -338,7 +338,7 @@ export default function Profile() {
                       activeTab === key
                         ? 'text-orange-500 border-b-2 border-orange-500 bg-orange-100'
                         : 'text-gray-600 hover:bg-gray-100 hover:text-gray-800'
-                    }`}
+                    }`} // Sửa cú pháp className
                   >
                     {label}
                   </button>

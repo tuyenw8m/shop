@@ -2,9 +2,10 @@ import { useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../pages/contexts/AuthContext';
 import { CircleUserRound, HelpCircle } from 'lucide-react';
+import type { AuthContextType } from '../../pages/contexts/AuthContext';
 
 export default function HeaderAuth() {
-  const { user, logout } = useContext(AuthContext);
+  const { user, logout } = useContext(AuthContext) as AuthContextType;
   const navigate = useNavigate();
 
   const handleLogout = () => {
