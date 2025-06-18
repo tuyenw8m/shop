@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-db
+    restart: always
+    env_file: .env
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+  backend:
+    build: ./shop-backend
+    container_name: spring-backend
+    ports:
+      - "8888:8888"
+    depends_on:
+      - mysql
+    env_file: .env
+    environment:
+      - DATABASE_URL=jdbc:mysql://mysql-db:3306/test3
+      - DATABASE_USERNAME=root
+      - DATABASE_PASSWORD=12345678
+
+  frontend:
+    build: ./shop-FE
+    container_name: react-frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+volumes:
+  mysql-data:

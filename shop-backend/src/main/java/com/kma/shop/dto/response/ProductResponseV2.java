@@ -13,6 +13,8 @@ public class ProductResponseV2 {
     private String id;
     private String name;
     private float price;
+    private float promotion_price;
+    private float promotion_percent;
     private String description;
     private String technical_specs;
     private String highlight_specs;

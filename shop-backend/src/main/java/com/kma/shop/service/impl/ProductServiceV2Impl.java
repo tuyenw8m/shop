@@ -4,6 +4,7 @@ import com.kma.shop.dto.request.ProductCreationRequest;
 import com.kma.shop.dto.response.PageResponse;
 import com.kma.shop.dto.response.ProductAdminResponseV2;
 import com.kma.shop.dto.response.ProductResponseV2;
+import com.kma.shop.dto.response.TopProductSoldInWeekResponse;
 import com.kma.shop.entity.*;
 import com.kma.shop.enums.EntityStatus;
 import com.kma.shop.exception.AppException;
@@ -15,6 +16,8 @@ import com.kma.shop.service.interfaces.CategoryServiceV2;
 import com.kma.shop.service.interfaces.ImageService;
 import com.kma.shop.service.interfaces.ProductServiceV2;
 import com.kma.shop.specification.ProductSpecification;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.criteria.*;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
@@ -27,8 +30,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
 
 @Service("productServiceV2Impl")
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -40,17 +45,73 @@ public class ProductServiceV2Impl implements ProductServiceV2 {
     ProductMappingV2 productMappingV2;
     List<EntityStatus> entityStatus = List.of(EntityStatus.CREATED, EntityStatus.UPDATED);
     BranchService branchService;
+    EntityManager entityManager;
 
     public ProductServiceV2Impl(ProductRepo repo,
                                 CategoryServiceV2 categoryServiceV2, ImageService imageService,
 
-                                ProductMappingV2 productMappingV2, BranchService branchService) {
+                                ProductMappingV2 productMappingV2, BranchService branchService, EntityManager entityManager) {
         this.repo = repo;
         this.categoryServiceV2 = categoryServiceV2;
         this.imageService = imageService;
         this.productMappingV2 = productMappingV2;
         this.branchService = branchService;
+        this.entityManager = entityManager;
     }
+
+
+    @Override
+    public List<TopProductSoldInWeekResponse> getTopSoldInWeek(
+            List<String> childCategories, String parentCategory, String search, float min_price, float max_price,
+            Integer page, Integer limit, String sort_by) throws AppException {
+
+        if (limit == null || limit <= 0) limit = 10;
+        if (page == null || page <= 0) page = 1;
+
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<TopProductSoldInWeekResponse> query = cb.createQuery(TopProductSoldInWeekResponse.class);
+        Root<ProductEntity> root = query.from(ProductEntity.class);
+
+        Join<ProductEntity, OrderEntity> productJoinOrder = root.join("orders");
+        Join<ProductEntity, ProductImageEntity> imageJoin = root.join("images", JoinType.LEFT); // ✅ sửa chỗ này
+
+        List<Predicate> predicates = new ArrayList<>();
+        predicates.add(cb.greaterThanOrEqualTo(productJoinOrder.get("creationDate"), LocalDateTime.now().minusDays(7))); // ✅ sửa chỗ này
+
+        // Bước 1: Truy vấn không join ảnh
+        query.select(cb.construct(
+                TopProductSoldInWeekResponse.class,
+                root.get("id"),
+                root.get("name"),
+                root.get("price"),
+                root.get("stock"),
+                cb.literal(""), // placeholder, để gán ảnh sau
+                cb.sum(productJoinOrder.get("quantity")),
+                root.get("original_price"),
+                root.get("rating")
+        )).groupBy(
+                root.get("id"),
+                root.get("name"),
+                root.get("price"),
+                root.get("stock"),
+                root.get("original_price"),
+                root.get("rating")
+        );
+
+
+        List<TopProductSoldInWeekResponse> content = entityManager.createQuery(query)
+                .setFirstResult(0)
+                .setMaxResults(limit)
+                .getResultList();
+        for (TopProductSoldInWeekResponse dto : content) {
+            ProductEntity product = findById(dto.getId());
+            if (product.getImages() != null && !product.getImages().isEmpty()) {
+                dto.setImage_url(product.getImages().getFirst().getUrl());
+            }
+        }
+        return content;
+    }
+
 
     //get product response by product id
     @Override
@@ -121,14 +182,6 @@ public class ProductServiceV2Impl implements ProductServiceV2 {
         boolean isAdmin = SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
 
-        //If admin pass null and spec will get all, or not pass created and updated for user get
-//        Specification<ProductEntity> spec = Specification
-//                .where(ProductSpecification.hasName(search))
-//                .and(ProductSpecification.hasPriceBetween(min_price, max_price))
-//                .and(ProductSpecification.hasCategory(category))
-//                .and(ProductSpecification.hasEntityStatus(isAdmin ? null : entityStatus));
-//        Page<ProductEntity> response = repo.findAll(spec, pageRequest);
-
         Specification<ProductEntity> spec = Specification
                 .where(ProductSpecification.hasName(search))
                 .and(ProductSpecification.hasPriceBetween(min_price, max_price))
@@ -149,7 +202,7 @@ public class ProductServiceV2Impl implements ProductServiceV2 {
                 .totalElements(response.getTotalElements())
                 .totalPages(response.getTotalPages())
                 .pageSize(response.getSize())
-                .pageNumber(response.getNumber())
+                .pageNumber(response.getNumber() + 1)
                 .build();
     }
 
@@ -161,7 +214,7 @@ public class ProductServiceV2Impl implements ProductServiceV2 {
                 .totalElements(result.getTotalElements())
                 .totalPages(result.getTotalPages())
                 .pageSize(result.getSize())
-                .pageNumber(result.getNumber())
+                .pageNumber(result.getNumber() + 1)
                 .content(result.getContent().stream().map(productMappingV2::toProductResponseV2).toList())
                 .build();
     }
@@ -398,7 +451,7 @@ public class ProductServiceV2Impl implements ProductServiceV2 {
                 .totalElements(response.getTotalElements())
                 .totalPages(response.getTotalPages())
                 .pageSize(response.getSize())
-                .pageNumber(response.getNumber())
+                .pageNumber(response.getNumber() + 1)
                 .build();
     }
     private <T> PageResponse<T> emptyResult(int page, int size) {

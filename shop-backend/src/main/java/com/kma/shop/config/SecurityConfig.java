@@ -70,7 +70,11 @@ public class SecurityConfig {
                                         HttpMethod.GET.name(), "/categories/v2/child/*",
                                         HttpMethod.GET.name(), "/products/v2",
                                         HttpMethod.GET.name(), "/products/v2/*",
-                                        HttpMethod.GET.name(), "/coupons"
+                                        HttpMethod.GET.name(), "/coupons",
+                                        HttpMethod.GET.name(), "/products/v2/top/week",
+                                        HttpMethod.GET.name(), "/events",
+                                        HttpMethod.GET.name(), "/event/*"
+
                                 ).permitAll()
                                 // --- End: Các đường dẫn cho phép truy cập công khai (permitAll) ---
 
@@ -112,6 +116,10 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.DELETE,"/products/v2/*").hasRole("ADMIN")
                                 .requestMatchers(HttpMethod.PUT,"/products/v2/disable/*").hasRole("ADMIN")
                                 .requestMatchers(HttpMethod.PUT,"/products/v2/enable/*").hasRole("ADMIN")
+
+                                .requestMatchers(HttpMethod.POST,"/events").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.PUT,"/events/*").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.DELETE,"/events/*").hasRole("ADMIN")
 
                                 // Đảm bảo bất kỳ request nào khác đều phải được xác thực
                                 .anyRequest().authenticated());

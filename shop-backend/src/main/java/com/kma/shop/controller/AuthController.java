@@ -24,11 +24,6 @@ import java.text.ParseException;
 public class AuthController {
     AuthService authService;
 
-    @GetMapping("/test")
-    public String test() {
-        return "Hell0";
-    }
-
     @Transactional
     @PutMapping("/changepassword")
     public ApiResponse<AuthResponse> changePassword(@RequestBody ChangePasswordRequest request)
@@ -73,8 +68,8 @@ public class AuthController {
                 .build();
     }
 
-    @GetMapping("/authentication")
-    public ApiResponse<Boolean> authentication(@RequestParam String token)
+    @PostMapping("/authentication")
+    public ApiResponse<Boolean> authentication(@RequestBody String token)
             throws  ParseException, JOSEException {
         return ApiResponse.<Boolean>builder()
                 .data(authService.authenticateToken(token))

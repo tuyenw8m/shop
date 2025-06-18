@@ -11,6 +11,7 @@ import com.kma.shop.entity.ProductImageEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,10 +26,22 @@ public class ProductMappingV2  {
 
     public ProductResponseV2 toProductResponseV2(ProductEntity response) {
         if(response == null) return null;
+        LocalDate now = LocalDate.now();
+        boolean inEvent;
+        if(response.getStartEvent() == null) inEvent = false;
+        else inEvent = response.getStartEvent().isBefore(now) && response.getEndEvent().isAfter(now);
         return ProductResponseV2.builder()
                 .id(response.getId())
                 .rating(response.getRating())
                 .highlight_specs(response.getHighlight_specs())
+                .promotion_percent(!inEvent ?
+                        0
+                            :
+                        response.getPromotionPercent())
+                .promotion_price(!inEvent ?
+                        response.getPrice()
+                                :
+                        response.getPrice() * (100 -  response.getPromotionPercent() )/100)
                 .technical_specs(response.getTechnical_specs())
                 .image_url(response.getImages().stream().map(ProductImageEntity::getUrl).toList())
                 .price(response.getPrice())
@@ -39,10 +52,18 @@ public class ProductMappingV2  {
                 .sold(response.getSold())
                 .features(response.getFeatures())
                 .original_price(response.getOriginal_price())
-                .branch_name(response.getBranch() == null ? null : response.getBranch().getName())
-                .parent_category_name(response.getParentCategory() == null ? null : response.getParentCategory().getName())
-                .children_category_name(
-                        response.getChildCategories() == null ? null : response.getChildCategories().stream().map(ChildCategoryEntity::getName).toList())
+                .branch_name(response.getBranch() == null ?
+                        null
+                            :
+                        response.getBranch().getName())
+                .parent_category_name(response.getParentCategory() == null ?
+                        null
+                            :
+                        response.getParentCategory().getName())
+                .children_category_name(response.getChildCategories() == null ?
+                        null
+                            :
+                        response.getChildCategories().stream().map(ChildCategoryEntity::getName).toList())
                 .build();
     }
 
@@ -53,6 +74,10 @@ public class ProductMappingV2  {
 
     public ProductAdminResponseV2 toProductAdminResponseV2(ProductEntity response) {
         if(response == null) return null;
+        LocalDate now = LocalDate.now();
+        boolean inEvent;
+        if(response.getStartEvent() == null) inEvent = false;
+        else inEvent = response.getStartEvent().isBefore(now) && response.getEndEvent().isAfter(now);
         return ProductAdminResponseV2.builder()
                 .id(response.getId())
                 .rating(response.getRating())
@@ -60,6 +85,14 @@ public class ProductMappingV2  {
                 .technical_specs(response.getTechnical_specs())
                 .image_url(response.getImages().stream().map(ProductImageEntity::getUrl).toList())
                 .price(response.getPrice())
+                .promotion_percent(!inEvent ?
+                        0
+                            :
+                        response.getPromotionPercent())
+                .promotion_price(!inEvent ?
+                        response.getPrice()
+                            :
+                        response.getPrice() * (100 -  response.getPromotionPercent() ) / 100)
                 .name(response.getName())
                 .promotions(response.getPromotions())
                 .stock(response.getStock())
@@ -67,10 +100,18 @@ public class ProductMappingV2  {
                 .sold(response.getSold())
                 .features(response.getFeatures())
                 .original_price(response.getOriginal_price())
-                .branch_name(response.getBranch() == null ? null : response.getBranch().getName())
-                .parent_category_name(response.getParentCategory() == null ? null : response.getParentCategory().getName())
-                .children_category_name(
-                        response.getChildCategories() == null ? null : response.getChildCategories().stream().map(ChildCategoryEntity::getName).toList())
+                .branch_name(response.getBranch() == null ?
+                        null
+                            :
+                        response.getBranch().getName())
+                .parent_category_name(response.getParentCategory() == null ?
+                        null
+                            :
+                        response.getParentCategory().getName())
+                .children_category_name(response.getChildCategories() == null ?
+                        null
+                            :
+                        response.getChildCategories().stream().map(ChildCategoryEntity::getName).toList())
                 .created_at(response.getCreationDate())
                 .deleted_at(response.getDeleteDate())
                 .updated_at(response.getModifiedDate())
