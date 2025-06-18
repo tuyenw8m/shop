@@ -26,7 +26,7 @@ export default function HeaderAuth() {
           {/* Tài khoản */}
           <div className="flex items-center">
             <Link
-              to={user ? '#' : '/login'}
+              to={user ? '/profile' : '/login'} // Điều hướng tới /profile khi đã đăng nhập
               className="flex items-center text-teal-600 hover:bg-teal-100 text-sm p-2 rounded cursor-pointer"
             >
               <CircleUserRound size={20} />

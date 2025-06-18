@@ -1,14 +1,9 @@
 // src/App.tsx
 import useRouterElement from './useRouterElement';
-import AuthProvider from './pages/contexts/AuthProvider';
 
 function App() {
   const routeElements = useRouterElement();
-  return (
-    <AuthProvider>
-      <div>{routeElements}</div>
-    </AuthProvider>
-  );
+  return <div>{routeElements}</div>;
 }
 
 export default App;

@@ -7,8 +7,8 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
+    console.log('Restoring session with token:', token);
     if (token) {
-      console.log('Restoring session with token:', token);
       fetch('http://localhost:8888/shop/api/v1/users/me', {
         method: 'GET',
         headers: {
@@ -34,7 +34,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             setUser(data.data);
           } else {
             console.warn('No valid user data:', data);
-            throw new Error('Dữ liệu người dùng không hợp lệ');
+            setUser(null);
           }
         })
         .catch((error) => {
@@ -43,6 +43,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         });
     } else {
       console.log('No token found in localStorage');
+      setUser(null);
     }
   }, []);
 

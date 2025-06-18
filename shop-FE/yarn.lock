@@ -1062,11 +1062,6 @@ chownr@^3.0.0:
   resolved "https://registry.npmjs.org/chownr/-/chownr-3.0.0.tgz"
   integrity sha512-+IxzY9BZOQd/XuYPRmrvEVjF/nqj5kgT4kEq7VofrDoM1MxoRjEWkrCC3EtLi59TVawxTAn+orJwFQcrqEN1+g==
 
-classnames@^2.5.1:
-  version "2.5.1"
-  resolved "https://registry.yarnpkg.com/classnames/-/classnames-2.5.1.tgz#ba774c614be0f016da105c858e7159eae8e7687b"
-  integrity sha512-saHYOzhIQs6wy2sVxTM6bUDsQO4F50V9RQ22qBpEdCW+I+/Wmke2HOl6lS6dTpdxVhb88/I6+Hs+438c3lfUow==
-
 "client@file:.":
   version "0.0.0"
   dependencies:
@@ -1074,7 +1069,7 @@ classnames@^2.5.1:
     "@tanstack/react-query" "^5.79.0"
     "@tanstack/react-query-devtools" "^5.79.0"
     axios "^1.9.0"
-    client "file:C:/Users/hoang/AppData/Local/Yarn/Cache/v6/npm-client-0.0.0-5ecf2497-18cb-444e-ae80-9c8fab39c384-1750046940197/node_modules/client"
+    client "file:../../../../AppData/Local/Yarn/Cache/v6/npm-client-0.0.0-0e896cc3-6dbd-4307-b697-345a72eedb72-1750261132303/node_modules/client"
     lucide-react "^0.515.0"
     react "^19.1.0"
     react-dom "^19.1.0"
