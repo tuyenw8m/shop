@@ -49,4 +49,13 @@ public class TokenService {
     public TokenEntity findByToken(String token) throws AppException {
         return tokenRepo.findByToken(token).orElseThrow(()->new AppException(ErrorCode.CONFLICT));
     }
+
+    public String save(String token, UserEntity user){
+        TokenEntity tokenEntity = TokenEntity.builder()
+                .token(token)
+                .user(user)
+                .build();
+        tokenRepo.save(tokenEntity);
+        return token;
+    }
 }
