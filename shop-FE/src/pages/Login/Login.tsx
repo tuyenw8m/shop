@@ -7,6 +7,7 @@ import { useState, useContext } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
 import LeftImage from '../leftimages/leftimages.jpg';
 import type { AuthContextType } from '../contexts/AuthContext'; // ✅ Đúng
+import type { User } from '../contexts/auth.types';
 
 
 const schema = yup.object({
