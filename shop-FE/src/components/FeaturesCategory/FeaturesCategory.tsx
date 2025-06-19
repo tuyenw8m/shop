@@ -1,5 +1,5 @@
 import { Laptop, MemoryStick, MonitorSmartphone, Cpu, GanttChart, Webcam, Camera } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 
 const categories = [
   {
@@ -40,6 +40,29 @@ const categories = [
 ]
 
 export default function FeaturesCategory() {
+  const location = useLocation()
+
+  const isActive = (categoryLinkUrl: string) => {
+    const categoryUrl = new URL(categoryLinkUrl, window.location.origin)
+
+    if (location.pathname !== categoryUrl.pathname) {
+      return false
+    }
+
+    const currentParams = new URLSearchParams(location.search)
+    const categoryParams = new URLSearchParams(categoryUrl.search)
+
+    if (currentParams.size !== categoryParams.size) {
+      return false
+    }
+    for (const [key, value] of categoryParams.entries()) {
+      if (currentParams.get(key) !== value) {
+        return false
+      }
+    }
+    return true
+  }
+
   return (
     <div className='bg-white rounded-lg p-6 mb-8'>
       <div className='flex items-center justify-between mb-6'>
@@ -48,16 +71,23 @@ export default function FeaturesCategory() {
       <div className='grid grid-cols-4 md:grid-cols-7 gap-4'>
         {categories.map((category, index) => {
           const Icon = category.icon
+          const active = isActive(category.link_url)
+          const activeClass = active ? 'bg-teal-100 text-teal-700 shadow-inner' : ''
+          const activeIconClass = active ? 'text-teal-600' : 'text-gray-600'
+          const activeLinkTextClass = active ? 'font-semibold' : ''
+
           return (
             <div
               key={index}
-              className='group flex flex-col items-center p-4 hover:bg-teal-50 hover:shadow-md rounded-xl cursor-pointer transition-transform duration-300 transform hover:-translate-y-1'
+              className={`group flex flex-col items-center p-4 hover:bg-teal-50 hover:shadow-md rounded-xl cursor-pointer transition-transform duration-300 transform hover:-translate-y-1 ${activeClass}`}
             >
               <Link
                 to={category.link_url}
-                className='text-sm text-gray-700 text-center group-hover:text-teal-600 transition-colors duration-300'
+                className={`text-sm text-gray-700 text-center group-hover:text-teal-600 transition-colors duration-300 ${activeLinkTextClass}`}
               >
-                <Icon className='w-8 h-8 mb-2 text-gray-600 group-hover:text-teal-500 transition-colors duration-300' />
+                <Icon
+                  className={`w-8 h-8 mb-2 group-hover:text-teal-500 transition-colors duration-300 ${activeIconClass}`}
+                />
                 {category.name}
               </Link>
             </div>
