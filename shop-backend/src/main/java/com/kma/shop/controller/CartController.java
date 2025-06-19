@@ -40,8 +40,8 @@ public class CartController {
     }
 
     @DeleteMapping("/{item_id}")
-    public ApiResponse<Void> delete(@PathVariable String item_id) throws AppException {
-        cartService.delete(item_id);
+    public ApiResponse<Void> deleteItemInCart(@PathVariable String item_id) throws AppException {
+        cartService.deleteItemInCart(item_id);
         return ApiResponse.<Void>builder()
                 .build();
     }

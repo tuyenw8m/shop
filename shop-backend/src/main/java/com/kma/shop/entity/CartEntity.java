@@ -17,7 +17,7 @@ import java.util.List;
 @Table(name = "cart")
 public class CartEntity extends FormEntity {
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL)
-    private List<CartItemEntity> items = new ArrayList<>();
+    private List<CartItemEntity> items;
 
     @OneToOne
     private UserEntity user;

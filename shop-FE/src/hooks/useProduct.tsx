@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { fetchProducts } from './fetchProduct'
+import { fetchProducts } from '../fetchProduct'
 
 interface ProductFilters {
   name?: string

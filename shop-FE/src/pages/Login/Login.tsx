@@ -33,20 +33,37 @@ export default function Login() {
   const { login } = useContext(AuthContext) as AuthContextType;
 
   const onSubmit = async (data: LoginForm) => {
-  setLoading(true);
-  setApiError(null);
-  try {
-    const response = await fetch('http://localhost:8888/shop/api/v1/auth/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    });
+    setLoading(true);
+    setApiError(null);
+    try {
+      const response = await fetch('http://localhost:8888/shop/api/v1/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
 
-    const contentType = response.headers.get('content-type');
-    if (!contentType || !contentType.includes('application/json')) {
-      throw new Error('Phản hồi từ server không hợp lệ!');
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error('Phản hồi từ server không hợp lệ!');
+      }
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || 'Đăng nhập thất bại!');
+      }
+
+      login(result.data.token, result.data.user); // Gọi hàm login từ AuthContext
+      alert('✅ Đăng nhập thành công!');
+      navigate('/');
+    } catch (error: any) {
+      console.error('Lỗi:', error);
+      setApiError(error.message || 'Có lỗi xảy ra khi đăng nhập!');
+    } finally {
+      setLoading(false);
+
     }
 
     const result = await response.json();

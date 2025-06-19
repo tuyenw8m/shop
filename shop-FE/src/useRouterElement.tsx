@@ -2,7 +2,8 @@
 import { useRoutes, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
 import Register from './pages/Register';
-import ProductDetail from './pages/productDetail/productDetail';
+import ProductDetail from './pages/productDetail/productDetail'; // Or './pages/productDetail/productDetail' depending on actual file name
+
 import DefaultLayout from './layouts/DefaultLayout/DefaultLayout';
 import AccountLayout from './layouts/AccountLayout/AccountLayout';
 import Home from './pages/Home';
