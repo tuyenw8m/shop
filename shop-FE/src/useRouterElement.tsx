@@ -1,17 +1,26 @@
+// src/useRouterElement.tsx
 import { useRoutes, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import ProductDetail from './pages/productDetail/productDetail'; // Or './pages/productDetail/productDetail' depending on actual file name
+
 import DefaultLayout from './layouts/DefaultLayout/DefaultLayout';
 import AccountLayout from './layouts/AccountLayout/AccountLayout';
 import Home from './pages/Home';
-import { useContext } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { AuthContext } from './pages/contexts/AuthContext';
-import Category from './pages/Category'; // Added from fe-apiv2
-import Profile from './pages/Profile/Profile'; // Added from main
+import Category from './pages/Category';
+import Profile from './pages/Profile/Profile';
 
 export default function useRouterElement() {
   const { user } = useContext(AuthContext);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Chờ một chút để đảm bảo AuthProvider đã cập nhật user
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 100); // Delay nhỏ để đồng bộ
+    return () => clearTimeout(timer);
+  }, [user]);
 
   const routeElements = useRoutes([
     {
@@ -25,7 +34,9 @@ export default function useRouterElement() {
     },
     {
       path: '/login',
-      element: !user ? (
+      element: isLoading ? (
+        <div>Đang kiểm tra...</div>
+      ) : !user ? (
         <AccountLayout>
           <Login />
         </AccountLayout>
@@ -35,7 +46,9 @@ export default function useRouterElement() {
     },
     {
       path: '/register',
-      element: !user ? (
+      element: isLoading ? (
+        <div>Đang kiểm tra...</div>
+      ) : !user ? (
         <AccountLayout>
           <Register />
         </AccountLayout>
@@ -52,7 +65,7 @@ export default function useRouterElement() {
       ),
     },
     {
-      path: '/categories/:id', // Route from fe-apiv2
+      path: '/categories/:id',
       element: (
         <DefaultLayout>
           <Category />
@@ -60,15 +73,18 @@ export default function useRouterElement() {
       ),
     },
     {
-      path: '/profile', // Route from main
-      element: user ? (
+      path: '/profile',
+      element: isLoading ? (
+        <div>Đang kiểm tra...</div>
+      ) : user ? (
         <DefaultLayout>
           <Profile />
         </DefaultLayout>
       ) : (
-        <Navigate to="/" />
+        <Navigate to="/login" />
       ),
     },
   ]);
+
   return routeElements;
 }

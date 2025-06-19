@@ -1,17 +1,14 @@
 export interface Category {
-  id: string
   name: string
   description: string
-  slug: string
-  children?: ChildCategory[] | null
-  branch_name?: string[] | null
+  id: string
+  children: ChildCategory[]
+  branch_name: null
 }
-
 export interface ChildCategory {
-  id: string
   name: string
   description: string
-  slug: string
-  children?: ChildCategory[] | null
-  branch_name?: string[] | null
+  id: string
+  children: null
+  branch_name: string[]
 }

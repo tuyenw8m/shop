@@ -1,62 +1,22 @@
-import React, { createContext, useState, useEffect } from 'react';
+// src/pages/contexts/AuthContext.tsx
+import { createContext, useContext } from 'react';
+import type { Dispatch, SetStateAction } from 'react';
+import type { User } from './auth.types';
 
-export const AuthContext = createContext<{
-  user: { token: string; name: string } | null;
-  login: (token: string, name: string) => void;
+export interface AuthContextType {
+  user: { token: string; user: User } | null;
+  setUser: Dispatch<SetStateAction<{ token: string; user: User } | null>>;
+  login: (token: string, user: User) => void;
   logout: () => void;
-}>({
-  user: null,
-  login: () => {},
-  logout: () => {},
-});
+}
 
-export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<{ token: string; name: string } | null>(null);
+export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      // Giả định API verify-token trả về name
-      fetch(`http://localhost:8888/shop/api/v1/auth/authentication?token=${token}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-      })
-        .then((response) => {
-          if (response.ok) {
-            return response.json();
-          } else {
-            throw new Error('Token không hợp lệ');
-          }
-        })
-        .then((data) => {
-  console.log("Verify response:", data); // ✅ Kiểm tra dữ liệu
-  setUser({ token, name: data.user?.name || 'Người dùng' });
-})
-        .catch(() => {
-          localStorage.removeItem('token');
-          setUser(null);
-        });
-    }
-  }, []);
-
-  const login = (token: string, name: string) => {
-    localStorage.setItem('token', token);
-    setUser({ token, name });
-  };
-
-  const logout = () => {
-    localStorage.removeItem('token');
-    setUser(null);
-  };
-
-  return (
-    <AuthContext.Provider value={{ user, login, logout }}>
-      {children}
-    </AuthContext.Provider>
-  );
+// Optional (rất nên dùng để tránh lỗi undefined)
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
 };
-
-export default AuthProvider;

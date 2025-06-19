@@ -29,7 +29,7 @@ export function ProductCard({ product }: ProductType) {
   return (
     <>
       {isQuickViewOpen && <ProductQuickOverview product={product} onClose={handleCloseQuickView} />}
-      <div className='group bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg hover:border-teal-200 transition-all duration-300 transform hover:-translate-y-1 flex flex-col'>
+      <div className='group bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg hover:border-teal-200 transition-all duration-300 transform hover:-translate-y-1 flex flex-col h-full'>
         <div className='relative overflow-hidden bg-gray-50 h-48 flex items-center justify-center'>
           {discountPercent > 0 && (
             <div className='absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full z-10'>

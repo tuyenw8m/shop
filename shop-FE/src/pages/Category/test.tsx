@@ -1,58 +1,42 @@
-import { useState, useMemo } from 'react'
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { useState, useMemo, useEffect } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import FilterSidebar from './components/FilterSidebar'
 import ProductCard from 'src/components/ProductCard'
-import type { Product, ProductSearchParams, ProductSearchParamsConfig } from 'src/types/product.type'
+import type { Product, ProductSearchParams } from 'src/types/product.type'
 import FeaturesCategory from 'src/components/FeaturesCategory'
 import ProductSortDropdown from './components/ProductSortDropdown'
 import productApi from 'src/apis/ProductService.api'
 import useQueryParams from 'src/hooks/useQueryParams'
 import { isUndefined, omitBy } from 'lodash'
-import Pagination from 'src/components/Pagination'
-import { sortType } from 'src/constant/sort.constant'
-import { createSearchParams, useNavigate } from 'react-router-dom'
-import { ArrowDownUp, Package } from 'lucide-react'
 
 export function Category() {
   const MAX_PRICE = 200000000
-  const navigate = useNavigate()
-  const queryParamsUrl: ProductSearchParamsConfig = useQueryParams()
+  const queryParamsUrl: ProductSearchParams = useQueryParams()
 
-  const cleannedQueryParams: ProductSearchParamsConfig = useMemo(() => {
-    return omitBy(
-      {
-        name: queryParamsUrl.name,
-        min_price: queryParamsUrl.min_price,
-        max_price: queryParamsUrl.max_price,
-        page: queryParamsUrl.page || '1',
-        limit: queryParamsUrl.limit,
-        sort_by: queryParamsUrl.sort_by,
-        sort_type: queryParamsUrl.sort_type,
-        children_category_name: queryParamsUrl.children_category_name,
-        parent_category_name: queryParamsUrl.parent_category_name,
-        branch_name: queryParamsUrl.branch_name
-      },
-      isUndefined
-    )
-  }, [
-    queryParamsUrl.name,
-    queryParamsUrl.min_price,
-    queryParamsUrl.max_price,
-    queryParamsUrl.page,
-    queryParamsUrl.limit,
-    queryParamsUrl.sort_by,
-    queryParamsUrl.sort_type,
-    queryParamsUrl.children_category_name,
-    queryParamsUrl.parent_category_name,
-    queryParamsUrl.branch_name
-  ])
+  const cleannedQueryParams = omitBy(
+    {
+      name: queryParamsUrl.name,
+      min_price: queryParamsUrl.min_price,
+      max_price: queryParamsUrl.max_price,
+      page: queryParamsUrl.page,
+      limit: queryParamsUrl.limit,
+      sort_by: queryParamsUrl.sort_by,
+      sort_type: queryParamsUrl.sort_type,
+      children_category_name: queryParamsUrl.children_category_name,
+      parent_category_name: queryParamsUrl.parent_category_name,
+      branch_name: queryParamsUrl.branch_name
+    },
+    isUndefined
+  )
+
+  // Lấy PARAMS xóa bỏ các fields không cần tránh query lỗi
+  console.log(cleannedQueryParams)
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['products', cleannedQueryParams],
     queryFn: () => {
-      return productApi.getAllProducts(cleannedQueryParams as ProductSearchParams)
-    },
-    placeholderData: keepPreviousData
+      return productApi.getAllProducts(cleannedQueryParams)
+    }
   })
 
   const products: Product[] = data?.data?.data.content || []
@@ -66,15 +50,20 @@ export function Category() {
     () => [...new Set(products.map((p) => p.parent_category_name).filter(Boolean))],
     [products]
   )
+  const maxPrice = useMemo(() => Math.max(...products.map((p) => p.price || 0), 0), [products])
 
   const [selectedCategories, setSelectedCategories] = useState<string[]>([])
   const [selectedBrands, setSelectedBrands] = useState<string[]>([])
   const [selectedParentCategory, setSelectedParentCategory] = useState<string>('')
-  const [selectedPriceRange, setSelectedPriceRange] = useState<[number, number]>(() => [
-    Number(cleannedQueryParams.min_price) || 0,
-    Number(cleannedQueryParams.max_price) || MAX_PRICE
-  ])
+  const [selectedPriceRange, setSelectedPriceRange] = useState<[number, number]>([0, 0])
   const [searchQuery, setSearchQuery] = useState<string>('')
+  const [sortOrder, setSortOrder] = useState<string>('')
+
+  useEffect(() => {
+    if (maxPrice > 0 && selectedPriceRange[1] === 0) {
+      setSelectedPriceRange([0, maxPrice])
+    }
+  }, [maxPrice, selectedPriceRange])
 
   const clearFilters = () => {
     setSelectedCategories([])
@@ -82,22 +71,11 @@ export function Category() {
     setSelectedParentCategory('')
     setSelectedPriceRange([0, MAX_PRICE])
     setSearchQuery('')
-    navigate({
-      pathname: location.pathname,
-      search: createSearchParams({
-        ...cleannedQueryParams
-      }).toString()
-    })
+    setSortOrder('')
   }
 
-  const handleSortType = (value: Exclude<ProductSearchParams['sort_type'], undefined>) => {
-    navigate({
-      pathname: location.pathname,
-      search: createSearchParams({
-        ...cleannedQueryParams,
-        sort_type: value
-      }).toString()
-    })
+  const handleSortChange = (sortValue: string) => {
+    setSortOrder(sortValue)
   }
 
   const filteredProducts = useMemo(() => {
@@ -112,8 +90,18 @@ export function Category() {
       return matchCategory && matchBrand && matchParent && matchPrice && matchSearch
     })
 
+    if (sortOrder === 'price-asc') {
+      currentProducts.sort((a, b) => a.price - b.price)
+    } else if (sortOrder === 'price-desc') {
+      currentProducts.sort((a, b) => b.price - a.price)
+    } else if (sortOrder === 'name-asc') {
+      currentProducts.sort((a, b) => a.name.localeCompare(b.name))
+    } else if (sortOrder === 'name-desc') {
+      currentProducts.sort((a, b) => b.name.localeCompare(a.name))
+    }
+
     return currentProducts
-  }, [products, selectedCategories, selectedBrands, selectedParentCategory, selectedPriceRange, searchQuery])
+  }, [products, selectedCategories, selectedBrands, selectedParentCategory, selectedPriceRange, searchQuery, sortOrder])
 
   if (isLoading) {
     return (
@@ -162,11 +150,10 @@ export function Category() {
             {/* Filter Sidebar */}
             <div className='lg:w-1/4'>
               <FilterSidebar
-                productSearchParams={cleannedQueryParams}
                 categories={categories}
                 brands={brands}
                 parentCategories={parentCategories}
-                maxPrice={MAX_PRICE}
+                maxPrice={maxPrice}
                 selectedCategories={selectedCategories}
                 selectedBrands={selectedBrands}
                 selectedParentCategory={selectedParentCategory}
@@ -185,44 +172,26 @@ export function Category() {
             <div className='lg:w-3/4'>
               <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6'>
                 <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4'>
-                  <div className='flex items-center flex-wrap gap-2'>
-                    <Package size={20} strokeWidth={1.75} />
-                    <div className='text-sm text-gray-600'>
-                      Hiển thị <span className='font-medium'>{filteredProducts.length}</span> sản phẩm
-                    </div>
-                    {cleannedQueryParams.sort_by && (
-                      <>
-                        <button
-                          key='asc'
-                          disabled={queryParamsUrl.sort_type === sortType.asc}
-                          onClick={() => handleSortType('asc')}
-                          className={`h-7 px-2 rounded-sm capitalize text-sm text-center ${queryParamsUrl.sort_type === sortType.asc ? 'bg-teal-400 text-white cursor-not-allowed' : 'bg-gray-200 text-teal-500 hover:bg-gray-100'}`}
-                        >
-                          Thấp -&gt; Cao
-                        </button>
-                        <button
-                          key='desc'
-                          disabled={queryParamsUrl.sort_type === sortType.desc}
-                          onClick={() => handleSortType('desc')}
-                          className={`h-7 px-2 rounded-sm capitalize text-sm text-center ${queryParamsUrl.sort_type === sortType.desc ? 'bg-teal-400 text-white cursor-not-allowed ' : 'bg-gray-200 text-teal-500 hover:bg-gray-100'}`}
-                        >
-                          Cao -&gt; Thấp
-                        </button>
-                      </>
-                    )}
+                  <div className='text-sm text-gray-600'>
+                    Hiển thị <span className='font-medium'>{filteredProducts.length}</span> sản phẩm
                   </div>
-
                   <div className='flex items-center space-x-2'>
-                    <ArrowDownUp size={20} strokeWidth={1.75} />
                     <span className='text-sm text-gray-600 whitespace-nowrap'>Sắp xếp theo:</span>
-                    <ProductSortDropdown productSearchParam={cleannedQueryParams} />
+                    <ProductSortDropdown onSortChange={handleSortChange} />
                   </div>
                 </div>
               </div>
 
               <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6'>
                 {filteredProducts.length > 0 ? (
-                  filteredProducts.map((product: Product) => <ProductCard key={product.id} product={product} />)
+                  filteredProducts.map((product: Product) => (
+                    <div
+                      key={product.id}
+                      className='transform hover:scale-103 hover:shadow-xl transition-all duration-300 rounded-lg overflow-hidden'
+                    >
+                      <ProductCard product={product} />
+                    </div>
+                  ))
                 ) : (
                   <div className='col-span-full text-center py-16 bg-gray-50 rounded-lg'>
                     <p className='text-gray-700 text-xl font-semibold mb-4'>
@@ -237,9 +206,6 @@ export function Category() {
                   </div>
                 )}
               </div>
-              {data?.data.data.pageSize && (
-                <Pagination cleanedQueryParams={cleannedQueryParams} totalPage={data.data.data.totalPages} />
-              )}
             </div>
           </div>
         </div>

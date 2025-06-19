@@ -1061,6 +1061,7 @@ chownr@^3.0.0:
   integrity sha512-+IxzY9BZOQd/XuYPRmrvEVjF/nqj5kgT4kEq7VofrDoM1MxoRjEWkrCC3EtLi59TVawxTAn+orJwFQcrqEN1+g==
 
 "client@file:":
+
   version "0.0.0"
   resolved "file:"
   dependencies:
@@ -1069,6 +1070,7 @@ chownr@^3.0.0:
     "@tanstack/react-query-devtools" "^5.79.0"
     axios "^1.9.0"
     client "file:"
+
     lucide-react "^0.515.0"
     react "^19.1.0"
     react-dom "^19.1.0"

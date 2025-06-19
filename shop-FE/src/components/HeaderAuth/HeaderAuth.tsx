@@ -2,9 +2,10 @@ import { useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../pages/contexts/AuthContext';
 import { CircleUserRound, HelpCircle } from 'lucide-react';
+import type { AuthContextType } from '../../pages/contexts/AuthContext';
 
 export default function HeaderAuth() {
-  const { user, logout } = useContext(AuthContext);
+  const { user, logout } = useContext(AuthContext) as AuthContextType;
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -26,7 +27,7 @@ export default function HeaderAuth() {
           {/* Tài khoản */}
           <div className="flex items-center">
             <Link
-              to={user ? '#' : '/login'}
+              to={user ? '/profile' : '/login'} // Điều hướng tới /profile khi đã đăng nhập
               className="flex items-center text-teal-600 hover:bg-teal-100 text-sm p-2 rounded cursor-pointer"
             >
               <CircleUserRound size={20} />

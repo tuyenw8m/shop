@@ -20,7 +20,7 @@ export interface Product {
 
 // Kiểu trả về của GetAllProducts
 export interface ProductList {
-  content: Product[]
+  content: Product[] | []
   pageNumber: number
   pageSize: number
   totalElements: number
@@ -34,9 +34,14 @@ export interface ProductSearchParams {
   max_price?: number
   page?: number
   limit?: number
-  sort_by?: string
+  sort_by?: 'price' | 'sold' | 'stock' | 'rating' | string
   sort_type?: 'asc' | 'desc'
   children_category_name?: string[]
   parent_category_name?: string
   branch_name?: string
+}
+
+// Lấy string rồi convert sau
+export type ProductSearchParamsConfig = {
+  [key in keyof ProductSearchParams]: string
 }
