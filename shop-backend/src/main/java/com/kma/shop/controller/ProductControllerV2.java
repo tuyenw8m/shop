@@ -69,11 +69,6 @@ public class ProductControllerV2 {
             ) throws AppException {
 
 
-        var security1 = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        var security2 = SecurityContextHolder.getContext().getAuthentication().getAuthorities();
-        var security3 = SecurityContextHolder.getContext().getAuthentication().getCredentials();
-        String security4 = SecurityContextHolder.getContext().getAuthentication().getName();
-        var security5 = SecurityContextHolder.getContext().getAuthentication().getDetails();
 
         return ApiResponse.<PageResponse<ProductResponseV2>>builder()
                 .data(productServiceV2.findV2(name, parent_category_name, children_category_name, branch_name, min_price, max_price, page - 1, limit, sort_by, sort_type))
