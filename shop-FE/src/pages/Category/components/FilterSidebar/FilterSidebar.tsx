@@ -1,7 +1,11 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ChevronDown, ChevronUp, Filter, Search } from 'lucide-react'
+import { createSearchParams, useNavigate } from 'react-router-dom'
+import type { ProductSearchParamsConfig } from 'src/types/product.type'
+import { omit } from 'lodash'
 
 interface FilterSidebarProps {
+  productSearchParams: ProductSearchParamsConfig
   categories: string[]
   brands: string[]
   parentCategories: string[]
@@ -20,10 +24,11 @@ interface FilterSidebarProps {
 }
 
 export function FilterSidebar({
+  productSearchParams,
   categories,
   brands,
   parentCategories,
-  // maxPrice,
+  maxPrice,
   selectedCategories,
   selectedBrands,
   selectedParentCategory,
@@ -36,11 +41,65 @@ export function FilterSidebar({
   onSearchChange,
   onClearFilters
 }: FilterSidebarProps) {
+  const navigate = useNavigate()
   const [showAllCategories, setShowAllCategories] = useState(false)
   const [showAllBrands, setShowAllBrands] = useState(false)
+  // state lưu giá trị
+  const [minPriceInput, setMinPriceInput] = useState<number | string>(selectedPriceRange[0])
+  const [maxPriceInput, setMaxPriceInput] = useState<number | string>(selectedPriceRange[1])
+  // error
+  const [minPriceError, setMinPriceError] = useState<string | null>(null)
+  const [maxPriceError, setMaxPriceError] = useState<string | null>(null)
+
+  useEffect(() => {
+    setMinPriceInput(selectedPriceRange[0])
+    setMaxPriceInput(selectedPriceRange[1])
+  }, [selectedPriceRange])
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('vi-VN').format(price) + '₫'
+  }
+
+  const handleApplyPriceFilter = () => {
+    const minVal = Number(minPriceInput)
+    const maxVal = Number(maxPriceInput)
+
+    setMinPriceError(null)
+    setMaxPriceError(null)
+
+    let hasError = false
+    if (minVal < 0) {
+      setMinPriceError('Giá tối thiểu không âm.')
+      hasError = true
+    }
+    if (minVal > maxPrice) {
+      setMinPriceError(`Giá tối thiểu không quá ${formatPrice(maxPrice)}.`)
+      hasError = true
+    }
+    if (maxVal < 0) {
+      setMaxPriceError('Giá tối đa không âm.')
+      hasError = true
+    }
+    if (maxVal > maxPrice) {
+      setMaxPriceError(`Giá tối đa không quá ${formatPrice(maxPrice)}.`)
+      hasError = true
+    }
+    if (!hasError && minVal > maxVal && maxVal !== 0) {
+      setMinPriceError('Giá tối thiểu không lớn hơn tối đa.')
+      hasError = true
+    }
+
+    if (!hasError) {
+      onPriceRangeChange([minVal, maxVal])
+      navigate({
+        pathname: location.pathname,
+        search: createSearchParams({
+          ...productSearchParams,
+          min_price: minVal.toString(),
+          max_price: maxVal.toString()
+        }).toString()
+      })
+    }
   }
 
   const handleCategoryToggle = (category: string) => {
@@ -59,6 +118,16 @@ export function FilterSidebar({
 
   const displayedCategories = showAllCategories ? categories : categories.slice(0, 6)
   const displayedBrands = showAllBrands ? brands : brands.slice(0, 6)
+
+  const handleSelectBtnAllCategory = () => {
+    const cloneParams = omit(productSearchParams, ['children_category_name', 'parent_category_name'])
+    navigate({
+      pathname: location.pathname,
+      search: createSearchParams({
+        ...cloneParams
+      }).toString()
+    })
+  }
 
   return (
     <div className='w-full bg-white rounded-lg shadow-sm border border-gray-200 p-6'>
@@ -96,6 +165,7 @@ export function FilterSidebar({
             <div className='relative'>
               <input
                 type='radio'
+                onClick={handleSelectBtnAllCategory}
                 name='parent_category'
                 checked={selectedParentCategory === ''}
                 onChange={() => onParentCategoryChange('')}
@@ -152,26 +222,36 @@ export function FilterSidebar({
                 <label className='block text-sm font-medium text-gray-700'>Giá tối thiểu</label>
                 <input
                   type='number'
-                  value={selectedPriceRange[0]}
-                  onChange={(e) => onPriceRangeChange([Number(e.target.value), selectedPriceRange[1]])}
-                  className='block w-full p-2 border border-gray-300 rounded-md'
+                  value={minPriceInput} // Giá trị hiển thị từ state cục bộ
+                  onChange={(e) => setMinPriceInput(e.target.value)}
+                  className={`block w-full p-2 border rounded-md ${minPriceError ? 'border-red-500' : 'border-gray-300'}`}
                 />
+                {minPriceError && <p className='text-red-500 text-xs mt-1'>{minPriceError}</p>}
               </div>
               <div className='flex-1'>
                 <label className='block text-sm font-medium text-gray-700'>Giá tối đa</label>
                 <input
                   type='number'
-                  value={selectedPriceRange[1]}
-                  onChange={(e) => onPriceRangeChange([selectedPriceRange[0], Number(e.target.value)])}
-                  className='block w-full p-2 border border-gray-300 rounded-md'
+                  value={maxPriceInput} // Giá trị hiển thị từ state cục bộ
+                  placeholder='0'
+                  onChange={(e) => setMaxPriceInput(e.target.value)}
+                  className={`block w-full p-2 border rounded-md ${maxPriceError ? 'border-red-500' : 'border-gray-300'}`}
                 />
+                {maxPriceError && <p className='text-red-500 text-xs mt-1'>{maxPriceError}</p>}
               </div>
             </div>
           </div>
           <div className='flex items-center justify-between text-sm text-gray-600'>
+            {/* Hiển thị giá trị đang được áp dụng, không phải giá trị input */}
             <span>{formatPrice(selectedPriceRange[0])}</span>
             <span>{formatPrice(selectedPriceRange[1])}</span>
           </div>
+          <button
+            onClick={handleApplyPriceFilter}
+            className='mt-4 w-full bg-teal-600 text-white py-2 rounded-md hover:bg-teal-700 transition-colors'
+          >
+            Áp dụng
+          </button>
         </div>
       </div>
 
