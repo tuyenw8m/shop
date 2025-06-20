@@ -13,8 +13,15 @@ import Category from './pages/Category';
 import Profile from './pages/Profile/Profile';
 
 export default function useRouterElement() {
-  const { user } = useContext(AuthContext);
+  const authContext = useContext(AuthContext);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Kiểm tra xem context có tồn tại không
+  if (!authContext) {
+    throw new Error('useRouterElement phải được dùng trong AuthProvider');
+  }
+
+  const { user } = authContext;
 
   // Chờ một chút để đảm bảo AuthProvider đã cập nhật user
   useEffect(() => {
