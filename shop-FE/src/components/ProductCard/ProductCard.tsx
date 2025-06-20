@@ -1,16 +1,23 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
-import type { Product } from 'src/types/product.type'
-import { formatPrices, getCategoryStyle } from 'src/utils/utils'
-import ProductQuickOverview from '../ProductQuickOverview'
-import RatingProduct from '../RatingProduct/RatingProduct'
+import { Link, useNavigate } from 'react-router-dom'
+import type { Product } from 'src/types/product.type' // Đảm bảo bạn có kiểu Product này
+import { formatPrices, getCategoryStyle, getProfileLocalStorage } from 'src/utils/utils'
+import ProductQuickOverview from '../ProductQuickOverview' // Đảm bảo component này tồn tại
+import RatingProduct from '../RatingProduct/RatingProduct' // Đảm bảo component này tồn tại
 import { Eye } from 'lucide-react'
+import { useCartMutations } from 'src/hooks/useCartMutations'
 
 interface ProductType {
   product: Product
 }
 
 export function ProductCard({ product }: ProductType) {
+  const userProfile = getProfileLocalStorage()
+  const user_id = userProfile?.id
+  const navigate = useNavigate()
+
+  const { addItemToCart } = useCartMutations(user_id)
+
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false)
 
   const handleQuickView = () => {
@@ -19,6 +26,13 @@ export function ProductCard({ product }: ProductType) {
 
   const handleCloseQuickView = () => {
     setIsQuickViewOpen(false)
+  }
+
+  const handleAddToCart = () => {
+    if (userProfile) {
+      return addItemToCart.mutate(product)
+    }
+    navigate('/login')
   }
 
   const discountPercent =
@@ -47,7 +61,7 @@ export function ProductCard({ product }: ProductType) {
             </div>
           )}
           <img
-            src={product.image_url[0] || '/placeholder.svg'}
+            src={product.image_url?.[0] || '/placeholder.svg'}
             alt={product.name}
             className='object-contain w-full h-full p-4 group-hover:scale-105 transition-transform duration-300'
           />
@@ -102,7 +116,10 @@ export function ProductCard({ product }: ProductType) {
                 Liên Hệ Đặt Hàng
               </button>
             ) : (
-              <button className='w-full bg-teal-600 hover:bg-teal-700 text-white text-sm rounded-md py-2 transition-colors'>
+              <button
+                onClick={handleAddToCart}
+                className='w-full bg-teal-600 hover:bg-teal-700 text-white text-sm rounded-md py-2 transition-colors'
+              >
                 Thêm vào giỏ
               </button>
             )}

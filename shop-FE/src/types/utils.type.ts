@@ -15,3 +15,17 @@ export interface ApiResponse<T> {
   message: string | null
   data: T
 }
+
+export interface AuthResponse {
+  token: string
+  refreshToken: null
+  user: {
+    id: string
+    name: string
+    avatar_url: string
+    email: string
+    phone: string
+    address: string
+    roles: string[]
+  }
+}
