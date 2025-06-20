@@ -1,4 +1,3 @@
-// src/useRouterElement.tsx
 import { useRoutes, Navigate } from 'react-router-dom'
 import Login from './pages/Login'
 import Register from './pages/Register'
@@ -13,12 +12,17 @@ import Profile from './pages/Profile/Profile'
 import CartPage from './pages/CartPage'
 
 export default function useRouterElement() {
-  const { user } = useContext(AuthContext)
+  const authContext = useContext(AuthContext)
   const [isLoading, setIsLoading] = useState(true)
 
-  // Chờ một chút để đảm bảo AuthProvider đã cập nhật user
+  if (!authContext) {
+    throw new Error('useRouterElement must be used within an AuthProvider')
+  }
+
+  const { user } = authContext
+
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 100) // Delay nhỏ để đồng bộ
+    const timer = setTimeout(() => setIsLoading(false), 100)
     return () => clearTimeout(timer)
   }, [user])
 

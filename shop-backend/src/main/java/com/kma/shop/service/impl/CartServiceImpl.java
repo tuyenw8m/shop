@@ -42,9 +42,11 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public CartItemResponse toCartItemResponse(CartItemEntity cart) {
+        String url = cart.getProduct().getImages().getFirst().getUrl();
         return CartItemResponse.builder()
                 .item_id(cart.getId())
                 .product_id(cart.getProduct().getId())
+                .image_url(List.of(url))
                 .name(cart.getProduct().getName())
                 .quantity(cart.getQuantity())
                 .price(cart.getQuantity() * cart.getProduct().getPrice())
@@ -92,10 +94,14 @@ public class CartServiceImpl implements CartService {
 
         return setUpCartResponseInfo(cart);
     }
+
     @Override
-    public void delete(String item_id){
-        cartRepo.deleteById(item_id);
+    public void deleteItemInCart(String item_id){
+        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
+        CartEntity cart = cartRepo.findByUserId(userId);
+        cartItemRepo.deleteById(item_id);
     }
+
     @Override
     public CartItemResponse update(String item_id, int quantity) throws AppException {
 

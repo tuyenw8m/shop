@@ -1,4 +1,4 @@
-package com.kma.shop.config;
+package com.kma.shop.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 

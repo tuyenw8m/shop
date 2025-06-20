@@ -89,17 +89,18 @@ public class  AuthServiceImpl  implements AuthService {
 //        }
 //        throw new AppException(ErrorCode.NOT_AUTHENTICATION);
 //    }
-@Override
-public boolean verifyEmailCode(String email, String code) throws AppException {
+    @Override
+    public boolean verifyEmailCode(String email, String code) throws AppException {
         if(signupVerificationService.verification(email, code)){
             signupVerificationService.delete(email);
             return true;
         }
         return false;
     }
+
     @Override
     public AuthResponse signup(UserCreationRequest userCreationRequest)
-            throws AppException, JOSEException, ParseException {
+            throws AppException, JOSEException {
         if(!userService.checkAttribute(userCreationRequest))
             throw  new AppException(ErrorCode.CONFLICT);
         if(userService.existByEmail(userCreationRequest.getEmail())

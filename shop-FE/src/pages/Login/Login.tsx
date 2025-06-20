@@ -1,4 +1,3 @@
-// src/pages/Login.tsx
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
@@ -6,7 +5,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useState, useContext } from 'react'
 import { AuthContext } from '../contexts/AuthContext'
 import LeftImage from '../leftimages/leftimages.jpg'
-import type { AuthContextType } from '../contexts/AuthContext' // ✅ Đúng
+import type { AuthContextType } from '../contexts/AuthContext'
 import { saveProfileToLocalStorage } from 'src/utils/utils'
 import type { User } from '../contexts/auth.types'
 import http from 'src/utils/http'
@@ -39,8 +38,8 @@ export default function Login() {
     setApiError(null)
     try {
       const response = await http.post('/auth/login', data)
-      console.log(response)
-      const result = await response.data
+      const result = response.data
+
       console.log('API Response:', result)
 
       const token: string = result.data.token
@@ -55,10 +54,18 @@ export default function Login() {
 
       saveProfileToLocalStorage(user)
       login(token, user)
-      navigate('/') // hoặc navigate('/') nếu bạn muốn về trang chủ
-    } catch (error: unknown) {
-      console.error('Lỗi:', error)
-      setApiError(error instanceof Error ? error.message : 'Lỗi xảy ra khi đăng nhập!')
+
+      navigate('/')
+    } catch (error: any) {
+      console.error('Lỗi đăng nhập:', error)
+      let errorMessage = 'Lỗi xảy ra khi đăng nhập!'
+
+      if (error.response && error.response.data && error.response.data.message) {
+        errorMessage = error.response.data.message
+      } else if (error instanceof Error) {
+        errorMessage = error.message
+      }
+      setApiError(errorMessage)
     } finally {
       setLoading(false)
     }
