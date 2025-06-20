@@ -42,9 +42,11 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public CartItemResponse toCartItemResponse(CartItemEntity cart) {
+        String url = cart.getProduct().getImages().getFirst().getUrl();
         return CartItemResponse.builder()
                 .item_id(cart.getId())
                 .product_id(cart.getProduct().getId())
+                .image_url(List.of(url))
                 .name(cart.getProduct().getName())
                 .quantity(cart.getQuantity())
                 .price(cart.getQuantity() * cart.getProduct().getPrice())
