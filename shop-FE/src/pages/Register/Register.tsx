@@ -108,17 +108,7 @@ export default function Register() {
                   <span className="text-red-500 text-sm block mt-1">{errors.confirm_password.message}</span>
                 )}
               </div>
-              <div>
-                <input
-                  type="tel"
-                  placeholder="Số điện thoại"
-                  className="w-full px-5 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-teal-500 bg-gray-50 text-gray-700 placeholder-gray-400 transition-all duration-200"
-                  {...register('phone')}
-                />
-                {errors?.phone && (
-                  <span className="text-red-500 text-sm block mt-1">{errors.phone.message}</span>
-                )}
-              </div>
+            
               <button
                 type="submit"
                 className="w-full bg-[#1C2A37] text-white py-3 rounded-full hover:bg-teal-700 transition-all duration-200 shadow-md hover:shadow-lg"

@@ -2,7 +2,6 @@ package com.kma.shop.utils;
 
 import com.kma.shop.entity.Authority;
 import com.kma.shop.entity.RoleEntity;
-import com.kma.shop.entity.TokenEntity;
 import com.kma.shop.entity.UserEntity;
 import com.kma.shop.exception.AppException;
 import com.kma.shop.exception.ErrorCode;
@@ -76,6 +75,7 @@ public class TokenUtils {
         } catch (ParseException e) {
             throw new AppException(ErrorCode.NOT_AUTHENTICATION);
         }
+        System.err.println(signedJWT);
         JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
         boolean verified = signedJWT.verify(verifier);
         if (!verified) {
@@ -100,12 +100,28 @@ public class TokenUtils {
     }
 
     //generate token from user
-    public String generateToken(UserEntity user) throws JOSEException, ParseException {
+    public String generateToken(UserEntity user) throws JOSEException {
+
         tokenService.deleteByUser(user);
+
         JWSHeader jwsHeader = new JWSHeader(JWSAlgorithm.HS512);
-        JWTClaimsSet jwtClaimsSet;
+        System.err.println(jwsHeader);
+
+        JWTClaimsSet jwtClaimsSet = generateJWTClaimSet(user);
+        System.err.println(jwtClaimsSet);
+
+
+        JWSObject jwsObject = new JWSObject(jwsHeader, new Payload(jwtClaimsSet.toJSONObject()));
+        jwsObject.sign(new MACSigner(SIGNER_KEY.getBytes()));
+
+        String token =  jwsObject.serialize();
+
+        return tokenService.save(token, user);
+    }
+
+    public JWTClaimsSet generateJWTClaimSet(UserEntity user){
         if(user.getRoles().size() == 1){
-            jwtClaimsSet = new JWTClaimsSet.Builder()
+            return new JWTClaimsSet.Builder()
                     .issuer("hoangtuyen.com")
                     .subject(user.getId())
                     .issueTime(new Date())
@@ -116,7 +132,7 @@ public class TokenUtils {
                     .build();
         }
         else{
-            jwtClaimsSet = new JWTClaimsSet.Builder()
+            return new JWTClaimsSet.Builder()
                     .issuer("hoangtuyen.com")
                     .subject(user.getId())
                     .issueTime(new Date())
@@ -126,15 +142,6 @@ public class TokenUtils {
                     .claim("scope", buildAuthorities(user.getRoles()))
                     .build();
         }
-        JWSObject jwsObject = new JWSObject(jwsHeader, new Payload(jwtClaimsSet.toJSONObject()));
-        jwsObject.sign(new MACSigner(SIGNER_KEY.getBytes()));
-        String token =  jwsObject.serialize();
-        TokenEntity tokenEntity = TokenEntity.builder()
-                .token(token)
-                .user(user)
-                .build();
-        tokenService.save(tokenEntity);
-        return token;
     }
 
     //build list Roles for claim roles

@@ -1,11 +1,7 @@
-package com.kma.shop.config;
+package com.kma.shop.security;
 
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -21,4 +17,7 @@ public class CustomFilter implements Filter {
         // Logic xác thực khác
         chain.doFilter(request, response);
     }
+
+
+
 }

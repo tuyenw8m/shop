@@ -7,7 +7,7 @@ import { useState, useContext } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
 import LeftImage from '../leftimages/leftimages.jpg';
 import type { AuthContextType } from '../contexts/AuthContext'; // ✅ Đúng
-import type { User } from '../contexts/auth.types';
+
 
 
 const schema = yup.object({
@@ -39,9 +39,7 @@ export default function Login() {
   try {
     const response = await fetch('http://localhost:8888/shop/api/v1/auth/login', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     });
 
@@ -51,32 +49,22 @@ export default function Login() {
     }
 
     const result = await response.json();
-    console.log('API Response:', result);
 
     if (!response.ok) {
       throw new Error(result.message || 'Đăng nhập thất bại!');
     }
 
-    const token: string = result.data.token;
-    const user: User = {
-      id: result.data.user.id,
-      name: result.data.user.name,
-      email: result.data.user.email,
-      phone: result.data.user.phone,
-      address: result.data.user.address,
-      avatar_url: result.data.user.avatar_url,
-    };
-
-    login(token, user);
+    login(result.data.token, result.data.user); // Gọi AuthContext
     alert('✅ Đăng nhập thành công!');
-    navigate('/'); // hoặc navigate('/') nếu bạn muốn về trang chủ
-  } catch (error: unknown) {
-    console.error('Lỗi:', error);
-    setApiError(error instanceof Error ? error.message : 'Lỗi xảy ra khi đăng nhập!');
-  } finally {
-    setLoading(false);
-  }
+    navigate('/');
+ } catch (error: unknown) {
+  const errorMessage = error instanceof Error ? error.message : 'Có lỗi xảy ra khi đăng nhập!';
+  console.error('Lỗi:', error);
+  setApiError(errorMessage);
+}
+
 };
+
 
   return (
     <div className="min-h-screen flex bg-[#E7E7E7]">
@@ -150,5 +138,4 @@ export default function Login() {
         </div>
       </div>
     </div>
-  );
-}
+  )}

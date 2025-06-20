@@ -1,4 +1,4 @@
-package com.kma.shop.config;
+package com.kma.shop.security;
 
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.core.GrantedAuthority;

@@ -1,8 +1,8 @@
 import { createSearchParams, Link, useLocation } from 'react-router-dom'
-import type { searchParamsConfig } from 'src/types/product.type'
+import type { ProductSearchParamsConfig } from 'src/types/product.type'
 
 interface Props {
-  cleanedQueryParams: searchParamsConfig
+  cleanedQueryParams: ProductSearchParamsConfig
   totalPage: number
 }
 

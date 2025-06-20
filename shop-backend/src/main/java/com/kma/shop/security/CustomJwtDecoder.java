@@ -1,4 +1,4 @@
-package com.kma.shop.config;
+package com.kma.shop.security;
 
 import com.kma.shop.exception.AppException;
 import com.kma.shop.utils.TokenUtils;
@@ -35,7 +35,7 @@ public class CustomJwtDecoder implements JwtDecoder {
     public Jwt decode(String token) throws JwtException {
         try {
             tokenUtils.isValidToken(token);
-        } catch (AppException | ParseException | JOSEException e) {
+        } catch (AppException | ParseException | JOSEException ignored) {
 
         }
         if (Objects.isNull(nimbusJwtDecoder)) {

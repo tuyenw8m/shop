@@ -20,7 +20,7 @@ public interface CartService {
 
     CartResponse getCart() throws AppException;
 
-    void delete(String item_id);
+    void deleteItemInCart(String item_id);
 
     CartItemResponse update(String item_id, int quantity) throws AppException;
 

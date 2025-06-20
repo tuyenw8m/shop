@@ -2,13 +2,15 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import type { User } from '../contexts/auth.types';
 
-// Define API_URL with a fallback
-const API_URL = import.meta.env.REACT_APP_API_URL || 'http://localhost:8888/shop/api/v1';
+const API_URL = 'http://localhost:8888/shop/api/v1';
 
 export default function Profile() {
   const { user, setUser } = useAuth();
   const [profileData, setProfileData] = useState<User | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(false);
+const [isLoadingPassword, setIsLoadingPassword] = useState(false);
+const [isLoadingEmail, setIsLoadingEmail] = useState(false);
+
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<
     'notifications' | 'account' | 'purchase' | 'waitingPayment' | 'shipping' | 'waitingDelivery' | 'completed' | 'cancelled' | 'returned'
@@ -54,6 +56,7 @@ export default function Profile() {
     [key in 'purchase' | 'waitingPayment' | 'shipping' | 'waitingDelivery' | 'completed' | 'cancelled' | 'returned']: Purchase[];
   };
 
+  
   // Mask email for display
   const maskEmail = (email: string) => {
     const [name, domain] = email.split('@');
@@ -103,7 +106,7 @@ export default function Profile() {
       }
     };
     fetchProfile();
-  }, [user?.token, setUser]);
+  }, [user, setUser]);
 
   // Handle avatar file change
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -174,7 +177,7 @@ export default function Profile() {
     }
   };
 
-  // Handle email update
+  // Handle email update (requires backend verification)
   const handleSaveEmail = async () => {
     if (!user?.token) return;
     try {

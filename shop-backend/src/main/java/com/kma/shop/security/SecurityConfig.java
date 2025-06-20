@@ -1,4 +1,4 @@
-package com.kma.shop.config;
+package com.kma.shop.security;
 
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
