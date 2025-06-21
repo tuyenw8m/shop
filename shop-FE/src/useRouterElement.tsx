@@ -78,7 +78,9 @@ export default function useRouterElement() {
     },
     {
       path: '/cart',
-      element: user ? (
+      element: isLoading ? (
+        <></>
+      ) : user ? (
         <DefaultLayout>
           <CartPage />
         </DefaultLayout>
