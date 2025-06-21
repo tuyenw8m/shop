@@ -1,9 +1,12 @@
-// src/App.tsx
-import useRouterElement from './useRouterElement';
+import useRouterElement from './useRouterElement'
 
 function App() {
-  const routeElements = useRouterElement();
-  return <div>{routeElements}</div>;
+  const routeElements = useRouterElement()
+  return (
+    <>
+      <div>{routeElements}</div>
+    </>
+  )
 }
 
-export default App;
+export default App

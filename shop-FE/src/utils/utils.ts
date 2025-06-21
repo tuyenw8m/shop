@@ -1,3 +1,5 @@
+import type { User } from 'src/pages/contexts/auth.types'
+
 export function formatPrices(price: number) {
   return new Intl.NumberFormat('vi-VN').format(price)
 }
@@ -10,6 +12,20 @@ export function formatNumberToSocialStyle(value: number) {
     .format(value)
     .replace('.', ',')
     .toLocaleLowerCase()
+}
+
+export const getAccessToken = () => localStorage.getItem('token') || ''
+export const getProfileLocalStorage = () => {
+  const result = localStorage.getItem('profile')
+  return result ? JSON.parse(result) : null
+}
+
+export const saveAccessTokenToLocalStorage = (accessToken: string) => {
+  localStorage.setItem('accessToken', accessToken)
+}
+
+export const saveProfileToLocalStorage = (profile: User) => {
+  localStorage.setItem('profile', JSON.stringify(profile))
 }
 
 export function getCategoryStyle(index: number) {
