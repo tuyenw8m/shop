@@ -96,15 +96,17 @@ export function Header() {
           {/* Actions của user */}
           <div className='flex items-center lg:w-1/4 justify-end w-full'>
             <div className='flex items-center relative' ref={profileRef}>
-              <button
-                onClick={() => setShowProfileMenu(!showProfileMenu)}
-                className='flex items-center text-teal-600 hover:bg-teal-100 text-sm p-2 rounded cursor-pointer'
-              >
-                <CircleUserRound size={20} />
-                <span className='hidden md:inline ml-1 text-sm overflow-hidden text-ellipsis whitespace-nowrap'>
-                  {profile.name}
-                </span>
-              </button>
+              {user && (
+                <button
+                  onClick={() => setShowProfileMenu(!showProfileMenu)}
+                  className='flex items-center text-teal-600 hover:bg-teal-100 text-sm p-2 rounded cursor-pointer'
+                >
+                  <CircleUserRound size={20} />
+                  <span className='hidden md:inline ml-1 text-sm overflow-hidden text-ellipsis whitespace-nowrap'>
+                    {profile.name}
+                  </span>
+                </button>
+              )}
               {user && showProfileMenu && (
                 <div className='absolute top-full right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-xl z-50'>
                   <Link
@@ -130,8 +132,14 @@ export function Header() {
                 </div>
               )}
               {!user && (
-                <Link to='/login' className='text-teal-600 hover:bg-teal-100 text-sm p-2 rounded cursor-pointer'>
-                  Đăng nhập
+                <Link
+                  to='/login'
+                  className='flex items-center text-teal-600 hover:bg-teal-100 text-sm p-2 rounded cursor-pointer'
+                >
+                  <CircleUserRound size={20} />
+                  <span className='hidden md:inline ml-1 text-sm overflow-hidden text-ellipsis whitespace-nowrap'>
+                    Đăng nhập
+                  </span>
                 </Link>
               )}
             </div>

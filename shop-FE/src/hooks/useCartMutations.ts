@@ -10,8 +10,11 @@ export const useCartMutations = (user_id: string | undefined) => {
   const dispatch = useDispatch()
 
   const addItemToCart = useMutation({
-    mutationFn: async (product: Product) => {
-      const response = await cartAPI.addItemToCart({ product_id: product.id, quantity: 1 })
+    mutationFn: async ({ product, quantity = 1 }: { product: Product; quantity?: number }) => {
+      const response = await cartAPI.addItemToCart({
+        product_id: product.id,
+        quantity
+      })
       return response?.data.data
     },
     onSuccess: (data: CartItem) => {
