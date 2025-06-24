@@ -30,7 +30,7 @@ export function ProductCard({ product }: ProductType) {
 
   const handleAddToCart = () => {
     if (userProfile) {
-      return addItemToCart.mutate(product)
+      return addItemToCart.mutate({ product })
     }
     navigate('/login')
   }

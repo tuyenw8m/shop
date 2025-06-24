@@ -62,10 +62,14 @@ export default function useRouterElement() {
     },
     {
       path: '/product/:id',
-      element: (
+      element: isLoading ? (
+        <></>
+      ) : user ? (
         <DefaultLayout>
           <ProductDetail />
         </DefaultLayout>
+      ) : (
+        <Navigate to='/login' />
       )
     },
     {
