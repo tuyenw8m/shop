@@ -14,6 +14,7 @@ import java.util.List;
 public class CartResponse {
     float total_price;
     int total_items;
+    float price;
     String user_id;
     List<CartItemResponse> items;
 }

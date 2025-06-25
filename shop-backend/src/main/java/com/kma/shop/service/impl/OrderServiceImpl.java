@@ -3,6 +3,7 @@ package com.kma.shop.service.impl;
 import com.kma.shop.dto.request.OrderRequest;
 import com.kma.shop.dto.response.OrderResponse;
 import com.kma.shop.dto.response.PageResponse;
+import com.kma.shop.entity.CartItemEntity;
 import com.kma.shop.entity.OrderEntity;
 import com.kma.shop.entity.ProductEntity;
 import com.kma.shop.entity.UserEntity;
@@ -43,6 +44,17 @@ public class OrderServiceImpl implements OrderService {
         this.userService = userService;
         this.productService = productService;
         this.orderMapping = orderMapping;
+    }
+
+    @PreAuthorize("hasRole('USER')")
+    @Override
+    public float countTotalPrice(){
+        UserEntity user = userService.getCurrentUser();
+        float total_price = 0;
+        for(OrderEntity orderEntity : user.getOrders()){
+            total_price += orderEntity.getQuantity() * orderEntity.getProduct().getPrice();
+        }
+        return total_price;
     }
 
     @Override

@@ -5,11 +5,15 @@ import com.kma.shop.dto.response.OrderResponse;
 import com.kma.shop.dto.response.PageResponse;
 import com.kma.shop.entity.OrderEntity;
 import com.kma.shop.exception.AppException;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.List;
 
 public interface OrderService {
 
+
+    @PreAuthorize("hasRole('ROLE_USER')")
+    float countTotalPrice();
 
     boolean isOrderedProductByProductId(String productId);
 
