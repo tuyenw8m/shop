@@ -21,4 +21,5 @@ public class OrderResponse {
     private Status status;
     private int items_count;
     private LocalDateTime created_at;
+    private float price;
 }

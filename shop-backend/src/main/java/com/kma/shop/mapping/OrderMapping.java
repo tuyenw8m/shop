@@ -18,6 +18,7 @@ public class OrderMapping {
         if(entity == null) return null;
         return OrderResponse.builder()
                 .id(entity.getId())
+                .price(entity.getProduct().getPrice())
                 .user_id(entity.getUser().getId())
                 .product_id(entity.getProduct().getId())
                 .items_count(entity.getQuantity())
