@@ -16,6 +16,7 @@ public class CartItemResponse {
     String product_id;
     String name;
     float price;
+    float total_price;
     int quantity;
     List<String> image_url;
 }
