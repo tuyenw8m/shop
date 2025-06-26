@@ -3,18 +3,24 @@ import { Link, useNavigate } from 'react-router-dom'
 import { AuthContext } from '../../pages/contexts/AuthContext'
 import CategoryMenu from './CategoryMenu'
 import { CircleUserRound, HelpCircle, Menu, MenuSquare, Search, ShoppingCart } from 'lucide-react'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { toggleCart } from 'src/features/cartSlice'
+import { getProfileLocalStorage } from 'src/utils/utils'
+import type { User } from 'src/pages/contexts/auth.types'
+import type { RootState } from 'src/app/store'
 
 export function Header() {
-  const dispatch = useDispatch()
   const [searchQuery, setSearchQuery] = useState('')
   const [menuOpen, setMenuOpen] = useState(false)
   const [showCategoryMenu, setShowCategoryMenu] = useState(false)
   const [showProfileMenu, setShowProfileMenu] = useState(false)
   const { user, logout } = useContext(AuthContext)
+  const dispatch = useDispatch()
+  const cartState = useSelector((state: RootState) => state.cart)
+  const { total_items } = cartState
   const navigate = useNavigate()
   const profileRef = useRef<HTMLDivElement>(null)
+  const profile: User = getProfileLocalStorage()
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
@@ -90,12 +96,17 @@ export function Header() {
           {/* Actions của user */}
           <div className='flex items-center lg:w-1/4 justify-end w-full'>
             <div className='flex items-center relative' ref={profileRef}>
-              <button
-                onClick={() => setShowProfileMenu(!showProfileMenu)}
-                className='flex items-center text-teal-600 hover:bg-teal-100 text-sm p-2 rounded cursor-pointer'
-              >
-                <CircleUserRound size={20} />
-              </button>
+              {user && (
+                <button
+                  onClick={() => setShowProfileMenu(!showProfileMenu)}
+                  className='flex items-center text-teal-600 hover:bg-teal-100 text-sm p-2 rounded cursor-pointer'
+                >
+                  <CircleUserRound size={20} />
+                  <span className='hidden md:inline ml-1 text-sm overflow-hidden text-ellipsis whitespace-nowrap'>
+                    {profile.name}
+                  </span>
+                </button>
+              )}
               {user && showProfileMenu && (
                 <div className='absolute top-full right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-xl z-50'>
                   <Link
@@ -121,8 +132,14 @@ export function Header() {
                 </div>
               )}
               {!user && (
-                <Link to='/login' className='text-teal-600 hover:bg-teal-100 text-sm p-2 rounded cursor-pointer'>
-                  Đăng nhập
+                <Link
+                  to='/login'
+                  className='flex items-center text-teal-600 hover:bg-teal-100 text-sm p-2 rounded cursor-pointer'
+                >
+                  <CircleUserRound size={20} />
+                  <span className='hidden md:inline ml-1 text-sm overflow-hidden text-ellipsis whitespace-nowrap'>
+                    Đăng nhập
+                  </span>
                 </Link>
               )}
             </div>
@@ -140,7 +157,7 @@ export function Header() {
                 className='flex items-center text-teal-600 hover:bg-teal-100 text-sm p-2 relative rounded cursor-pointer'
               >
                 <span className='absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center'>
-                  0
+                  {total_items}
                 </span>
                 <ShoppingCart size={20} />
                 <span className='hidden md:inline ml-1 text-sm overflow-hidden text-ellipsis whitespace-nowrap'>

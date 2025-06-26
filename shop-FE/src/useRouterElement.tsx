@@ -62,10 +62,14 @@ export default function useRouterElement() {
     },
     {
       path: '/product/:id',
-      element: (
+      element: isLoading ? (
+        <></>
+      ) : user ? (
         <DefaultLayout>
           <ProductDetail />
         </DefaultLayout>
+      ) : (
+        <Navigate to='/login' />
       )
     },
     {
@@ -78,7 +82,9 @@ export default function useRouterElement() {
     },
     {
       path: '/cart',
-      element: user ? (
+      element: isLoading ? (
+        <></>
+      ) : user ? (
         <DefaultLayout>
           <CartPage />
         </DefaultLayout>

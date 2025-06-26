@@ -15,7 +15,6 @@ import com.kma.shop.service.interfaces.CartService;
 import com.kma.shop.service.interfaces.ProductService;
 import com.kma.shop.service.interfaces.UserService;
 import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -32,6 +31,16 @@ public class CartServiceImpl implements CartService {
     ProductService productService;
     CartItemRepo cartItemRepo;
 
+    @Override
+    public float countTotalPrice(){
+        UserEntity user = userService.getCurrentUser();
+        float total_price = 0;
+        for(CartItemEntity item : user.getCart().getItems()){
+            total_price += item.getQuantity() * item.getProduct().getPrice();
+        }
+        return total_price;
+    }
+
     public CartServiceImpl(CartRepo cartRepo, UserService userService,
                            @Qualifier("productServiceImpl") ProductService productService, CartItemRepo cartItemRepo) {
         this.cartRepo = cartRepo;
@@ -42,14 +51,18 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public CartItemResponse toCartItemResponse(CartItemEntity cart) {
-        String url = cart.getProduct().getImages().getFirst().getUrl();
+        String url = "";
+        if(cart.getProduct().getImages() != null && !cart.getProduct().getImages().isEmpty()) {
+            url = cart.getProduct().getImages().getFirst().getUrl();
+        }
         return CartItemResponse.builder()
                 .item_id(cart.getId())
                 .product_id(cart.getProduct().getId())
                 .image_url(List.of(url))
                 .name(cart.getProduct().getName())
                 .quantity(cart.getQuantity())
-                .price(cart.getQuantity() * cart.getProduct().getPrice())
+                .price(cart.getProduct().getPrice())
+                .total_price(cart.getQuantity() * cart.getProduct().getPrice())
                 .build();
     }
     @Override

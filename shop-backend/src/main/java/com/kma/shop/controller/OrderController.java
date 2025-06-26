@@ -20,6 +20,13 @@ import org.springframework.web.bind.annotation.*;
 public class OrderController{
     OrderService orderService;
 
+    @GetMapping("/count")
+    public ApiResponse<Float> countTotalPrice(){
+        return ApiResponse.<Float>builder()
+                .data(orderService.countTotalPrice())
+                .build();
+    }
+
     @PutMapping("/{id}")
     @Transactional
     public ApiResponse<OrderResponse> update(@PathVariable String id, @RequestBody StatusRequest status) throws AppException {

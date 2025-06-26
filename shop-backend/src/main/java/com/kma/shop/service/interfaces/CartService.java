@@ -10,6 +10,8 @@ import com.kma.shop.entity.UserEntity;
 import com.kma.shop.exception.AppException;
 
 public interface CartService {
+    float countTotalPrice();
+
     CartItemResponse toCartItemResponse(CartItemEntity cart);
 
     CartEntity createNewCart(UserEntity user);

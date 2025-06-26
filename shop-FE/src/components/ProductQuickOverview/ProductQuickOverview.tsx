@@ -1,8 +1,11 @@
 import { useState, useEffect, useRef, useId } from 'react'
 import { createPortal } from 'react-dom'
 import type { Product } from 'src/types/product.type'
-import { formatPrices } from 'src/utils/utils'
+import { formatPrices, getProfileLocalStorage } from 'src/utils/utils'
 import RatingProduct from '../RatingProduct/RatingProduct'
+import { useNavigate } from 'react-router-dom'
+import { useCartMutations } from 'src/hooks/useCartMutations'
+import type { User } from 'src/pages/contexts/auth.types'
 
 interface Props {
   product: Product
@@ -10,6 +13,10 @@ interface Props {
 }
 
 export default function ProductQuickOverview({ product, onClose }: Props) {
+  const navigate = useNavigate()
+  const user: User = getProfileLocalStorage()
+  const { addItemToCart } = useCartMutations(user.id)
+
   const [quantity, setQuantity] = useState(1)
   const [mounted, setMounted] = useState(false)
   const [selectedImage, setSelectedImage] = useState(0)
@@ -52,6 +59,14 @@ export default function ProductQuickOverview({ product, onClose }: Props) {
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [onClose])
+
+  const handleAddToCart = () => {
+    if (!user) {
+      navigate('/login')
+      return
+    }
+    addItemToCart.mutate({ product, quantity })
+  }
 
   if (!mounted) return null
 
@@ -169,7 +184,7 @@ export default function ProductQuickOverview({ product, onClose }: Props) {
             <div className='flex space-x-4'>
               <button
                 className='flex-1 bg-sky-600 hover:bg-sky-500 text-white py-3 px-6 rounded-lg font-bold transition-colors'
-                onClick={() => console.log('Hết tiền thêm giỏ chờ daddy', quantity)}
+                onClick={() => handleAddToCart()}
               >
                 Thêm vào giỏ
               </button>

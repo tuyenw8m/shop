@@ -1,12 +1,11 @@
-// src/types/cart.type.ts
 export interface CartItem {
-  item_id: string // ID của item trong giỏ hàng (duy nhất cho mỗi sản phẩm cụ thể trong giỏ)
-  product_id: string // ID của sản phẩm
+  item_id: string
+  product_id: string
   name: string
   price: number
   quantity: number
-  image_url: string | null
-  stock?: number // Số lượng tồn kho của sản phẩm
+  image_url: string
+  stock?: number
 }
 
 export interface CartState {
@@ -14,9 +13,9 @@ export interface CartState {
   total_items: number
   user_id: string
   items: CartItem[]
-  isOpen: boolean // Trạng thái đóng/mở của giỏ hàng preview
-  lastAddedItem: CartItem | null // Item cuối cùng được thêm vào
-  loading: boolean // Trạng thái tải dữ liệu
+  isOpen: boolean
+  lastAddedItem: CartItem | null
+  loading: boolean
 }
 
 export interface CartDataType {
@@ -33,5 +32,6 @@ export interface AddItemCart {
 
 export interface UpdateQuantity {
   item_id: string
+  product_id: string
   quantity: number
 }

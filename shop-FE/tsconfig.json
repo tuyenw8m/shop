@@ -1,11 +1,4 @@
 {
-  "compilerOptions": {
-    "jsx": "react-jsx",
-    "noEmitOnError": false,
-    "skipLibCheck": true,
-    "strict": false,
-    "noUnusedLocals": false,
-    "noUnusedParameters": false
-  },
-  "include": ["src"]
+  "files": [],
+  "references": [{ "path": "./tsconfig.app.json" }, { "path": "./tsconfig.node.json" }]
 }

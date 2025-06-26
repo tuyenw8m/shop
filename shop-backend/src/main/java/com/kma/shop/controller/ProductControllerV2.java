@@ -38,7 +38,7 @@ public class ProductControllerV2 {
 
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
-    @Transactional
+
     public ApiResponse<ProductResponseV2> update
             (@PathVariable String id, @ModelAttribute ProductCreationRequest request) throws AppException {
         return ApiResponse.<ProductResponseV2>builder()

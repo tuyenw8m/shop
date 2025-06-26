@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom'
 import { toggleCart } from 'src/features/cartSlice'
 import { formatPrices, getProfileLocalStorage } from 'src/utils/utils'
 import { useCartQuery } from 'src/hooks/useCartQuery'
+import type { CartItem } from 'src/types/cart.type'
 
 export default function ReviewCart() {
   const userProfile = getProfileLocalStorage()
@@ -46,11 +47,11 @@ export default function ReviewCart() {
                 </div>
               ) : (
                 <div className='p-4 space-y-3'>
-                  {items.slice(-3).map((item) => (
+                  {items.slice(-3).map((item: CartItem) => (
                     <div key={item.item_id} className='flex items-center space-x-3 p-2 hover:bg-gray-50 rounded-lg'>
                       <div className='w-12 h-12 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0'>
                         <img
-                          src='https://i.pinimg.com/736x/b6/14/28/b614286ef52de836895c9855796e3e84.jpg'
+                          src={item?.image_url[0]}
                           alt={item.name}
                           width={48}
                           height={48}

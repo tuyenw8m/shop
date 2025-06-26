@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { ChevronDown, ChevronUp } from 'lucide-react'
-import { sortBy } from 'src/constant/sort.constant'
 import { createSearchParams, useNavigate } from 'react-router-dom'
 import type { ProductSearchParamsConfig, ProductSearchParams } from 'src/types/product.type'
 import React from 'react'
+import { sortBy } from 'src/constant/sort.constant'
 
 interface ProductSortDropdownProps {
   productSearchParam: ProductSearchParamsConfig
