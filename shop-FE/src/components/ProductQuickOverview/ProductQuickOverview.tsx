@@ -14,8 +14,8 @@ interface Props {
 
 export default function ProductQuickOverview({ product, onClose }: Props) {
   const navigate = useNavigate()
-  const user: User = getProfileLocalStorage()
-  const { addItemToCart } = useCartMutations(user.id)
+  const user: User | null = getProfileLocalStorage()
+  const { addItemToCart } = useCartMutations(user?.id)
 
   const [quantity, setQuantity] = useState(1)
   const [mounted, setMounted] = useState(false)
@@ -66,6 +66,15 @@ export default function ProductQuickOverview({ product, onClose }: Props) {
       return
     }
     addItemToCart.mutate({ product, quantity })
+  }
+
+  const handleBuyNow = () => {
+    if (!user) {
+      navigate('/login')
+      return
+    }
+    // Navigate to checkout or cart page
+    navigate('/cart')
   }
 
   if (!mounted) return null
@@ -190,7 +199,7 @@ export default function ProductQuickOverview({ product, onClose }: Props) {
               </button>
               <button
                 className='flex-1 bg-red-600 hover:bg-red-700 text-white py-3 px-6 rounded-lg font-bold transition-colors'
-                onClick={() => console.log('Mua cho anh iu', quantity)}
+                onClick={() => handleBuyNow()}
               >
                 Mua ngay
               </button>
