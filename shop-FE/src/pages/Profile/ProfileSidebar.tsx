@@ -2,12 +2,11 @@ import { type ProfileUser, type TabType } from './types';
 
 interface ProfileSidebarProps {
   profileData: ProfileUser;
-  avatarPreview: string | null;
   activeTab: TabType;
   setActiveTab: React.Dispatch<React.SetStateAction<TabType>>;
 }
 
-export default function ProfileSidebar({ profileData, avatarPreview, activeTab, setActiveTab }: ProfileSidebarProps) {
+export default function ProfileSidebar({ profileData, activeTab, setActiveTab }: ProfileSidebarProps) {
   const maskEmail = (email: string) => {
     const [name, domain] = email.split('@');
     if (name.length <= 2) return email;
@@ -18,7 +17,7 @@ export default function ProfileSidebar({ profileData, avatarPreview, activeTab, 
     <div className="w-1/5 bg-white p-4 shadow">
       <div className="flex flex-col items-center mb-6">
         <img
-          src={avatarPreview || profileData.avatar_url || '/path-to-avatar.jpg'}
+          src={profileData.avatar_url || '/path-to-avatar.jpg'}
           alt="Avatar"
           className="w-16 h-16 rounded-full mb-2 object-cover"
         />

@@ -7,6 +7,7 @@ export interface ProfileUser {
   birthDate?: string;
   avatar_url?: string;
   address?: string;
+  phone?: string;
   bankName?: string;
   accountNumber?: string;
   accountHolder?: string;
@@ -41,4 +42,4 @@ export interface Notification {
   read: boolean;
 }
 
-export type TabType = 'notifications' | 'account' | 'purchase' | 'waitingPayment' | 'shipping' | 'waitingDelivery' | 'completed' | 'cancelled' | 'returned' | 'bank' | 'address' | 'password';
+export type TabType = 'notifications' | 'account' | 'purchase' | 'waitingPayment' | 'shipping' | 'waitingDelivery' | 'completed' | 'cancelled' | 'returned' | 'bank' | 'address' | 'password' | 'cart';
