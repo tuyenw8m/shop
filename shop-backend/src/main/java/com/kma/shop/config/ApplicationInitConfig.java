@@ -9,6 +9,7 @@ import com.kma.shop.repo.AuthorityRepo;
 import com.kma.shop.repo.RoleRepo;
 import com.kma.shop.repo.UserRepo;
 import com.kma.shop.utils.generatedata.*;
+import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -20,7 +21,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.HashSet;
 import java.util.Set;
 
-@Configuration(proxyBeanMethods=false)
+@Configuration
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ApplicationInitConfig {
@@ -34,6 +35,7 @@ public class ApplicationInitConfig {
 
 
     @Bean
+    @Transactional
     ApplicationRunner applicationRunner(UserRepo userRepo, RoleRepo roleRepo, AuthorityRepo authorityRepo ) throws AppException {
 
         System.err.println("AAAAA");
@@ -70,10 +72,11 @@ public class ApplicationInitConfig {
             userRepo.save(user);
         }
         System.err.println("ERR");
+        generateUserData.generate();
         generateBranchData.generate();
         generateCommonData.generate();
         generateProductData.generate();
-        generateUserData.generate();
+
         generateOrderData.generate();
         generateReviewData.generate();
         return args->{
