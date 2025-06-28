@@ -42,3 +42,22 @@ export function getCategoryStyle(index: number) {
 export function salePercent(priceOriginal: number, price: number) {
   return Math.round(((priceOriginal - price) / priceOriginal) * 100)
 }
+
+export const formatDateFromNow = (dateString: string | Date): string => {
+  const date = new Date(dateString)
+  const now = new Date()
+
+  const diffTime = Math.abs(now.getTime() - date.getTime())
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+  const diffMonths = Math.floor(diffDays / 30)
+
+  const formattedDate = date.toLocaleDateString('vi-VN')
+
+  if (diffMonths > 0) {
+    return `${diffMonths} tháng trước - (${formattedDate})`
+  } else if (diffDays > 0) {
+    return `${diffDays} ngày trước - (${formattedDate})`
+  } else {
+    return `Hôm nay (${formattedDate})`
+  }
+}
