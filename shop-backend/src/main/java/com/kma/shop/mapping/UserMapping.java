@@ -26,7 +26,7 @@ public class UserMapping {
 
     public UserEntity buildUserBase(String email, String phone, String name, String password, String address, String imageLink, Set<RoleEntity> roles){
 
-        UserEntity user = UserEntity.builder()
+        return UserEntity.builder()
                 .email(email)
                 .phone(phone)
                 .name(name)
@@ -35,10 +35,6 @@ public class UserMapping {
                 .address(address)
                 .roles(roles)
                 .build();
-        roles.forEach(role ->{
-            role.getUsers().add(user);
-        });
-        return user;
     }
 
     public UserCreationRequest toUserCreation(EmailCreationTemporaryEntity request){
