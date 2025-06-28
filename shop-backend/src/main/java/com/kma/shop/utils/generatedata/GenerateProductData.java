@@ -17,6 +17,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
+import java.util.Map;
 
 @Component
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -208,50 +209,124 @@ public class GenerateProductData {
     }
 
     private String generateProductName(String parentName, String childName) {
-        List<String> brands = Arrays.asList("Sony", "Canon", "Nikon", "Asus", "Dell", "HP", "MSI", "Gigabyte", "Intel", "AMD", "Corsair", "Samsung", "Kingston");
-        List<String> models = Arrays.asList("Alpha", "Pro", "Elite", "Z", "X", "Gamer", "Ultra", "Neo", "Core", "Max", "Prime", "Vivid", "Turbo");
+        // Realistic brand names for different categories
+        Map<String, List<String>> categoryBrands = Map.of(
+            "Camera", Arrays.asList("Canon", "Sony", "Nikon", "GoPro", "Panasonic", "Fujifilm", "Hikvision", "Dahua", "Logitech", "Razer"),
+            "Máy tính", Arrays.asList("Dell", "HP", "Lenovo", "Asus", "Acer", "MSI", "Apple", "Gigabyte", "Samsung", "LG"),
+            "Linh kiện", Arrays.asList("Intel", "AMD", "NVIDIA", "Corsair", "Kingston", "G.Skill", "ASRock", "Gigabyte", "Cooler Master", "NZXT", "Seagate", "Western Digital")
+        );
+
+        // Model series for different categories
+        Map<String, List<String>> categoryModels = Map.of(
+            "Camera", Arrays.asList("EOS", "Alpha", "D", "Hero", "Lumix", "X-T", "DS-2CD", "IPC", "C920", "Kiyo"),
+            "Máy tính", Arrays.asList("Inspiron", "Pavilion", "ThinkPad", "VivoBook", "Aspire", "GE", "MacBook", "AORUS", "Galaxy", "Gram"),
+            "Linh kiện", Arrays.asList("Core i", "Ryzen", "GeForce", "Vengeance", "HyperX", "Ripjaws", "B", "AORUS", "Hyper", "H510", "Barracuda", "Blue")
+        );
+
+        List<String> brands = categoryBrands.getOrDefault(parentName, Arrays.asList("Tech", "Pro", "Elite"));
+        List<String> models = categoryModels.getOrDefault(parentName, Arrays.asList("Series", "Pro", "Elite"));
 
         String brand = brands.get(random.nextInt(brands.size()));
         String model = models.get(random.nextInt(models.size()));
-        String suffix = switch (parentName) {
+        
+        // Generate realistic model numbers based on category and child category
+        String modelNumber = generateModelNumber(parentName, childName);
+        
+        return brand + " " + model + " " + modelNumber;
+    }
+
+    private String generateModelNumber(String parentName, String childName) {
+        return switch (parentName) {
             case "Camera" -> switch (childName) {
-                case "Camera hành động" -> "Act" + random.nextInt(100);
-                case "Camera chuyên nghiệp" -> "Pro" + random.nextInt(1000);
-                case "Webcam" -> "Web" + random.nextInt(50);
-                case "Camera an ninh/IP" -> "IP" + random.nextInt(200);
-                case "Camera hành trình" -> "Dash" + random.nextInt(300);
-                default -> "Cam" + random.nextInt(100);
+                case "Camera hành động" -> "Hero" + (random.nextInt(10) + 8); // Hero 8-17
+                case "Camera chuyên nghiệp" -> "EOS R" + (random.nextInt(5) + 5); // EOS R5-R10
+                case "Webcam" -> "C" + (random.nextInt(900) + 100); // C100-C999
+                case "Camera an ninh/IP" -> "DS-2CD" + (random.nextInt(2000) + 1000); // DS-2CD1000-2999
+                case "Camera hành trình" -> "Dash" + (random.nextInt(5) + 1); // Dash 1-5
+                default -> "Cam" + (random.nextInt(100) + 1); // Cam 1-100
             };
             case "Máy tính" -> switch (childName) {
-                case "PC gaming" -> "Game" + random.nextInt(500);
-                case "PC đồ họa / workstation" -> "Work" + random.nextInt(200);
-                case "Mini PC" -> "Mini" + random.nextInt(100);
-                case "PC để bàn" -> "Desk" + random.nextInt(300);
-                case "Laptop" -> "Lap" + random.nextInt(400);
-                default -> "PC" + random.nextInt(100);
+                case "PC gaming" -> "GE" + (random.nextInt(70) + 60); // GE60-GE129
+                case "PC đồ họa / workstation" -> "Precision" + (random.nextInt(5000) + 3000); // Precision3000-7999
+                case "Mini PC" -> "NUC" + (random.nextInt(10) + 10); // NUC10-NUC19
+                case "PC để bàn" -> "Inspiron" + (random.nextInt(5000) + 3000); // Inspiron3000-7999
+                case "Laptop" -> switch (random.nextInt(3)) {
+                    case 0 -> "ThinkPad T" + (random.nextInt(10) + 14); // ThinkPad T14-T23
+                    case 1 -> "MacBook " + (random.nextBoolean() ? "Air" : "Pro");
+                    case 2 -> "VivoBook S" + (random.nextInt(10) + 14); // VivoBook S14-S23
+                    default -> "Laptop" + (random.nextInt(100) + 1);
+                };
+                default -> "PC" + (random.nextInt(100) + 1); // PC 1-100
             };
             case "Linh kiện" -> switch (childName) {
-                case "Case" -> "C" + random.nextInt(50);
-                case "Tản nhiệt" -> "Cool" + random.nextInt(60);
-                case "PSU" -> "PSU" + random.nextInt(700);
-                case "GPU" -> "GPU" + random.nextInt(800);
-                case "Mainboard" -> "MB" + random.nextInt(300);
-                case "SSD/HDD" -> "Drive" + random.nextInt(200);
-                case "RAM" -> "RAM" + random.nextInt(16);
-                case "CPU" -> "CPU" + random.nextInt(9);
-                default -> "Comp" + random.nextInt(100);
+                case "Case" -> "H" + (random.nextInt(500) + 100); // H100-H599
+                case "Tản nhiệt" -> "Hyper" + (random.nextInt(200) + 100); // Hyper100-Hyper299
+                case "PSU" -> "RM" + (random.nextInt(800) + 200); // RM200-RM999
+                case "GPU" -> "RTX " + (random.nextInt(4000) + 3000); // RTX 3000-6999
+                case "Mainboard" -> "B" + (random.nextInt(600) + 400) + "M"; // B400M-B999M
+                case "SSD/HDD" -> random.nextBoolean() ? 
+                    "SSD" + (random.nextInt(1000) + 500) : // SSD500-SSD1499
+                    "WD" + (random.nextInt(1000) + 1000); // WD1000-WD1999
+                case "RAM" -> (random.nextInt(32) + 8) + "GB"; // 8GB-39GB
+                case "CPU" -> switch (random.nextInt(2)) {
+                    case 0 -> "i" + (random.nextInt(5) + 5) + "-" + (random.nextInt(1000) + 1000); // i5-1000 to i9-1999
+                    case 1 -> "Ryzen " + (random.nextInt(5) + 5) + " " + (random.nextInt(1000) + 1000); // Ryzen 5 1000 to Ryzen 9 1999
+                    default -> "CPU" + (random.nextInt(100) + 1);
+                };
+                default -> "Comp" + (random.nextInt(100) + 1); // Comp 1-100
             };
-            default -> "Product" + random.nextInt(1000);
+            default -> "Product" + (random.nextInt(1000) + 1); // Product 1-1000
         };
-        return brand + " " + model + " " + suffix;
     }
 
     private float generatePrice(String parentName) {
         return switch (parentName) {
-            case "Camera" -> 5000000 + random.nextFloat() * 25000000; // 5M - 30M VND
-            case "Máy tính" -> 10000000 + random.nextFloat() * 40000000; // 10M - 50M VND
-            case "Linh kiện" -> 500000 + random.nextFloat() * 15000000; // 0.5M - 15.5M VND
+            case "Camera" -> generateCameraPrice();
+            case "Máy tính" -> generateComputerPrice();
+            case "Linh kiện" -> generateComponentPrice();
             default -> 1000000 + random.nextFloat() * 10000000; // 1M - 11M VND
+        };
+    }
+
+    private float generateCameraPrice() {
+        // Camera prices vary significantly by type
+        int type = random.nextInt(5);
+        return switch (type) {
+            case 0 -> 1500000 + random.nextFloat() * 3500000; // Webcam: 1.5M - 5M VND
+            case 1 -> 3000000 + random.nextFloat() * 7000000; // Action camera: 3M - 10M VND
+            case 2 -> 8000000 + random.nextFloat() * 12000000; // Security camera: 8M - 20M VND
+            case 3 -> 15000000 + random.nextFloat() * 25000000; // Professional camera: 15M - 40M VND
+            case 4 -> 5000000 + random.nextFloat() * 8000000; // Dash cam: 5M - 13M VND
+            default -> 2000000 + random.nextFloat() * 5000000; // General camera: 2M - 7M VND
+        };
+    }
+
+    private float generateComputerPrice() {
+        // Computer prices vary by type
+        int type = random.nextInt(5);
+        return switch (type) {
+            case 0 -> 8000000 + random.nextFloat() * 12000000; // Mini PC: 8M - 20M VND
+            case 1 -> 12000000 + random.nextFloat() * 18000000; // Desktop PC: 12M - 30M VND
+            case 2 -> 15000000 + random.nextFloat() * 25000000; // Laptop: 15M - 40M VND
+            case 3 -> 25000000 + random.nextFloat() * 35000000; // Gaming PC: 25M - 60M VND
+            case 4 -> 30000000 + random.nextFloat() * 50000000; // Workstation: 30M - 80M VND
+            default -> 15000000 + random.nextFloat() * 20000000; // General computer: 15M - 35M VND
+        };
+    }
+
+    private float generateComponentPrice() {
+        // Component prices vary significantly by type
+        int type = random.nextInt(8);
+        return switch (type) {
+            case 0 -> 800000 + random.nextFloat() * 1200000; // Case: 800K - 2M VND
+            case 1 -> 500000 + random.nextFloat() * 1500000; // Cooling: 500K - 2M VND
+            case 2 -> 1500000 + random.nextFloat() * 3000000; // PSU: 1.5M - 4.5M VND
+            case 3 -> 8000000 + random.nextFloat() * 15000000; // GPU: 8M - 23M VND
+            case 4 -> 2000000 + random.nextFloat() * 4000000; // Mainboard: 2M - 6M VND
+            case 5 -> 1000000 + random.nextFloat() * 3000000; // Storage: 1M - 4M VND
+            case 6 -> 1500000 + random.nextFloat() * 4000000; // RAM: 1.5M - 5.5M VND
+            case 7 -> 3000000 + random.nextFloat() * 8000000; // CPU: 3M - 11M VND
+            default -> 1000000 + random.nextFloat() * 2000000; // General component: 1M - 3M VND
         };
     }
 
@@ -339,9 +414,7 @@ public class GenerateProductData {
                     break;
                 case "Máy tính":
                     switch (childName) {
-                        case "PC gaming":
-                            baseDescription = "Đắm chìm vào thế giới game với hiệu năng đỉnh cao. Chiếc PC này được trang bị card đồ họa mạnh mẽ, bộ xử lý tiên tiến và hệ thống tản nhiệt tối ưu, đảm bảo trải nghiệm chơi game mượt mà, không giật lag ngay cả với các tựa game đồ họa nặng nhất. Thiết kế hầm hố, phong cách.";
-                            break;
+                        case "PC gaming" -> baseDescription = "Đắm chìm vào thế giới game với hiệu năng đỉnh cao. Chiếc PC này được trang bị card đồ họa mạnh mẽ, bộ xử lý tiên tiến và hệ thống tản nhiệt tối ưu, đảm bảo trải nghiệm chơi game mượt mà, không giật lag ngay cả với các tựa game đồ họa nặng nhất. Thiết kế hầm hố, phong cách.";
                         case "PC đồ họa / workstation":
                             baseDescription = "Sức mạnh vượt trội cho các tác vụ đòi hỏi hiệu năng cao như thiết kế đồ họa, dựng phim 3D, hoặc phân tích dữ liệu. Với CPU đa nhân, dung lượng RAM lớn và ổ cứng tốc độ cao, máy tính này là công cụ lý tưởng cho các chuyên gia sáng tạo và kỹ thuật.";
                             break;
@@ -411,7 +484,7 @@ public class GenerateProductData {
                 case "Máy tính" -> switch (childName) {
                     case "PC gaming" -> "Những cỗ máy này được thiết kế để đạt hiệu suất chơi game cao nhất. Chúng có các đơn vị GPU chuyên dụng mạnh mẽ như dòng NVIDIA GeForce RTX cho hình ảnh tuyệt đẹp và dò tia, dung lượng RAM tốc độ cao dồi dào 16GB (hoặc hơn) để đa nhiệm mượt mà, và thường là hệ thống tản nhiệt nước tiên tiến (AIO hoặc vòng lặp tùy chỉnh) để duy trì nhiệt độ tối ưu trong các phiên chơi game cường độ cao. Hỗ trợ màn hình tần số quét cao, đèn RGB tùy chỉnh, và lưu trữ SSD nhanh cũng phổ biến.";
                     case "PC đồ họa / workstation" -> "Được xây dựng cho các tác vụ sáng tạo và chuyên nghiệp đòi hỏi khắt khe. Chúng thường chứa các CPU đa nhân với 12 nhân trở lên (ví dụ: Intel i9, AMD Ryzen 9, Threadripper) cho việc dựng hình nặng và tính toán phức tạp. Chúng được trang bị RAM ECC 32GB (hoặc hơn) đáng kể cho sự ổn định và sửa lỗi, và SSD NVMe 1TB (hoặc lớn hơn) cực nhanh để truy cập tệp và tải ứng dụng nhanh chóng. Các GPU chuyên nghiệp (NVIDIA Quadro, AMD Radeon Pro) và bộ nguồn mạnh mẽ cũng là tiêu chuẩn.";
-                    case "Mini PC" -> "Ưu tiên thiết kế tiết kiệm không gian, chúng cực kỳ nhỏ gọn và tiết kiệm năng lượng, làm cho chúng lý tưởng cho không gian làm việc nhỏ hoặc thiết lập rạp hát gia đình. Mặc dù có kích thước nhỏ, chúng thường đi kèm với 8GB RAM đáng nể và một ổ SSD cho thời gian khởi động nhanh và hiệu suất đáp ứng cho các tác vụ hàng ngày và tiêu thụ đa phương tiện. Nhiều loại cung cấp khả năng tương thích với giá treo VESA.";
+                    case "Mini PC" -> "Ưu tiên thiết kế tiết kiệm không gian, chúng cực kỳ nhỏ gọn và tiết kiệm năng lượng, làm cho chúng lý tưởng cho các thiết lập tối giản hoặc HTPC.";
                     case "PC để bàn" -> "Lựa chọn cổ điển cho điện toán nói chung, mang lại hiệu suất ổn định và khả năng nâng cấp tuyệt vời. Chúng thường bao gồm một ổ SSD 512GB cho hệ điều hành và các ứng dụng thường dùng, thường được ghép nối với một ổ HDD lớn hơn để lưu trữ dữ liệu lớn. Thiết kế mô-đun của chúng cho phép dễ dàng thay thế và thêm các thành phần, làm cho chúng trở thành một lựa chọn linh hoạt cho nhiều người dùng.";
                     case "Laptop" -> "Nhấn mạnh tính di động và chức năng tích hợp. Các tính năng phổ biến bao gồm màn hình Full HD 15.6 inch cho sự cân bằng giữa không gian màn hình và tính di động, pin lâu dài (ví dụ: 8 giờ trở lên) cho năng suất khi di chuyển, và thiết kế nhẹ (thường dưới 2kg) để dễ dàng vận chuyển. Chúng thường tích hợp webcam, micrô và Wi-Fi cho khả năng kết nối toàn diện.";
                     default -> "Nói chung, cung cấp cấu hình linh hoạt để đáp ứng nhiều nhu cầu người dùng khác nhau và mang lại hiệu suất tổng thể cao cho các tác vụ điện toán nói chung.";
@@ -422,10 +495,10 @@ public class GenerateProductData {
                     case "PSU" -> "Trái tim của hệ thống của bạn, một bộ nguồn tốt cung cấp năng lượng ổn định. Các tính năng bao gồm công suất đầu ra cao 650W (hoặc hơn) để hỗ trợ các thành phần mạnh mẽ, xếp hạng hiệu suất 80+ Gold (hoặc cao hơn) để giảm lãng phí năng lượng và nhiệt, và thiết kế mô-đun cho phép người dùng chỉ kết nối các cáp cần thiết, cải thiện luồng không khí và tính thẩm mỹ.";
                     case "GPU" -> "Động cơ xử lý hình ảnh, các GPU hiện đại đi kèm với 8GB (hoặc hơn) bộ nhớ video GDDR6 (hoặc GDDR6X), cung cấp các tính năng tiên tiến như dò tia (Ray Tracing) cho ánh sáng và bóng đổ chân thực, và được tối ưu hóa cho chơi game 1440p (2K) hoặc 4K. Chúng cũng hỗ trợ nhiều đầu ra hiển thị và các giải pháp tản nhiệt tiên tiến.";
                     case "Mainboard" -> "Xương sống kết nối tất cả các thành phần. Các tính năng chính bao gồm hỗ trợ RAM DDR4 (hoặc DDR5), các khe cắm PCIe 4.0 (hoặc 5.0) cho GPU và SSD NVMe tốc độ cao, và Wi-Fi 6 (hoặc 6E) tích hợp cho mạng không dây nhanh, đáng tin cậy. Chúng cũng cung cấp nhiều khe cắm M.2, cổng USB 3.2 và VRM mạnh mẽ để cung cấp năng lượng ổn định cho CPU.";
-                    case "SSD/HDD" -> "Các giải pháp lưu trữ khác nhau về tốc độ và dung lượng. SSD (Ổ đĩa trạng thái rắn) cung cấp tốc độ đọc/ghi cực nhanh (ví dụ: 3500MB/s cho NVMe), lý tưởng cho hệ điều hành và các ứng dụng được truy cập thường xuyên. HDD (Ổ đĩa cứng) cung cấp dung lượng lớn (ví dụ: 1TB trở lên) với chi phí mỗi gigabyte thấp hơn, phù hợp cho lưu trữ dữ liệu lớn. SSD có nhiều giao diện khác nhau như NVMe và SATA.";
-                    case "RAM" -> "Quan trọng cho đa nhiệm và hiệu suất ứng dụng. Các tính năng điển hình bao gồm 16GB (hoặc hơn) RAM DDR4 (hoặc DDR5), chạy ở tốc độ cao 3200MHz (hoặc cao hơn), và độ trễ CAS thấp (CL16 hoặc thấp hơn) để phản hồi tốt hơn. Có sẵn với nhiều dung lượng khác nhau và thường có đèn RGB.";
-                    case "CPU" -> "Là 'bộ não' của máy tính. Các CPU hiện đại tự hào với 8 nhân và 16 luồng (hoặc hơn) cho khả năng đa nhiệm và xử lý tuyệt vời, với tốc độ xung nhịp tăng cường 4.5GHz (hoặc cao hơn) cho hiệu suất đơn luồng. Chúng đi kèm với đồ họa tích hợp (trên một số mẫu) và các kích thước bộ nhớ đệm khác nhau.";
-                    default -> "Nói chung, cung cấp hiệu suất cao và khả năng tương thích rộng rãi với các thành phần hệ thống khác, đảm bảo một bản dựng đáng tin cậy.";
+                    case "SSD/HDD" -> "SSD NVMe M.2 1TB với tốc độ đọc tuần tự lên đến 3500MB/s và tốc độ ghi lên đến 3000MB/s. Đối với HDD, thường có dung lượng 1TB với tốc độ trục quay 7200 RPM và giao diện SATA 6Gb/s.";
+                    case "RAM" -> "Bộ kit DDR4 16GB (2x8GB), chạy ở tần số 3200MHz, với độ trễ CAS (CL) là 16, và non-ECC unbuffered.";
+                    case "CPU" -> "8 nhân và 16 luồng, được xây dựng trên tiến trình 7nm (hoặc 10nm/Intel 7), với xung nhịp cơ bản 3.8GHz và xung nhịp tăng cường lên đến 4.5GHz, và TDP 65W.";
+                    default -> "Nói chung, cung cấp khả năng tương thích cao trên nhiều hệ thống khác nhau và mang lại hiệu suất ổn định cho danh mục của nó.";
                 };
                 default -> "Tính năng đa dạng, phù hợp mọi nhu cầu và mang lại trải nghiệm người dùng tối ưu.";
             };
@@ -497,13 +570,59 @@ public class GenerateProductData {
         };
     }
     private String generatePromotions() {
-        List<String> promotions = Arrays.asList(
-                "Giảm 5% khi mua online",
-                "Tặng kèm phụ kiện khi mua trong tuần",
-                "Miễn phí vận chuyển toàn quốc",
-                "Giảm 10% khi mua combo",
-                "Bảo hành mở rộng 24 tháng"
+        // Realistic promotions based on product type and season
+        List<String> generalPromotions = Arrays.asList(
+            "🎉 Giảm giá 5% khi mua online",
+            "🚚 Miễn phí vận chuyển toàn quốc",
+            "🎁 Tặng kèm phụ kiện trị giá 500K",
+            "💳 Giảm thêm 3% khi thanh toán qua thẻ",
+            "📱 Giảm 10% khi mua qua app",
+            "⭐ Giảm 15% cho khách hàng VIP",
+            "🎯 Giảm giá sốc cuối tuần",
+            "🔥 Flash sale - Giảm đến 20%",
+            "🎊 Khuyến mãi sinh nhật - Giảm 10%",
+            "💎 Giảm giá đặc biệt cho combo"
         );
-        return promotions.get(random.nextInt(promotions.size()));
+
+        List<String> techPromotions = Arrays.asList(
+            "🔧 Bảo hành mở rộng 24 tháng",
+            "⚡ Tặng gói bảo trì 1 năm",
+            "🎮 Tặng game key trị giá 1 triệu",
+            "💻 Tặng kèm chuột gaming cao cấp",
+            "🎧 Tặng tai nghe bluetooth",
+            "📦 Tặng balo laptop chống sốc",
+            "🔌 Tặng bộ cáp kết nối đầy đủ",
+            "🛡️ Tặng gói bảo mật 1 năm",
+            "🎯 Tặng voucher mua hàng 500K",
+            "🌟 Tặng gói cài đặt phần mềm"
+        );
+
+        List<String> seasonalPromotions = Arrays.asList(
+            "🎓 Giảm 10% cho sinh viên",
+            "👨‍💼 Giảm 8% cho doanh nghiệp",
+            "👨‍👩‍👧‍👦 Giảm 12% cho gia đình",
+            "🎉 Giảm giá Black Friday",
+            "🎄 Giảm giá Giáng sinh",
+            "🎊 Giảm giá Tết nguyên đán",
+            "🌺 Giảm giá mùa hè",
+            "🍂 Giảm giá mùa thu",
+            "❄️ Giảm giá mùa đông",
+            "🌸 Giảm giá mùa xuân"
+        );
+
+        // Combine different types of promotions
+        List<String> allPromotions = new ArrayList<>();
+        allPromotions.addAll(generalPromotions);
+        allPromotions.addAll(techPromotions);
+        allPromotions.addAll(seasonalPromotions);
+
+        // Sometimes generate multiple promotions
+        if (random.nextInt(100) < 30) { // 30% chance for multiple promotions
+            String promo1 = allPromotions.get(random.nextInt(allPromotions.size()));
+            String promo2 = allPromotions.get(random.nextInt(allPromotions.size()));
+            return promo1 + " | " + promo2;
+        } else {
+            return allPromotions.get(random.nextInt(allPromotions.size()));
+        }
     }
 }
