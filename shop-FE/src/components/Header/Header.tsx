@@ -117,7 +117,7 @@ export function Header() {
                     Hồ sơ
                   </Link>
                   <Link
-                    to='/orders'
+                    to='/profile'
                     className='block px-4 py-2 text-sm text-gray-700 hover:bg-teal-100 hover:text-teal-600'
                     onClick={() => setShowProfileMenu(false)}
                   >
