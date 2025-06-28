@@ -414,7 +414,9 @@ public class GenerateProductData {
                     break;
                 case "Máy tính":
                     switch (childName) {
-                        case "PC gaming" -> baseDescription = "Đắm chìm vào thế giới game với hiệu năng đỉnh cao. Chiếc PC này được trang bị card đồ họa mạnh mẽ, bộ xử lý tiên tiến và hệ thống tản nhiệt tối ưu, đảm bảo trải nghiệm chơi game mượt mà, không giật lag ngay cả với các tựa game đồ họa nặng nhất. Thiết kế hầm hố, phong cách.";
+                        case "PC gaming":
+                            baseDescription = "Đắm chìm vào thế giới game với hiệu năng đỉnh cao. Chiếc PC này được trang bị card đồ họa mạnh mẽ, bộ xử lý tiên tiến và hệ thống tản nhiệt tối ưu, đảm bảo trải nghiệm chơi game mượt mà, không giật lag ngay cả với các tựa game đồ họa nặng nhất. Thiết kế hầm hố, phong cách.";
+                            break;
                         case "PC đồ họa / workstation":
                             baseDescription = "Sức mạnh vượt trội cho các tác vụ đòi hỏi hiệu năng cao như thiết kế đồ họa, dựng phim 3D, hoặc phân tích dữ liệu. Với CPU đa nhân, dung lượng RAM lớn và ổ cứng tốc độ cao, máy tính này là công cụ lý tưởng cho các chuyên gia sáng tạo và kỹ thuật.";
                             break;
