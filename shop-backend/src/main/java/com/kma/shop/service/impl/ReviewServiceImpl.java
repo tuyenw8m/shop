@@ -6,14 +6,12 @@ import com.kma.shop.dto.response.ReviewResponse;
 import com.kma.shop.entity.*;
 import com.kma.shop.exception.AppException;
 import com.kma.shop.exception.ErrorCode;
-import com.kma.shop.mapping.ProductMapping;
 import com.kma.shop.repo.ReviewRepo;
 import com.kma.shop.service.interfaces.*;
 import com.kma.shop.specification.ReviewSpecification;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -41,6 +39,11 @@ public class ReviewServiceImpl implements ReviewService{
         this.imageService = imageService;
         this.productServiceV2 = productServiceV2;
         this.orderService = orderService;
+    }
+
+    @Override
+    public long count(){
+        return repo.count();
     }
 
     //create review for product is ordered

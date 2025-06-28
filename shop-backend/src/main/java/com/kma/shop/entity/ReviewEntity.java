@@ -16,8 +16,10 @@ public class ReviewEntity extends  FormEntity {
     private int rating;
     private String comment;
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
     UserEntity user;
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id")
     ProductEntity product;
     @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
     List<ImageEntity> imagesV1;

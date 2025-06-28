@@ -8,6 +8,8 @@ import com.kma.shop.exception.AppException;
 import jakarta.transaction.Transactional;
 
 public interface ReviewService {
+    long count();
+
     //create review for product is ordered
     ReviewResponse create(String productId, ReviewCreationRequest request) throws AppException;
 

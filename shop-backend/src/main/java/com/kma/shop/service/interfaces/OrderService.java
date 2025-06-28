@@ -12,6 +12,8 @@ import java.util.List;
 public interface OrderService {
 
 
+    long count();
+
     @PreAuthorize("hasRole('ROLE_USER')")
     float countTotalPrice();
 

@@ -30,5 +30,6 @@ public class OrderEntity extends FormEntity{
     Status status = Status.PENDING;
     float soldPrice;
     float primaryPrice;
+    float price;
 
 }

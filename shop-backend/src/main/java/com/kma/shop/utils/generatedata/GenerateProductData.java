@@ -34,7 +34,7 @@ public class GenerateProductData {
 
     @Transactional // Quan trọng để đảm bảo tất cả các thao tác lưu đều nằm trong một transaction
     public void generate() throws AppException {
-        if (productServiceV2.count() < 20) {
+        if (productServiceV2.count() < 1) {
             List<ParentCategoryEntity> parents = categoryServiceV2.findAllParents();
             if (parents.isEmpty()) {
                 throw new AppException(ErrorCode.CATEGORY_NOT_FOUND);
@@ -67,7 +67,7 @@ public class GenerateProductData {
 
     // Đổi tên phương thức để rõ ràng hơn rằng nó tạo sản phẩm cho một Parent Category
     private void generateProductsForParentCategory(ParentCategoryEntity parent, List<ChildCategoryEntity> childCategoriesOfParent, List<BranchEntity> availableBranches) throws AppException {
-        int numberOfProducts = random.nextInt(3) + 3; // Generate 3-5 products for this parent's ecosystem
+        int numberOfProducts = random.nextInt(3) + 50; // Generate 3-5 products for this parent's ecosystem
         System.out.println("Generating " + numberOfProducts + " products for parent category: " + parent.getName());
 
         for (int i = 0; i < numberOfProducts; i++) {
@@ -305,9 +305,8 @@ public class GenerateProductData {
                 "https://i.pinimg.com/736x/94/ce/4e/94ce4ed0f49d59f829cfb3195b6403a9.jpg",
                 "https://i.pinimg.com/736x/28/91/eb/2891ebd512688a0dd1b056a1375c3367.jpg",
                 "https://i.pinimg.com/736x/8c/30/3d/8c303de9ece18fb1de2d91879306f988.jpg",
-                "https://i.pinimg.com/736x/29/f3/99/29f399aec2699d49113314f1e96d5063.jpg",
-                "https://unsplash.com/photos/a-laptop-computer-sitting-on-top-of-a-wooden-table-6RqSDGaNJ5c"
-        );
+                "https://i.pinimg.com/736x/29/f3/99/29f399aec2699d49113314f1e96d5063.jpg"
+                );
         return links.get(random.nextInt(links.size()));
     }
 

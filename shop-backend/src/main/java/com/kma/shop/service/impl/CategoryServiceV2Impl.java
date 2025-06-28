@@ -9,7 +9,6 @@ import com.kma.shop.exception.ErrorCode;
 import com.kma.shop.mapping.CategoryMapping;
 import com.kma.shop.repo.ChildCategoryRepo;
 import com.kma.shop.repo.ParentCategoryRepo;
-import com.kma.shop.repo.ProductRepo;
 import com.kma.shop.service.interfaces.BranchService;
 import com.kma.shop.service.interfaces.CategoryServiceV2;
 import lombok.AccessLevel;
@@ -29,7 +28,11 @@ public class CategoryServiceV2Impl  implements CategoryServiceV2 {
     ChildCategoryRepo childRepo;
     CategoryMapping categoryMapping;
     BranchService branchService;
-    private final ProductRepo productRepo;
+
+    @Override
+    public long count(){
+        return parentRepo.count();
+    }
 
     @Override
     public List<CategoryResponse> getAll(){
