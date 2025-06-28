@@ -1,13 +1,19 @@
 // src/pages/Register.tsx
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom'
 import { type FormDataTypeRegister } from 'src/utils/rulesValidate';
 import { schema } from 'src/utils/rulesValidate';
 import LeftImage from '../leftimages/leftre.jpg';
-import { useState } from 'react';
+import type { User } from '../contexts/auth.types'
+import { saveProfileToLocalStorage } from 'src/utils/utils'
+import type { AuthContextType } from '../contexts/AuthContext'
+import { useState, useContext } from 'react'
+import { AuthContext } from '../contexts/AuthContext'
 
 export default function Register() {
+  const navigate = useNavigate()
+  const { login } = useContext(AuthContext) as AuthContextType
   const {
     register,
     handleSubmit,
@@ -37,6 +43,23 @@ export default function Register() {
 
       const result = await response.json();
       console.log('Phản hồi từ server:', result); // Log toàn bộ phản hồi
+
+             const token: string = result.data.token
+                   const user: User = {
+                     id: result.data.user.id,
+                     name: result.data.user.name,
+                     email: result.data.user.email,
+                     phone: result.data.user.phone,
+                     address: result.data.user.address,
+                     avatar_url: result.data.user.avatar_url
+                   }
+             
+                   saveProfileToLocalStorage(user)
+                   login(token, user)
+             
+                   navigate('/')
+
+
 
       if (!response.ok) {
         throw new Error(result.message || result.error || 'Đăng ký thất bại!');
