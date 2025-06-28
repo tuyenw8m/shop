@@ -10,13 +10,27 @@ import FeaturedBrands from '../FeaturedBrands'
 export default function ContentHome() {
   const queryParamsUrl = useQueryParams()
 
-  const { data, error } = useQuery({
+  // API phần best-selling
+  const { data: dataBestSelling, error: errorBestSelling } = useQuery({
     queryKey: ['products', queryParamsUrl],
-    queryFn: () => productApi.getAllProducts(queryParamsUrl),
+    queryFn: () => productApi.getTopSold(queryParamsUrl),
     placeholderData: keepPreviousData
   })
 
-  if (error || !data)
+  const products: ProductList = dataBestSelling?.data.data as ProductList
+
+  // API Sản phẩm ngẫu nhiên
+  const { data: dataSuggest } = useQuery({
+    queryKey: ['productSuggest'],
+    queryFn: async () => {
+      const randomPage = Math.floor(Math.random() * 16)
+      return await productApi.getAllProducts({ page: randomPage })
+    }
+  })
+
+  const listSuggest: ProductList = dataSuggest?.data.data as ProductList
+
+  if (errorBestSelling || !dataBestSelling)
     return (
       <div className='flex items-center justify-center'>
         <svg
@@ -38,19 +52,17 @@ export default function ContentHome() {
       </div>
     )
 
-  const products: ProductList = data.data.data
-
-  const listSuggest: ProductList = {
-    ...products,
-    content: products.content?.filter((product) => product.stock < 20) || []
-  }
-
   return (
     <>
       <HeroSlide />
       <FeaturesCategory />
-      <ProductGrid title='Flash Sale 🔥' products={products} viewAllLink='/flash-sale' />
-      <ProductGrid title='Gợi Ý Cho Bạn ' products={listSuggest} viewAllLink='/suggest' />
+      <ProductGrid
+        title='Best Seller'
+        child_title='Được bán nhiều nhất'
+        products={products}
+        viewAllLink='/best-selling'
+      />
+      <ProductGrid title='Suggest' child_title='Sản Phẩm Ngẫu Nhiên ' products={listSuggest} />
       <FeaturedBrands />
     </>
   )

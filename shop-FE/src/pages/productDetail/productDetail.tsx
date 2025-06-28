@@ -45,21 +45,10 @@ export default function ProductDetail() {
     }
   }
 
-
-  const handleReviewSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!userProfile) {
-      navigate('/login')
-      return
-    }
-    console.log('Đánh giá:', { ...review, rating })
-  }
-
-
   return (
     <div className='max-w-7xl mx-auto px-12 py-12'>
-      <div className='grid lg:grid-cols-2 gap-8'>
-        <div className='space-y-4'>
+      <div className='grid lg:grid-cols-3 gap-8'>
+        <div className='col-span-2 space-y-4'>
           {product.image_url && product.image_url.length > 0 && (
             <div className='relative'>
               <div className='absolute top-4 left-4 bg-red-600 text-white px-3 py-1 rounded text-sm font-bold z-10'>
@@ -81,8 +70,9 @@ export default function ProductDetail() {
                 <div
                   key={i}
                   onClick={() => setSelectedImage(i)}
-                  className={`w-16 h-16 border-2 rounded overflow-hidden cursor-pointer ${selectedImage === i ? 'border-red-500' : 'border-gray-200'
-                    }`}
+                  className={`w-16 h-16 border-2 rounded overflow-hidden cursor-pointer ${
+                    selectedImage === i ? 'border-red-500' : 'border-gray-200'
+                  }`}
                 >
                   <img src={img} alt={`${product.name} ${i + 1}`} className='w-full h-full object-cover' />
                 </div>
@@ -90,9 +80,14 @@ export default function ProductDetail() {
             </div>
           )}
 
-          <div className='bg-gray-50 p-4  rounded-lg'>
-            <h3 className='flex items-center font-semibold mb-2 text-gray-800'>🎁 ƯU ĐÃI ĐẶC BIỆT</h3>
-            <ul className='ml-4 text-sm space-y-1 text-gray-700'>🔹 {product.promotions}</ul>
+          <div className='bg-red-50 p-4 rounded-xl border border-red-200 shadow-inner'>
+            <h3 className='flex items-center font-bold mb-2 text-red-800 text-base'>
+              <span className='mr-1.5 text-xl'>🎁</span> ƯU ĐÃI ĐẶC BIỆT
+            </h3>
+            <ul className='ml-5 text-sm space-y-1 text-gray-800 list-disc'>
+              {product.promotions &&
+                product.promotions.split(',').map((promotion, i) => <li key={i}>{promotion.trim()}</li>)}
+            </ul>
           </div>
         </div>
 
@@ -136,13 +131,13 @@ export default function ProductDetail() {
             <div className='flex space-x-4'>
               <button
                 onClick={handleAddToCart}
-                className='flex-1 bg-red-600 hover:bg-red-700 text-white py-3 px-6 rounded-lg font-bold flex items-center justify-center space-x-2 transition-colors'
+                className='bg-gradient-to-r from-teal-400 to-teal-600 hover:from-teal-300 hover:to-teal-500 text-white px-5 py-2 rounded-lg flex items-center gap-2 font-medium shadow'
               >
                 <span>THÊM VÀO GIỎ</span>
               </button>
               <button
                 onClick={handleBuyNow}
-                className='flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg font-bold transition-colors'
+                className='flex-1 bg-blue-500 hover:bg-blue-400 text-white py-3 px-6 rounded-lg font-bold transition-colors'
               >
                 MUA NGAY
               </button>
@@ -171,22 +166,34 @@ export default function ProductDetail() {
         <h2 className='text-2xl font-bold mb-6 text-gray-900'>MÔ TẢ SẢN PHẨM</h2>
         <div className='grid md:grid-cols-2 gap-8'>
           <div>
-            <h3 className='text-lg font-bold mb-4 text-gray-800 bg-gray-100 p-3 rounded'>THÔNG SỐ KỸ THUẬT</h3>
-            <div className='bg-white border border-gray-200 rounded-lg overflow-hidden'>
+            <h3 className='text-lg font-bold mb-4 text-gray-800 bg-gray-100 p-3 border-l-3 border-red-500 rounded'>
+              THÔNG SỐ KỸ THUẬT
+            </h3>
+            <div className='bg-white border border-gray-200 rounded-xl overflow-hidden shadow-md'>
               <div className='divide-y divide-gray-200'>
                 {product.technical_specs &&
-                  product.technical_specs.split(',').map((spec, i) => (
-                    <div key={i} className='flex justify-between py-3 px-4 hover:bg-gray-50'>
-                      <span className='text-gray-600 font-medium'>{spec}</span>
-                      <span className='text-gray-900 text-right max-w-xs'>{spec}</span>
-                    </div>
-                  ))}
+                  product.technical_specs.split(',').map((spec, i) => {
+                    const [key, value] = spec.split(':').map((s) => s.trim())
+                    return (
+                      <div
+                        key={i}
+                        className='flex flex-col sm:flex-row justify-between py-3 px-4 hover:bg-gray-50 transition-colors text-sm'
+                      >
+                        <span className='text-gray-600 font-medium w-full sm:w-1/2'>{key}</span>
+                        <span className='text-gray-900 font-semibold mt-0.5 sm:mt-0 w-full sm:w-1/2 text-left sm:text-right'>
+                          {value || 'N/A'}
+                        </span>
+                      </div>
+                    )
+                  })}
               </div>
             </div>
           </div>
 
           <div>
-            <h3 className='text-lg font-bold mb-4 text-gray-800 bg-gray-100 p-3 rounded'>TÍNH NĂNG NỔI BẬT</h3>
+            <h3 className='text-lg font-bold mb-4 text-gray-800 bg-gray-100 p-3 border-l-3 border-red-500 rounded'>
+              TÍNH NĂNG NỔI BẬT
+            </h3>
             <div className='space-y-4'>
               {product.features &&
                 product.features.split(',').map((feature, i) => (
@@ -195,8 +202,8 @@ export default function ProductDetail() {
                     className='border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer'
                   >
                     <div className='flex space-x-4'>
-                      <div className='w-16 h-12 bg-gray-100 rounded flex items-center justify-center text-2xl'>
-                        {i === 0 ? '⚡' : i === 1 ? '🔧' : '🚀'}
+                      <div className='w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center text-2xl flex-shrink-0'>
+                        {i === 0 ? '🚀' : i === 1 ? '💎' : i === 2 ? '🔒' : '✨'}
                       </div>
                       <div className='flex-1'>
                         <h4 className='font-medium text-sm mb-1 text-gray-900'>{feature}</h4>

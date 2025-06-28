@@ -226,7 +226,7 @@ export default function ReviewSection({ productId }: { productId: string }) {
       </div>
 
       <div className='mt-8'>
-        <h3 className='text-xl font-bold mb-4 text-gray-900'>Các đánh giá khác</h3>
+        <h3 className='text-xl font-bold mb-4 text-gray-900'>BÌNH LUẬN CỦA KHÁCH HÀNG</h3>
         {isLoading ? (
           <p className='text-gray-600 text-sm'>Đang tải đánh giá...</p>
         ) : isError ? (

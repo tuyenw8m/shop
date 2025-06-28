@@ -9,6 +9,11 @@ const productApi = {
       params
     })
   },
+  getTopSold(params: ProductSearchParams) {
+    return http.get<SuccessResponse<ProductList>>(`${pathURL}/top/week/v2`, {
+      params
+    })
+  },
   getProductDetail(id: string) {
     return http.get<SuccessResponse<Product>>(`${pathURL}/${id}`)
   }

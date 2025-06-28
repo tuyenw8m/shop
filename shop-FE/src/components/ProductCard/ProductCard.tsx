@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import type { Product } from 'src/types/product.type' // Đảm bảo bạn có kiểu Product này
 import { formatPrices, getCategoryStyle, getProfileLocalStorage } from 'src/utils/utils'
 import ProductQuickOverview from '../ProductQuickOverview' // Đảm bảo component này tồn tại
@@ -114,9 +114,12 @@ export function ProductCard({ product }: ProductType) {
                 <span className='text-sm text-gray-500 line-through'>{formatPrices(product.original_price)}₫</span>
               )}
             </div>
-            {product.promotions && (
-              <div className='bg-red-50 text-red-600 text-xs px-2 py-1 rounded'>{product.promotions}</div>
-            )}
+            {product.promotions &&
+              product.promotions.split('|').map((promotion, index) => (
+                <div key={index} className='bg-red-50 text-red-600 text-xs px-2 py-1 rounded'>
+                  {promotion}
+                </div>
+              ))}
           </div>
 
           <div className='mt-4'>

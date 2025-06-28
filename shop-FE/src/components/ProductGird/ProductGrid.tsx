@@ -1,20 +1,30 @@
+import { GemIcon } from 'lucide-react'
 import ProductCard from 'src/components/ProductCard'
 import type { ProductList } from 'src/types/product.type'
 
 interface Props {
   title: string
+  child_title: string
   products: ProductList | undefined
   viewAllLink?: string
 }
 
-export function ProductGrid({ title, products, viewAllLink }: Props) {
+export function ProductGrid({ title, child_title, products, viewAllLink }: Props) {
   return (
     <div className='mt-8 mb-12'>
       <div className='flex items-center justify-between mb-4'>
-        <h2 className='text-xl md:text-2xl font-bold text-gray-800 relative'>
-          {title}
-          <span className='absolute -bottom-1 left-0 w-12 h-1 bg-blue-600'></span>
-        </h2>
+        <div className='flex items-center space-x-3 p-4'>
+          <div className='bg-gradient-to-r from-teal-400 to-yellow-200 p-2 rounded-lg'>
+            <GemIcon className='w-6 h-6 text-white' />
+          </div>
+          <h2 className='bg-gradient-to-r from-blue-600 via-green-500 to-indigo-400 inline-block text-transparent bg-clip-text'>
+            <p className='text-lg font-semibold leading-none'>{title}</p>
+            <p className='text-sm bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent'>
+              {child_title}
+            </p>
+          </h2>
+        </div>
+
         {viewAllLink && (
           <a href={viewAllLink} className='text-teal-600 hover:text-teal-800 text-sm font-medium transition-colors'>
             Xem tất cả

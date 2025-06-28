@@ -10,6 +10,7 @@ import { AuthContext } from './pages/contexts/AuthContext'
 import Category from './pages/Category'
 import Profile from './pages/Profile/Profile'
 import CartPage from './pages/CartPage'
+import ViewAllLink from './pages/Home/components/ViewAllLink'
 
 export default function useRouterElement() {
   const authContext = useContext(AuthContext)
@@ -73,6 +74,14 @@ export default function useRouterElement() {
       element: (
         <DefaultLayout>
           <Category />
+        </DefaultLayout>
+      )
+    },
+    {
+      path: '/best-selling',
+      element: (
+        <DefaultLayout>
+          <ViewAllLink />
         </DefaultLayout>
       )
     },
