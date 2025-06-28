@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import productApi from 'src/apis/ProductService.api'
+import ReviewSection from 'src/components/ReviewSection'
 import type { Product } from 'src/types/product.type'
 import { formatPrices, salePercent, getProfileLocalStorage } from 'src/utils/utils'
 import { useCartMutations } from 'src/hooks/useCartMutations'
@@ -214,7 +215,7 @@ export default function ProductDetail() {
       <div className='mt-8 bg-gray-50 p-6 rounded-lg'>
         <p className='text-gray-700 leading-relaxed'>{product.description}</p>
       </div>
-
+      <ReviewSection productId={product.id} />
       <div className='mt-12'>
         <h2 className='text-2xl font-bold mb-6 text-gray-900'>ĐÁNH GIÁ SẢN PHẨM</h2>
         <div className='bg-gray-50 border border-gray-200 p-6 rounded-lg'>
