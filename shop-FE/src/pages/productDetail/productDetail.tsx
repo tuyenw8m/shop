@@ -22,12 +22,7 @@ export default function ProductDetail() {
   console.log(data?.data?.data)
   const product = data?.data?.data as Product
 
-  const [rating, setRating] = useState(0)
   const [selectedImage, setSelectedImage] = useState(0)
-  const [review, setReview] = useState({
-    name: '',
-    content: ''
-  })
 
   if (!product) {
     return <div className='text-center py-10'>404. Sản phẩm không tồn tại...</div>
@@ -50,6 +45,7 @@ export default function ProductDetail() {
     }
   }
 
+
   const handleReviewSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!userProfile) {
@@ -59,8 +55,9 @@ export default function ProductDetail() {
     console.log('Đánh giá:', { ...review, rating })
   }
 
+
   return (
-    <div className='max-w-7xl mx-auto px-4 py-6'>
+    <div className='max-w-7xl mx-auto px-12 py-12'>
       <div className='grid lg:grid-cols-2 gap-8'>
         <div className='space-y-4'>
           {product.image_url && product.image_url.length > 0 && (
@@ -216,52 +213,6 @@ export default function ProductDetail() {
         <p className='text-gray-700 leading-relaxed'>{product.description}</p>
       </div>
       <ReviewSection productId={product.id} />
-      <div className='mt-12'>
-        <h2 className='text-2xl font-bold mb-6 text-gray-900'>ĐÁNH GIÁ SẢN PHẨM</h2>
-        <div className='bg-gray-50 border border-gray-200 p-6 rounded-lg'>
-          <form onSubmit={handleReviewSubmit}>
-            <div className='flex items-center space-x-4 mb-4'>
-              <span className='font-medium'>Đánh giá của bạn:</span>
-              <div className='flex space-x-1'>
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <button
-                    key={star}
-                    type='button'
-                    onClick={() => setRating(star)}
-                    className={`text-2xl ${star <= rating ? 'text-yellow-400' : 'text-gray-300'}`}
-                  >
-                    ★
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className='space-y-4'>
-              <input
-                type='text'
-                placeholder='Họ và tên của bạn'
-                className='w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500'
-                value={review.name}
-                onChange={(e) => setReview({ ...review, name: e.target.value })}
-                required
-              />
-              <textarea
-                className='w-full p-3 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-red-500'
-                rows={4}
-                placeholder='Nội dung đánh giá của bạn về sản phẩm...'
-                value={review.content}
-                onChange={(e) => setReview({ ...review, content: e.target.value })}
-                required
-              />
-              <button
-                type='submit'
-                className='bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-medium transition-colors'
-              >
-                GỬI ĐÁNH GIÁ
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
     </div>
   )
 }
