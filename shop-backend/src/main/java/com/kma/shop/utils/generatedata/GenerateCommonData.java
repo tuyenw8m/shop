@@ -29,8 +29,7 @@ public class GenerateCommonData {
     }
 
     public void generate() throws AppException {
-        String parentCamera = "Camera";
-        if (!categoryServiceV2.existParentByName(parentCamera)) {
+        if (categoryServiceV2.count() < 1) {
             ParentCategoryEntity camera = generateCameraParentCategories();
             ParentCategoryEntity mayTinh = generateMayTinhParentCategories();
             ParentCategoryEntity linhKien = generateLinhKienParentCategories();

@@ -9,6 +9,8 @@ import com.kma.shop.exception.AppException;
 import java.util.List;
 
 public interface CategoryServiceV2 {
+    long count();
+
     List<CategoryResponse> getAll();
 
     CategoryResponse createParent(CategoryCreationRequest request) throws AppException;

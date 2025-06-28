@@ -8,9 +8,7 @@ import com.kma.shop.exception.AppException;
 import com.kma.shop.repo.AuthorityRepo;
 import com.kma.shop.repo.RoleRepo;
 import com.kma.shop.repo.UserRepo;
-import com.kma.shop.utils.generatedata.GenerateBranchData;
-import com.kma.shop.utils.generatedata.GenerateCommonData;
-import com.kma.shop.utils.generatedata.GenerateProductData;
+import com.kma.shop.utils.generatedata.*;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -30,14 +28,14 @@ public class ApplicationInitConfig {
     GenerateCommonData generateCommonData;
     GenerateProductData generateProductData;
     GenerateBranchData generateBranchData;
-
+    GenerateUserData generateUserData;
+    GenerateOrderData generateOrderData;
+    GenerateReviewData generateReviewData;
 
 
     @Bean
     ApplicationRunner applicationRunner(UserRepo userRepo, RoleRepo roleRepo, AuthorityRepo authorityRepo ) throws AppException {
-        generateBranchData.generate();
-        generateCommonData.generate();
-        generateProductData.generate();
+
         System.err.println("AAAAA");
         if(!authorityRepo.existsByName("SUPER_ADMIN")){
             Authority authority = Authority.builder()
@@ -72,7 +70,12 @@ public class ApplicationInitConfig {
             userRepo.save(user);
         }
         System.err.println("ERR");
-
+        generateBranchData.generate();
+        generateCommonData.generate();
+        generateProductData.generate();
+        generateUserData.generate();
+        generateOrderData.generate();
+        generateReviewData.generate();
         return args->{
 
 
