@@ -30,7 +30,7 @@ public class ReviewController {
     }
 
     @PostMapping("/products/{id}/reviews")
-    @Transactional
+
     public ApiResponse<ReviewResponse> create(@PathVariable String id,
                                               @ModelAttribute ReviewCreationRequest request) throws AppException {
         return ApiResponse.<ReviewResponse>builder()
@@ -39,7 +39,6 @@ public class ReviewController {
     }
 
     @PutMapping("/reviews/{id}")
-    @Transactional
     public ApiResponse<ReviewResponse> update2(@PathVariable String id,
                                               @ModelAttribute ReviewCreationRequest request) throws AppException {
         ReviewResponse response = reviewService.update(id, request);
@@ -49,7 +48,6 @@ public class ReviewController {
     }
 
     @PutMapping("/products/{id}/reviews")
-    @Transactional
     public ApiResponse<ReviewResponse> update(@PathVariable String id,
                                               @ModelAttribute ReviewCreationRequest request) throws AppException {
         ReviewResponse response = reviewService.update(id, request);

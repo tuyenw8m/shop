@@ -21,10 +21,4 @@ public class CartEntity extends FormEntity {
 
     @OneToOne
     private UserEntity user;
-
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "cart_product",
-            joinColumns = @JoinColumn(name = "cart_id"),
-            inverseJoinColumns = @JoinColumn(name = "product_id"))
-    private List<ProductEntity> products;
 }
