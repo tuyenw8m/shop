@@ -14,6 +14,7 @@ import com.kma.shop.repo.CartRepo;
 import com.kma.shop.service.interfaces.CartService;
 import com.kma.shop.service.interfaces.ProductService;
 import com.kma.shop.service.interfaces.UserService;
+import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -69,15 +70,18 @@ public class CartServiceImpl implements CartService {
     public CartEntity createNewCart(UserEntity user) {
         CartEntity cartEntity = new CartEntity();
         cartEntity.setUser(user);
-        cartEntity.setProducts(new ArrayList<>());
+        cartEntity.setItems(new ArrayList<>());
         return cartRepo.save(cartEntity);
     }
+
     @Override
     public CartItemEntity createNewCartItem(CartEntity cart, ProductEntity product, int quantity) {
         CartItemEntity cartItemEntity = new CartItemEntity();
         cartItemEntity.setProduct(product);
+        product.getItems().add(cartItemEntity);
         cartItemEntity.setQuantity(quantity);
         cartItemEntity.setCart(cart);
+        cart.getItems().add(cartItemEntity);
         return cartItemEntity;
     }
     @Override
@@ -136,29 +140,31 @@ public class CartServiceImpl implements CartService {
          }
         throw new AppException(ErrorCode.CONFLICT);
     }
+    @Transactional
     @Override
     public CartItemResponse add(AddCartItemRequest request) throws AppException {
         String userId = SecurityContextHolder.getContext().getAuthentication().getName();
         UserEntity user = userService.findUserById(userId);
         ProductEntity product = productService.findById(request.getProduct_id());
 
-        CartEntity cart = cartRepo.findByUser(user);
+        CartEntity cart = user.getCart();
         if (cart == null) {
             cart = new CartEntity();
             cart.setUser(user);
             cart.setItems(new ArrayList<>());
+            user.setCart(cart);
         }
 
+
         // Kiểm tra nếu sản phẩm đã có trong cart thì sửa lại số lượng
-        for(int i = 0; i < cart.getItems().size(); i++) {
+        for(int i = 0; cart.getItems() != null && i <  cart.getItems().size(); i++) {
             if(cart.getItems().get(i).getProduct().getId().equals(product.getId())) {
                 cart.getItems().get(i).setQuantity(request.getQuantity());
-                cartRepo.save(cart);
                 return toCartItemResponse(cart.getItems().get(i));
             }
         }
 
-        CartItemEntity item = cartItemRepo.save(createNewCartItem(cart, product, request.getQuantity()));
+        CartItemEntity item = createNewCartItem(cart, product, request.getQuantity());
         return toCartItemResponse(item);
     }
 }

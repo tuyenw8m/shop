@@ -20,7 +20,9 @@ export function ProductCard({ product }: ProductType) {
 
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false)
 
-  const handleQuickView = () => {
+  const handleQuickView = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
     setIsQuickViewOpen(true)
   }
 
@@ -28,11 +30,17 @@ export function ProductCard({ product }: ProductType) {
     setIsQuickViewOpen(false)
   }
 
-  const handleAddToCart = () => {
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
     if (userProfile) {
       return addItemToCart.mutate({ product })
     }
     navigate('/login')
+  }
+
+  const handleCardClick = () => {
+    navigate(`/product/${product.id}`)
   }
 
   const discountPercent =
@@ -43,7 +51,10 @@ export function ProductCard({ product }: ProductType) {
   return (
     <>
       {isQuickViewOpen && <ProductQuickOverview product={product} onClose={handleCloseQuickView} />}
-      <div className='group bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg hover:border-teal-200 transition-all duration-300 transform hover:-translate-y-1 flex flex-col h-full'>
+      <div
+        className='group bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg hover:border-teal-200 transition-all duration-300 transform hover:-translate-y-1 flex flex-col h-full cursor-pointer'
+        onClick={handleCardClick}
+      >
         <div className='relative overflow-hidden bg-gray-50 h-48 flex items-center justify-center'>
           {discountPercent > 0 && (
             <div className='absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full z-10'>
@@ -86,11 +97,9 @@ export function ProductCard({ product }: ProductType) {
               ))}
           </div>
 
-          <Link to={`/product/${product.id}`}>
-            <h3 className='text-sm font-medium text-gray-800 mb-2 line-clamp-2 min-h-[2.5rem] group-hover:text-teal-600 transition-colors'>
-              {product.name}
-            </h3>
-          </Link>
+          <h3 className='text-sm font-medium text-gray-800 mb-2 line-clamp-2 min-h-[2.5rem] group-hover:text-teal-600 transition-colors'>
+            {product.name}
+          </h3>
 
           <div className='space-y-1 mt-auto'>
             <div className='flex items-center justify-between mb-3'>
@@ -112,7 +121,13 @@ export function ProductCard({ product }: ProductType) {
 
           <div className='mt-4'>
             {product.stock === 0 ? (
-              <button className='w-full bg-red-500 hover:bg-red-600 text-white text-sm rounded-md py-2 transition-colors'>
+              <button
+                className='w-full bg-red-500 hover:bg-red-600 text-white text-sm rounded-md py-2 transition-colors'
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                }}
+              >
                 Liên Hệ Đặt Hàng
               </button>
             ) : (

@@ -6,14 +6,12 @@ import com.kma.shop.dto.response.ReviewResponse;
 import com.kma.shop.entity.*;
 import com.kma.shop.exception.AppException;
 import com.kma.shop.exception.ErrorCode;
-import com.kma.shop.mapping.ProductMapping;
 import com.kma.shop.repo.ReviewRepo;
 import com.kma.shop.service.interfaces.*;
 import com.kma.shop.specification.ReviewSpecification;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -21,6 +19,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -42,8 +41,14 @@ public class ReviewServiceImpl implements ReviewService{
         this.orderService = orderService;
     }
 
+    @Override
+    public long count(){
+        return repo.count();
+    }
+
     //create review for product is ordered
     @Override
+    @Transactional
     public ReviewResponse create(String productId, ReviewCreationRequest request) throws AppException {
 
         //check input
@@ -64,9 +69,12 @@ public class ReviewServiceImpl implements ReviewService{
         ReviewEntity reviewEntity = ReviewEntity.builder()
                 .comment(request.getComment())
                 .rating(request.getRating())
+                .images(new ArrayList<>())
                 .product(product)
                 .user(user)
                 .build();
+        user.getReviews().add(reviewEntity);
+        product.getReviews().add(reviewEntity);
 
         //upload image and add review entity for image entity
         //Save image
@@ -110,7 +118,6 @@ public class ReviewServiceImpl implements ReviewService{
             int rating = (product.getRating() * product.getReviews().size() + request.getRating() - reviewEntity.getRating())
                     /product.getReviews().size();
             product.setRating(rating);
-            productServiceV2.save(product);
         }
 
         // Xóa ảnh cũ (orphanRemoval sẽ lo phần còn lại)
@@ -127,8 +134,7 @@ public class ReviewServiceImpl implements ReviewService{
         reviewEntity.setRating(request.getRating());
 
         // Save and return
-        ReviewEntity savedEntity = repo.save(reviewEntity);
-        return toResponse(savedEntity);
+        return toResponse(repo.save(reviewEntity));
     }
 
     @Override

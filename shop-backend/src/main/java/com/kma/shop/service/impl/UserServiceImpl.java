@@ -32,6 +32,12 @@ public class UserServiceImpl implements UserService {
     PasswordEncoder passwordEncoder;
     UserMapping userMapping;
 
+
+    @Override
+    public long count(){
+        return userRepo.count();
+    }
+
     @Override
     public UserEntity getCurrentUser(){
         String userId = SecurityContextHolder.getContext().getAuthentication().getName();

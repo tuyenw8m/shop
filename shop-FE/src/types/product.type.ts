@@ -45,3 +45,14 @@ export interface ProductSearchParams {
 export type ProductSearchParamsConfig = {
   [key in keyof ProductSearchParams]: string
 }
+
+export interface ReviewProduct {
+  id: string
+  product_id: string
+  user_id: string
+  user_name: string
+  rating: number
+  comment: string
+  created_at: Date | string
+  image_url: string[]
+}

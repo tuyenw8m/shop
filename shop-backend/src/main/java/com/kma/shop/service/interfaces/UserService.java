@@ -9,6 +9,8 @@ import com.kma.shop.entity.UserEntity;
 import com.kma.shop.exception.AppException;
 
 public interface UserService {
+    long count();
+
     UserEntity getCurrentUser();
 
     PageResponse<UserResponse> getUsers(String search, int page, int limit) throws AppException;
