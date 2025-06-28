@@ -8,12 +8,9 @@ import com.kma.shop.mapping.OrderMapping;
 import com.kma.shop.repo.OrderRepo;
 import com.kma.shop.repo.ProductRepo;
 import com.kma.shop.repo.UserRepo;
-import com.kma.shop.service.interfaces.OrderService;
-import com.kma.shop.service.interfaces.UserService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.apache.catalina.User;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
