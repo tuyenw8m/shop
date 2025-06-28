@@ -23,17 +23,13 @@ export default function Profile() {
   const [editData, setEditData] = useState<{
     name: string;
     email: string;
-    gender: string;
-    birthDate: string;
     address: string;
-    avatar: File | null;
+    phone: string;
   }>({
     name: '',
     email: '',
-    gender: '',
-    birthDate: '',
     address: '',
-    avatar: null,
+    phone: '',
   });
   const [bankData, setBankData] = useState<{
     bankName: string;
@@ -55,7 +51,6 @@ export default function Profile() {
   });
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [bankError, setBankError] = useState<string | null>(null);
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const hasFetchedRef = useRef(false);
 
   useEffect(() => {
@@ -67,12 +62,19 @@ export default function Profile() {
       try {
         setIsLoadingProfile(true);
         setError(null);
+        
+        console.log('Attempting to fetch profile from:', `${API_URL}/users/me`);
+        console.log('User token:', user.token ? 'Present' : 'Missing');
+        
         const response = await fetch(`${API_URL}/users/me`, {
           headers: {
             Authorization: `Bearer ${user.token}`,
             'Content-Type': 'application/json',
           },
         });
+        
+        console.log('Response received:', response);
+        
         if (!response.ok) {
           const errorText = await response.text();
           console.error('Profile fetch error:', response.status, errorText);
@@ -80,27 +82,36 @@ export default function Profile() {
             setError('Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.');
             return;
           }
+          if (response.status === 0) {
+            setError('Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.');
+            return;
+          }
           throw new Error(`Lỗi khi tải thông tin: ${errorText}`);
         }
+        
         const data = await response.json();
+        console.log('Profile data received:', data);
+        
         if (data.status === 0 && data.data) {
           const userData = data.data as ProfileUser;
           setProfileData(userData);
           setEditData({
             name: userData.name || '',
             email: userData.email || '',
-            gender: userData.gender || '',
-            birthDate: userData.birthDate || '',
             address: userData.address || '',
-            avatar: null,
+            phone: userData.phone || '',
           });
           setUser((prevUser) => ({ ...prevUser!, user: userData }));
         } else {
           throw new Error('Dữ liệu người dùng không hợp lệ');
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Đã xảy ra lỗi không xác định');
-        console.error('Profile fetch error:', err);
+        console.error('Fetch error details:', err);
+        if (err instanceof TypeError && err.message.includes('fetch')) {
+          setError('Không thể kết nối đến server. Vui lòng kiểm tra: 1) Backend có đang chạy không? 2) URL có đúng không? 3) CORS có được cấu hình không?');
+        } else {
+          setError(err instanceof Error ? err.message : 'Đã xảy ra lỗi không xác định');
+        }
       } finally {
         setIsLoadingProfile(false);
       }
@@ -110,32 +121,7 @@ export default function Profile() {
       try {
         setIsLoadingBank(true);
         setBankError(null);
-        const response = await fetch(`${API_URL}/users/me/bank`, {
-          headers: {
-            Authorization: `Bearer ${user.token}`,
-            'Content-Type': 'application/json',
-          },
-        });
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error('Bank profile fetch error:', response.status, errorText);
-          if (response.status === 401) {
-            setError('Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.');
-            return;
-          }
-          throw new Error(`Lỗi khi tải thông tin ngân hàng: ${errorText}`);
-        }
-        const data = await response.json();
-        if (data.status === 0 && data.data) {
-          const bankInfo = data.data;
-          setBankData({
-            bankName: bankInfo.bankName || '',
-            accountNumber: bankInfo.accountNumber || '',
-            accountHolder: bankInfo.accountHolder || '',
-          });
-        } else {
-          throw new Error('Dữ liệu ngân hàng không hợp lệ');
-        }
+        setBankError('Endpoint ngân hàng không khả dụng. Vui lòng liên hệ admin.');
       } catch (err) {
         setBankError(err instanceof Error ? err.message : 'Lỗi khi tải thông tin ngân hàng');
         console.error('Bank profile fetch error:', err);
@@ -147,32 +133,7 @@ export default function Profile() {
     hasFetchedRef.current = true;
     fetchProfile();
     fetchBankProfile();
-
-    return () => {
-      if (avatarPreview) {
-        URL.revokeObjectURL(avatarPreview);
-      }
-    };
-  }, [user?.token, avatarPreview, setUser]);
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      if (file.size > 1_000_000) {
-        setError('File ảnh vượt quá 1MB');
-        return;
-      }
-      if (!['image/jpeg', 'image/png'].includes(file.type)) {
-        setError('Chỉ hỗ trợ định dạng .JPEG hoặc .PNG');
-        return;
-      }
-      if (avatarPreview) {
-        URL.revokeObjectURL(avatarPreview);
-      }
-      setEditData({ ...editData, avatar: file });
-      setAvatarPreview(URL.createObjectURL(file));
-    }
-  };
+  }, [user?.token, setUser]);
 
   const handleSaveProfile = async () => {
     if (!user?.token) {
@@ -187,27 +148,28 @@ export default function Profile() {
         setError('Tên không được để trống');
         return;
       }
-      if (editData.gender && !['Nam', 'Nữ', 'Khác'].includes(editData.gender)) {
-        setError('Giới tính không hợp lệ');
-        return;
-      }
-      if (editData.birthDate && new Date(editData.birthDate) > new Date()) {
-        setError('Ngày sinh không được là tương lai');
-        return;
-      }
 
-      const formData = new FormData();
-      formData.append('name', editData.name);
-      formData.append('gender', editData.gender);
-      formData.append('birthDate', editData.birthDate);
-      if (editData.avatar) formData.append('avatar', editData.avatar);
+      const payload = {
+        name: editData.name,
+        address: editData.address,
+        email: editData.email,
+        phone: editData.phone,
+      };
+
+      console.log('Sending profile update with JSON:', payload);
+      console.log('API URL:', `${API_URL}/users/me`);
+      console.log('Request method: PUT');
+
+      const headers = {
+        Authorization: `Bearer ${user.token}`,
+        'Content-Type': 'application/json',
+      };
+      console.log('Request headers:', headers);
 
       const response = await fetch(`${API_URL}/users/me`, {
         method: 'PUT',
-        headers: {
-          Authorization: `Bearer ${user.token}`,
-        },
-        body: formData,
+        headers,
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
@@ -217,14 +179,12 @@ export default function Profile() {
       }
 
       const data = await response.json();
+      console.log('Profile update response:', data);
+
       if (data.status === 0 && data.data) {
         const updatedUser = data.data as ProfileUser;
         setProfileData(updatedUser);
         setUser((prevUser) => ({ ...prevUser!, user: updatedUser }));
-        if (avatarPreview) {
-          URL.revokeObjectURL(avatarPreview);
-          setAvatarPreview(null);
-        }
         alert('Cập nhật hồ sơ thành công!');
       } else {
         throw new Error('Dữ liệu trả về không hợp lệ');
@@ -259,12 +219,15 @@ export default function Profile() {
         return;
       }
 
+      const headers = {
+        Authorization: `Bearer ${user.token}`,
+        'Content-Type': 'application/json',
+      };
+      console.log('Bank profile request headers:', headers);
+
       const response = await fetch(`${API_URL}/users/me/bank`, {
         method: 'PUT',
-        headers: {
-          Authorization: `Bearer ${user.token}`,
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify({
           bankName: bankData.bankName,
           accountNumber: bankData.accountNumber,
@@ -279,6 +242,8 @@ export default function Profile() {
       }
 
       const data = await response.json();
+      console.log('Bank profile update response:', data);
+
       if (data.status === 0 && data.data) {
         setBankData({
           bankName: data.data.bankName || '',
@@ -311,13 +276,22 @@ export default function Profile() {
         return;
       }
 
+      const payload = {
+        address: editData.address,
+      };
+
+      console.log('Sending address update:', payload);
+
+      const headers = {
+        Authorization: `Bearer ${user.token}`,
+        'Content-Type': 'application/json',
+      };
+      console.log('Address request headers:', headers);
+
       const response = await fetch(`${API_URL}/users/me`, {
         method: 'PUT',
-        headers: {
-          Authorization: `Bearer ${user.token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ address: editData.address }),
+        headers,
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
@@ -327,6 +301,8 @@ export default function Profile() {
       }
 
       const data = await response.json();
+      console.log('Address update response:', data);
+
       if (data.status === 0 && data.data) {
         const updatedUser = data.data as ProfileUser;
         setProfileData(updatedUser);
@@ -357,12 +333,18 @@ export default function Profile() {
         return;
       }
 
-      const response = await fetch(`${API_URL}/users/update-email`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${user.token}`,
-          'Content-Type': 'application/json',
-        },
+      const headers = {
+        Authorization: `Bearer ${user.token}`,
+        'Content-Type': 'application/json',
+      };
+      console.log('Email request headers:', headers);
+      console.log('Email update payload:', { email: editData.email });
+      console.log('API URL:', `${API_URL}/users/me`);
+      console.log('Request method: PUT');
+
+      const response = await fetch(`${API_URL}/users/me`, {
+        method: 'PUT',
+        headers,
         body: JSON.stringify({ email: editData.email }),
       });
 
@@ -371,6 +353,9 @@ export default function Profile() {
         console.error('Email update error:', response.status, errorText);
         throw new Error(`Cập nhật email thất bại: ${errorText}`);
       }
+
+      const data = await response.json();
+      console.log('Email update response:', data);
 
       alert('Yêu cầu cập nhật email đã được gửi. Vui lòng kiểm tra hộp thư để xác minh.');
     } catch (err) {
@@ -403,12 +388,15 @@ export default function Profile() {
         return;
       }
 
-      const response = await fetch(`${API_URL}/users/change-password`, {
+      const headers = {
+        Authorization: `Bearer ${user.token}`,
+        'Content-Type': 'application/json',
+      };
+      console.log('Password change request headers:', headers);
+
+      const response = await fetch(`${API_URL}/users/me`, {
         method: 'POST',
-        headers: {
-          Authorization: `Bearer ${user.token}`,
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify({
           currentPassword: passwordData.currentPassword,
           newPassword: passwordData.newPassword,
@@ -422,6 +410,8 @@ export default function Profile() {
       }
 
       const data = await response.json();
+      console.log('Password change response:', data);
+
       if (data.status === 0) {
         setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
         alert('Đổi mật khẩu thành công!');
@@ -463,19 +453,7 @@ export default function Profile() {
   ];
 
   const purchases: Purchases = {
-    purchase: [
-      {
-        id: '12345',
-        date: '16/06/2025',
-        product: 'Bàn phím gaming',
-        originalPrice: '4,999,999 đ',
-        price: '115,500 đ',
-        totalPrice: '115,500 đ',
-        status: 'Đã giao',
-        shop: '5TECH Store',
-        image: '/path-to-gaming-keyboard.jpg',
-      },
-    ],
+    purchase: [],
     waitingPayment: [],
     shipping: [],
     waitingDelivery: [],
@@ -488,7 +466,6 @@ export default function Profile() {
     <div className="flex h-screen bg-gray-100 font-sans">
       <ProfileSidebar
         profileData={profileData}
-        avatarPreview={avatarPreview}
         activeTab={activeTab}
         setActiveTab={setActiveTab}
       />
@@ -498,14 +475,11 @@ export default function Profile() {
           <AccountForm
             editData={editData}
             setEditData={setEditData}
-            avatarPreview={avatarPreview}
-            profileData={profileData}
             error={error}
             isLoadingProfile={isLoadingProfile}
             isLoadingEmail={isLoadingEmail}
             handleSaveProfile={handleSaveProfile}
             handleSaveEmail={handleSaveEmail}
-            handleFileChange={handleFileChange}
           />
         )}
         {activeTab === 'bank' && (

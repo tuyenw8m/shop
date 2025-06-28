@@ -1,10 +1,17 @@
-interface AddressFormProps {
-  editData: { name: string; email: string; gender: string; birthDate: string; address: string; avatar: File | null };
-  setEditData: React.Dispatch<React.SetStateAction<{ name: string; email: string; gender: string; birthDate: string; address: string; avatar: File | null }>>;
+import { useState } from 'react';
+
+type AddressFormProps = {
+  editData: { name: string; email: string; address: string; phone: string };
+  setEditData: React.Dispatch<React.SetStateAction<{
+    name: string;
+    email: string;
+    address: string;
+    phone: string;
+  }>>;
   error: string | null;
   isLoadingProfile: boolean;
-  handleSaveAddress: () => void;
-}
+  handleSaveAddress: () => Promise<void>;
+};
 
 export default function AddressForm({
   editData,
@@ -14,26 +21,22 @@ export default function AddressForm({
   handleSaveAddress,
 }: AddressFormProps) {
   return (
-    <div>
-      <h2 className="text-2xl font-semibold text-gray-800 mb-6">Địa chỉ</h2>
-      <p className="text-sm text-gray-500 mb-6">Quản lý địa chỉ giao hàng của bạn</p>
-      {error && (
-        <div className="mb-6 p-4 bg-red-50 text-red-600 rounded-lg border border-red-200">{error}</div>
-      )}
-      <div className="space-y-6 max-w-lg">
-        <div>
-          <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-2">Địa chỉ</label>
-          <input
-            id="address"
-            type="text"
-            value={editData.address}
-            onChange={(e) => setEditData({ ...editData, address: e.target.value })}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors duration-200"
-          />
-        </div>
+    <div className="space-y-6">
+      {error && <div className="text-red-600 text-sm">{error}</div>}
+      <div className="flex items-center space-x-4">
+        <label className="w-32 text-sm font-medium text-gray-700">Địa chỉ</label>
+        <input
+          type="text"
+          value={editData.address}
+          onChange={(e) => setEditData({ ...editData, address: e.target.value })}
+          className="flex-1 p-2 border rounded text-sm text-gray-700 bg-gray-100 focus:outline-none focus:ring-2 focus:ring-green-500"
+          placeholder="Nhập địa chỉ của bạn"
+        />
+      </div>
+      <div className="flex justify-end">
         <button
           onClick={handleSaveAddress}
-          className="w-full py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 disabled:bg-orange-300 transition-colors duration-200"
+          className="px-6 py-2 text-sm text-white bg-green-700 rounded hover:bg-green-800 disabled:bg-gray-400 disabled:cursor-not-allowed"
           disabled={isLoadingProfile}
         >
           {isLoadingProfile ? 'Đang lưu...' : 'Lưu'}

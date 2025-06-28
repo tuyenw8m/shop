@@ -1,132 +1,120 @@
-import { type ProfileUser } from './types';
+import { useState } from 'react';
 
-interface AccountFormProps {
-  editData: { name: string; email: string; gender: string; birthDate: string; address: string; avatar: File | null };
-  setEditData: (data: { name: string; email: string; gender: string; birthDate: string; address: string; avatar: File | null }) => void;
-  avatarPreview: string | null;
-  profileData: ProfileUser;
+type AccountFormProps = {
+  editData: { name: string; email: string; address: string; phone: string };
+  setEditData: React.Dispatch<React.SetStateAction<{
+    name: string;
+    email: string;
+    address: string;
+    phone: string;
+  }>>;
   error: string | null;
   isLoadingProfile: boolean;
   isLoadingEmail: boolean;
-  handleSaveProfile: () => void;
-  handleSaveEmail: () => void;
-  handleFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-}
+  handleSaveProfile: () => Promise<void>;
+  handleSaveEmail: () => Promise<void>;
+};
 
 export default function AccountForm({
   editData,
   setEditData,
-  avatarPreview,
-  profileData,
   error,
   isLoadingProfile,
   isLoadingEmail,
   handleSaveProfile,
   handleSaveEmail,
-  handleFileChange,
 }: AccountFormProps) {
+  const [showEmailModal, setShowEmailModal] = useState(false);
+
+  const handleEmailUpdate = async () => {
+    try {
+      await handleSaveEmail();
+      setShowEmailModal(false);
+    } catch (error) {
+      // Error is handled in the parent component
+      console.error('Email update failed:', error);
+    }
+  };
+
   return (
-    <div>
-      <h2 className="text-2xl font-semibold text-gray-800 mb-6">Hồ Sơ</h2>
-      <p className="text-sm text-gray-500 mb-6">Quản lý thông tin hồ sơ để bảo mật tài khoản</p>
-      {error && (
-        <div className="mb-6 p-4 bg-red-50 text-red-600 rounded-lg border border-red-200">{error}</div>
-      )}
-      <div className="space-y-6 max-w-lg">
-        <div>
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">Tên</label>
-          <input
-            id="name"
-            type="text"
-            value={editData.name}
-            onChange={(e) => setEditData({ ...editData, name: e.target.value })}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors duration-200"
-          />
-        </div>
-        <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-          <div className="flex gap-2">
-            <input
-              id="email"
-              type="email"
-              value={editData.email}
-              onChange={(e) => setEditData({ ...editData, email: e.target.value })}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors duration-200"
-            />
-            <button
-              onClick={handleSaveEmail}
-              className="px-4 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 disabled:bg-orange-300 transition-colors duration-200"
-              disabled={isLoadingEmail}
-            >
-              {isLoadingEmail ? 'Đang xử lý...' : 'Cập nhật'}
-            </button>
-          </div>
-          <p className="mt-2 text-xs text-gray-500">Cập nhật email yêu cầu xác minh qua hộp thư.</p>
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Giới tính</label>
-          <div className="flex gap-4">
-            {['Nam', 'Nữ', 'Khác'].map((gender) => (
-              <label key={gender} className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  name="gender"
-                  value={gender}
-                  checked={editData.gender === gender}
-                  onChange={(e) => setEditData({ ...editData, gender: e.target.value })}
-                  className="h-4 w-4 text-orange-500 focus:ring-orange-500"
-                />
-                {gender}
-              </label>
-            ))}
-          </div>
-        </div>
-        <div>
-          <label htmlFor="birthDate" className="block text-sm font-medium text-gray-700 mb-2">Ngày sinh</label>
-          <input
-            id="birthDate"
-            type="date"
-            value={editData.birthDate}
-            onChange={(e) => setEditData({ ...editData, birthDate: e.target.value })}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors duration-200"
-            max={new Date().toISOString().split('T')[0]}
-          />
-        </div>
-        <div>
-          <label htmlFor="avatarUpload" className="block text-sm font-medium text-gray-700 mb-2">Ảnh đại diện</label>
-          <div className="flex items-center gap-4">
-            <div className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
-              {avatarPreview || profileData.avatar_url ? (
-                <img
-                  src={avatarPreview || profileData.avatar_url}
-                  alt="Avatar Preview"
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <span className="text-2xl text-gray-500">{profileData.name?.[0]?.toUpperCase() || 'U'}</span>
-              )}
-            </div>
-            <div>
-              <input
-                type="file"
-                accept="image/jpeg,image/png"
-                onChange={handleFileChange}
-                className="hidden"
-                id="avatarUpload"
-              />
-              <label
-                htmlFor="avatarUpload"
-                className="inline-block px-4 py-2 bg-orange-500 text-white rounded-lg cursor-pointer hover:bg-orange-600 transition-colors duration-200"
+    <div className="space-y-6">
+      {error && <div className="text-red-600 text-sm">{error}</div>}
+      <div className="flex items-center space-x-4">
+        <label className="w-32 text-sm font-medium text-gray-700">Tên</label>
+        <input
+          type="text"
+          value={editData.name}
+          onChange={(e) => setEditData({ ...editData, name: e.target.value })}
+          className="flex-1 p-2 border rounded text-sm text-gray-700 bg-gray-100 focus:outline-none focus:ring-2 focus:ring-green-500"
+          placeholder="Nhập tên của bạn"
+        />
+      </div>
+      <div className="flex items-center space-x-4">
+        <label className="w-32 text-sm font-medium text-gray-700">Email</label>
+        <input
+          type="email"
+          value={editData.email}
+          onChange={(e) => setEditData({ ...editData, email: e.target.value })}
+          className="flex-1 p-2 border rounded text-sm text-gray-700 bg-gray-100 focus:outline-none focus:ring-2 focus:ring-green-500"
+          placeholder="Nhập email của bạn"
+          readOnly={!showEmailModal}
+        />
+        <button
+          onClick={() => setShowEmailModal(true)}
+          className="px-4 py-2 text-sm text-white bg-green-700 rounded hover:bg-green-800 disabled:bg-gray-400 disabled:cursor-not-allowed"
+          disabled={isLoadingEmail}
+        >
+          {isLoadingEmail ? 'Đang xử lý...' : 'Cập nhật email'}
+        </button>
+      </div>
+      {showEmailModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded shadow-lg max-w-md w-full mx-4">
+            <h3 className="text-lg font-medium text-gray-900">Xác nhận cập nhật email</h3>
+            <p className="mt-2 text-sm text-gray-600">Bạn có chắc chắn muốn cập nhật email thành: {editData.email}?</p>
+            <div className="mt-4 flex justify-end space-x-4">
+              <button
+                onClick={() => setShowEmailModal(false)}
+                className="px-4 py-2 text-sm text-gray-700 bg-gray-200 rounded hover:bg-gray-300"
+                disabled={isLoadingEmail}
               >
-                Chọn Ảnh
-              </label>
-              <p className="mt-2 text-xs text-gray-500">Dung lượng file tối đa 1MB. Định dạng: .JPEG, .PNG</p>
+                Hủy
+              </button>
+              <button
+                onClick={handleEmailUpdate}
+                className="px-4 py-2 text-sm text-white bg-green-700 rounded hover:bg-green-800 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                disabled={isLoadingEmail}
+              >
+                {isLoadingEmail ? 'Đang xử lý...' : 'Xác nhận'}
+              </button>
             </div>
           </div>
         </div>
+      )}
+      <div className="flex items-center space-x-4">
+        <label className="w-32 text-sm font-medium text-gray-700">Số điện thoại</label>
+        <input
+          type="tel"
+          value={editData.phone}
+          onChange={(e) => setEditData({ ...editData, phone: e.target.value })}
+          className="flex-1 p-2 border rounded text-sm text-gray-700 bg-gray-100 focus:outline-none focus:ring-2 focus:ring-green-500"
+          placeholder="Nhập số điện thoại"
+        />
+      </div>
+      <div className="flex items-center space-x-4">
+        <label className="w-32 text-sm font-medium text-gray-700">Địa chỉ</label>
+        <input
+          type="text"
+          value={editData.address}
+          onChange={(e) => setEditData({ ...editData, address: e.target.value })}
+          className="flex-1 p-2 border rounded text-sm text-gray-700 bg-gray-100 focus:outline-none focus:ring-2 focus:ring-green-500"
+          placeholder="Nhập địa chỉ của bạn"
+        />
+      </div>
+      <div className="flex justify-end">
         <button
           onClick={handleSaveProfile}
-          className="w-full py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 disabled:bg-orange-300 transition-colors duration-200"
+          className="px-6 py-2 text-sm text-white bg-green-700 rounded hover:bg-green-800 disabled:bg-gray-400 disabled:cursor-not-allowed"
           disabled={isLoadingProfile}
         >
           {isLoadingProfile ? 'Đang lưu...' : 'Lưu'}
