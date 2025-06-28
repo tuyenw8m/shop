@@ -23,6 +23,7 @@ import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -59,6 +60,26 @@ public class ProductServiceV2Impl implements ProductServiceV2 {
         this.entityManager = entityManager;
     }
 
+    @Override
+    public PageResponse<ProductResponseV2> getTopSoldInWeekV2(
+            List<String> childCategories, String parentCategory, String search, float min_price, float max_price,
+            Integer page, Integer limit, String sort_by)   {
+
+        Specification<ProductEntity> spec = Specification
+                .where(ProductSpecification.topSoldWeek());
+
+        Pageable pageable = PageRequest.of(page, limit, Sort.Direction.DESC, "sold");
+
+        Page<ProductEntity> result = repo.findAll(spec, pageable);
+        List<ProductResponseV2> productResponseV2List  = result.getContent().stream().map(productMappingV2::toProductResponseV2).toList();
+        return PageResponse.<ProductResponseV2>builder()
+                .content(productResponseV2List)
+                .totalElements(result.getTotalElements())
+                .totalPages(result.getTotalPages())
+                .pageSize(result.getSize())
+                .pageNumber(result.getNumber() + 1)
+                .build();
+    }
 
     @Override
     public List<TopProductSoldInWeekResponse> getTopSoldInWeek(

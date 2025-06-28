@@ -72,6 +72,7 @@ public class SecurityConfig {
                                         HttpMethod.GET.name(), "/products/v2/*",
                                         HttpMethod.GET.name(), "/coupons",
                                         HttpMethod.GET.name(), "/products/v2/top/week",
+                                        HttpMethod.GET.name(), "/products/v2/top/week/v2",
                                         HttpMethod.GET.name(), "/events",
                                         HttpMethod.GET.name(), "/event/*"
 

@@ -125,4 +125,22 @@ public class ProductControllerV2 {
                 .data(null)
                 .build();
     }
+
+    @GetMapping("/top/week/v2")
+    public  ApiResponse<PageResponse<ProductResponseV2>> getTopSoldInWeekV2(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false, defaultValue = "0.0") float min_price,
+            @RequestParam(required = false, defaultValue = "99999999999.9") float max_price,
+            @RequestParam(required = false, defaultValue = "1") int page,
+            @RequestParam(required = false, defaultValue = "10") int limit,
+            @RequestParam(required = false, defaultValue = "") String sort_by,
+            @RequestParam(required = false, defaultValue = "desc") String sort_type,
+            @RequestParam(required = false) List<String> children_category_name,
+            @RequestParam(required = false, defaultValue = "") String parent_category_name,
+            @RequestParam(required = false, defaultValue = "") String branch_name
+    ) throws AppException {
+        return ApiResponse.<PageResponse<ProductResponseV2>>builder()
+                .data(productServiceV2.getTopSoldInWeekV2(children_category_name,parent_category_name, name, min_price, max_price, page - 1, limit, sort_by))
+                .build();
+    }
 }
