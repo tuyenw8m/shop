@@ -8,9 +8,23 @@ import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public class ProductSpecification {
+
+    public static Specification<ProductEntity> topSoldWeek() {
+        return (root, query, criteriaBuilder) -> {
+            // Chỉ thực hiện distinct khi query là dạng truy vấn select (không count)
+            if (query.getResultType() != Long.class) {
+                query.distinct(true);
+            }
+            return criteriaBuilder.greaterThan(
+                    root.join("orders").get("creationDate"),
+                    LocalDate.now().minusDays(7)
+            );
+        };
+    }
 
     public static Specification<ProductEntity> hasName(String name){
         return (name == null || name.isBlank()) ? null : (root, query, cb) ->

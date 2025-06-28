@@ -29,8 +29,9 @@ public class GenerateCommonData {
     }
 
     public void generate() throws AppException {
-        String parentCamera = "Camera";
-        if (!categoryServiceV2.existParentByName(parentCamera)) {
+        if (categoryServiceV2.count() < 1) {
+            System.out.println("🔄 Generating parent categories...");
+            
             ParentCategoryEntity camera = generateCameraParentCategories();
             ParentCategoryEntity mayTinh = generateMayTinhParentCategories();
             ParentCategoryEntity linhKien = generateLinhKienParentCategories();
@@ -39,6 +40,8 @@ public class GenerateCommonData {
             mayTinh = categoryServiceV2.saveParent(mayTinh);
             linhKien = categoryServiceV2.saveParent(linhKien);
 
+            System.out.println("🔄 Generating child categories...");
+            
             List<ChildCategoryEntity> cameraChildCategories = generateCameraChildCategories(camera);
             List<ChildCategoryEntity> mayTinhChildCategories = generateMayTinhChildCategories(mayTinh);
             List<ChildCategoryEntity> linhKienChildCategories = generateLinhKienChildCategories(linhKien);
@@ -55,6 +58,8 @@ public class GenerateCommonData {
             categoryServiceV2.saveParent(camera);
             categoryServiceV2.saveParent(mayTinh);
             categoryServiceV2.saveParent(linhKien);
+            
+            System.out.println("✅ Generated all categories successfully");
         }
     }
 

@@ -1,13 +1,17 @@
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import productApi from 'src/apis/ProductService.api'
 import ReviewSection from 'src/components/ReviewSection'
 import type { Product } from 'src/types/product.type'
-import { formatPrices, salePercent } from 'src/utils/utils'
+import { formatPrices, salePercent, getProfileLocalStorage } from 'src/utils/utils'
+import { useCartMutations } from 'src/hooks/useCartMutations'
 
 export default function ProductDetail() {
   const { id = '' } = useParams()
+  const navigate = useNavigate()
+  const userProfile = getProfileLocalStorage()
+  const { addItemToCart } = useCartMutations(userProfile?.id)
 
   const { data } = useQuery({
     queryKey: ['product', id],
@@ -25,8 +29,32 @@ export default function ProductDetail() {
   }
 
   const handleAddToCart = () => {
-    console.log('Thêm vào giỏ hàng:', product.id)
+    if (userProfile) {
+      addItemToCart.mutate({ product })
+    } else {
+      navigate('/login')
+    }
   }
+
+  const handleBuyNow = () => {
+    if (userProfile) {
+      // Navigate to checkout or cart page
+      navigate('/cart')
+    } else {
+      navigate('/login')
+    }
+  }
+
+
+  const handleReviewSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!userProfile) {
+      navigate('/login')
+      return
+    }
+    console.log('Đánh giá:', { ...review, rating })
+  }
+
 
   return (
     <div className='max-w-7xl mx-auto px-12 py-12'>
@@ -53,9 +81,8 @@ export default function ProductDetail() {
                 <div
                   key={i}
                   onClick={() => setSelectedImage(i)}
-                  className={`w-16 h-16 border-2 rounded overflow-hidden cursor-pointer ${
-                    selectedImage === i ? 'border-red-500' : 'border-gray-200'
-                  }`}
+                  className={`w-16 h-16 border-2 rounded overflow-hidden cursor-pointer ${selectedImage === i ? 'border-red-500' : 'border-gray-200'
+                    }`}
                 >
                   <img src={img} alt={`${product.name} ${i + 1}`} className='w-full h-full object-cover' />
                 </div>
@@ -113,7 +140,10 @@ export default function ProductDetail() {
               >
                 <span>THÊM VÀO GIỎ</span>
               </button>
-              <button className='flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg font-bold transition-colors'>
+              <button
+                onClick={handleBuyNow}
+                className='flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg font-bold transition-colors'
+              >
                 MUA NGAY
               </button>
             </div>

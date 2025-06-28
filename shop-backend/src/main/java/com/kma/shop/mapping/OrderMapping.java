@@ -14,10 +14,25 @@ import java.util.stream.Collectors;
 
 @Component
 public class OrderMapping {
+
+    public OrderEntity buildOrderBase(UserEntity user, ProductEntity product, int quantity, String comment){
+        return OrderEntity.builder()
+                .comment(comment)
+                .quantity(quantity)
+                .product(product)
+                .user(user)
+                .soldPrice(quantity * product.getPrice()) // need update after discount
+                .primaryPrice(product.getPrice() * quantity)
+                .status(Status.PENDING)
+                .price(product.getPrice())
+                .build();
+    }
+
     public OrderResponse toOrderResponse(OrderEntity entity){
         if(entity == null) return null;
         return OrderResponse.builder()
                 .id(entity.getId())
+                .price(entity.getProduct().getPrice())
                 .user_id(entity.getUser().getId())
                 .product_id(entity.getProduct().getId())
                 .items_count(entity.getQuantity())
@@ -41,6 +56,7 @@ public class OrderMapping {
                 .quantity(request.getQuantity())
                 .product(product)
                 .user(user)
+                .price(product.getPrice())
                 .soldPrice(request.getQuantity() * product.getPrice()) // need update after discount
                 .primaryPrice(product.getPrice() * request.getQuantity())
                 .status(Status.PENDING)

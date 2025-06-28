@@ -3,6 +3,7 @@ package com.kma.shop.security;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.stereotype.Component;
 
@@ -19,16 +20,15 @@ public class CustomJwtAuthenticationConverter implements Converter<Jwt, Collecti
 
     @Override
     public Collection<GrantedAuthority> convert(Jwt jwt) {
-        Collection<GrantedAuthority> authorities = defaultGrantedAuthoritiesConverter.convert(jwt);
+//        Collection<GrantedAuthority> authorities = defaultGrantedAuthoritiesConverter.convert(jwt);
         List<String> roles = jwt.getClaimAsStringList("roles");
         if (roles != null) {
-            List<GrantedAuthority> roleAuthorities = roles.stream()
+            return roles.stream()
                     .map(role -> "ROLE_" + role.toUpperCase())
-                    .map(org.springframework.security.core.authority.SimpleGrantedAuthority::new)
+                    .map(SimpleGrantedAuthority::new)
                     .collect(Collectors.toList());
-            return Stream.concat(authorities.stream(), roleAuthorities.stream()).collect(Collectors.toSet());
         }
 
-        return authorities;
+        return null;
     }
 }

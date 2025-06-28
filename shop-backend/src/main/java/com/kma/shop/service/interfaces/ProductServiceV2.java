@@ -13,7 +13,12 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import java.util.List;
 
 public interface ProductServiceV2 {
-    List<TopProductSoldInWeekResponse> getTopSoldInWeek(List<String> childCategories, String parentCategory, String search, float min_price, float max_price,
+    PageResponse<ProductResponseV2> getTopSoldInWeekV2(
+            List<String> childCategories, String parentCategory, String search, float min_price, float max_price,
+            Integer page, Integer limit, String sort_by) throws AppException;
+
+    List<TopProductSoldInWeekResponse> getTopSoldInWeek(List<String> childCategories, String parentCategory, String search,
+                                                        float min_price, float max_price,
                                                         Integer Page, Integer limit, String sort_by) throws AppException;
 
     //get product response by product id

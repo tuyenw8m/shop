@@ -72,6 +72,7 @@ public class SecurityConfig {
                                         HttpMethod.GET.name(), "/products/v2/*",
                                         HttpMethod.GET.name(), "/coupons",
                                         HttpMethod.GET.name(), "/products/v2/top/week",
+                                        HttpMethod.GET.name(), "/products/v2/top/week/v2",
                                         HttpMethod.GET.name(), "/events",
                                         HttpMethod.GET.name(), "/event/*"
 
@@ -99,12 +100,14 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.PUT,"/cart/*").hasRole("USER")
                                 .requestMatchers(HttpMethod.POST,"/cart").hasRole("USER")
                                 .requestMatchers(HttpMethod.DELETE,"/cart/*").hasRole("USER")
+                                .requestMatchers(HttpMethod.GET, "/cart/count").hasRole("USER")
 
                                 .requestMatchers(HttpMethod.GET,"/orders").hasRole("USER")
                                 .requestMatchers(HttpMethod.GET,"/orders/*").hasRole("USER")
                                 .requestMatchers(HttpMethod.POST,"/orders").hasRole("USER")
                                 .requestMatchers(HttpMethod.PUT,"/orders/*").hasRole("ADMIN")
                                 .requestMatchers(HttpMethod.DELETE,"/orders/*").hasRole("USER")
+                                .requestMatchers(HttpMethod.GET, "/orders/count").hasRole("USER")
 
                                 .requestMatchers(HttpMethod.POST,"/products/*/reviews").hasRole("USER")
                                 .requestMatchers(HttpMethod.DELETE,"/reviews/*").hasRole("USER")

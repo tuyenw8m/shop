@@ -45,6 +45,23 @@ public class OrderServiceImpl implements OrderService {
         this.orderMapping = orderMapping;
     }
 
+
+    @Override
+    public long count(){
+        return orderRepo.count();
+    }
+
+    @PreAuthorize("hasRole('USER')")
+    @Override
+    public float countTotalPrice(){
+        UserEntity user = userService.getCurrentUser();
+        float total_price = 0;
+        for(OrderEntity orderEntity : user.getOrders()){
+            total_price += orderEntity.getQuantity() * orderEntity.getProduct().getPrice();
+        }
+        return total_price;
+    }
+
     @Override
     public boolean isOrderedProductByProductId(String productId){
         UserEntity user = userService.getCurrentUser();

@@ -25,6 +25,13 @@ public class CartController {
                 .build();
     }
 
+    @GetMapping("/count")
+    public ApiResponse<Float> getCartCount() throws AppException {
+        return ApiResponse.<Float>builder()
+                .data(cartService.countTotalPrice())
+                .build();
+    }
+
     @PostMapping
     public ApiResponse<CartItemResponse> add(@RequestBody AddCartItemRequest request) throws AppException {
         return ApiResponse.<CartItemResponse>builder()

@@ -14,8 +14,8 @@ import com.kma.shop.repo.CartRepo;
 import com.kma.shop.service.interfaces.CartService;
 import com.kma.shop.service.interfaces.ProductService;
 import com.kma.shop.service.interfaces.UserService;
+import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -32,6 +32,16 @@ public class CartServiceImpl implements CartService {
     ProductService productService;
     CartItemRepo cartItemRepo;
 
+    @Override
+    public float countTotalPrice(){
+        UserEntity user = userService.getCurrentUser();
+        float total_price = 0;
+        for(CartItemEntity item : user.getCart().getItems()){
+            total_price += item.getQuantity() * item.getProduct().getPrice();
+        }
+        return total_price;
+    }
+
     public CartServiceImpl(CartRepo cartRepo, UserService userService,
                            @Qualifier("productServiceImpl") ProductService productService, CartItemRepo cartItemRepo) {
         this.cartRepo = cartRepo;
@@ -42,29 +52,36 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public CartItemResponse toCartItemResponse(CartItemEntity cart) {
-        String url = cart.getProduct().getImages().getFirst().getUrl();
+        String url = "";
+        if(cart.getProduct().getImages() != null && !cart.getProduct().getImages().isEmpty()) {
+            url = cart.getProduct().getImages().getFirst().getUrl();
+        }
         return CartItemResponse.builder()
                 .item_id(cart.getId())
                 .product_id(cart.getProduct().getId())
                 .image_url(List.of(url))
                 .name(cart.getProduct().getName())
                 .quantity(cart.getQuantity())
-                .price(cart.getQuantity() * cart.getProduct().getPrice())
+                .price(cart.getProduct().getPrice())
+                .total_price(cart.getQuantity() * cart.getProduct().getPrice())
                 .build();
     }
     @Override
     public CartEntity createNewCart(UserEntity user) {
         CartEntity cartEntity = new CartEntity();
         cartEntity.setUser(user);
-        cartEntity.setProducts(new ArrayList<>());
+        cartEntity.setItems(new ArrayList<>());
         return cartRepo.save(cartEntity);
     }
+
     @Override
     public CartItemEntity createNewCartItem(CartEntity cart, ProductEntity product, int quantity) {
         CartItemEntity cartItemEntity = new CartItemEntity();
         cartItemEntity.setProduct(product);
+        product.getItems().add(cartItemEntity);
         cartItemEntity.setQuantity(quantity);
         cartItemEntity.setCart(cart);
+        cart.getItems().add(cartItemEntity);
         return cartItemEntity;
     }
     @Override
@@ -123,29 +140,31 @@ public class CartServiceImpl implements CartService {
          }
         throw new AppException(ErrorCode.CONFLICT);
     }
+    @Transactional
     @Override
     public CartItemResponse add(AddCartItemRequest request) throws AppException {
         String userId = SecurityContextHolder.getContext().getAuthentication().getName();
         UserEntity user = userService.findUserById(userId);
         ProductEntity product = productService.findById(request.getProduct_id());
 
-        CartEntity cart = cartRepo.findByUser(user);
+        CartEntity cart = user.getCart();
         if (cart == null) {
             cart = new CartEntity();
             cart.setUser(user);
             cart.setItems(new ArrayList<>());
+            user.setCart(cart);
         }
 
+
         // Kiểm tra nếu sản phẩm đã có trong cart thì sửa lại số lượng
-        for(int i = 0; i < cart.getItems().size(); i++) {
+        for(int i = 0; cart.getItems() != null && i <  cart.getItems().size(); i++) {
             if(cart.getItems().get(i).getProduct().getId().equals(product.getId())) {
                 cart.getItems().get(i).setQuantity(request.getQuantity());
-                cartRepo.save(cart);
                 return toCartItemResponse(cart.getItems().get(i));
             }
         }
 
-        CartItemEntity item = cartItemRepo.save(createNewCartItem(cart, product, request.getQuantity()));
+        CartItemEntity item = createNewCartItem(cart, product, request.getQuantity());
         return toCartItemResponse(item);
     }
 }
