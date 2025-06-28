@@ -44,7 +44,7 @@ public class GenerateUserData {
     );
 
     public void generate() throws AppException {
-        if(userRepo.count() < 1){
+        if(userRepo.count() < 2){
             Set<RoleEntity> roles = getUserRole();
             List<UserEntity> users = new ArrayList<>(150); // Increased to 150 users
             
