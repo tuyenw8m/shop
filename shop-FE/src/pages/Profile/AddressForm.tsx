@@ -1,15 +1,21 @@
 interface AddressFormProps {
-  editData: { address: string };
-  setEditData: (data: { address: string }) => void;
+  editData: { name: string; email: string; gender: string; birthDate: string; address: string; avatar: File | null };
+  setEditData: React.Dispatch<React.SetStateAction<{ name: string; email: string; gender: string; birthDate: string; address: string; avatar: File | null }>>;
   error: string | null;
   isLoadingProfile: boolean;
   handleSaveAddress: () => void;
 }
 
-export default function AddressForm({ editData, setEditData, error, isLoadingProfile, handleSaveAddress }: AddressFormProps) {
+export default function AddressForm({
+  editData,
+  setEditData,
+  error,
+  isLoadingProfile,
+  handleSaveAddress,
+}: AddressFormProps) {
   return (
     <div>
-      <h2 className="text-2xl font-semibold text-gray-800 mb-6">Địa Chỉ</h2>
+      <h2 className="text-2xl font-semibold text-gray-800 mb-6">Địa chỉ</h2>
       <p className="text-sm text-gray-500 mb-6">Quản lý địa chỉ giao hàng của bạn</p>
       {error && (
         <div className="mb-6 p-4 bg-red-50 text-red-600 rounded-lg border border-red-200">{error}</div>

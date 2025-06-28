@@ -1,10 +1,10 @@
-import { ProfileUser } from './types';
+import { type ProfileUser, type TabType } from './types';
 
 interface ProfileSidebarProps {
   profileData: ProfileUser;
   avatarPreview: string | null;
-  activeTab: string;
-  setActiveTab: (tab: string) => void;
+  activeTab: TabType;
+  setActiveTab: React.Dispatch<React.SetStateAction<TabType>>;
 }
 
 export default function ProfileSidebar({ profileData, avatarPreview, activeTab, setActiveTab }: ProfileSidebarProps) {

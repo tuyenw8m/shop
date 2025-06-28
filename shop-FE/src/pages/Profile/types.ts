@@ -40,3 +40,5 @@ export interface Notification {
   message: string;
   read: boolean;
 }
+
+export type TabType = 'notifications' | 'account' | 'purchase' | 'waitingPayment' | 'shipping' | 'waitingDelivery' | 'completed' | 'cancelled' | 'returned' | 'bank' | 'address' | 'password';

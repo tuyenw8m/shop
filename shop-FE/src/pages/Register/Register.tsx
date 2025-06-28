@@ -1,7 +1,7 @@
 // src/pages/Register.tsx
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { type FormDataTypeRegister } from 'src/utils/rulesValidate';
 import { schema } from 'src/utils/rulesValidate';
 import LeftImage from '../leftimages/leftre.jpg';

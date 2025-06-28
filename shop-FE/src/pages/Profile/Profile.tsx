@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import ProfileSidebar from './ProfileSidebar';
 import NotificationsTab from './NotificationsTab';
@@ -7,7 +7,7 @@ import BankForm from './BankForm';
 import AddressForm from './AddressForm';
 import PasswordForm from './PasswordForm';
 import PurchasesTab from './PurchasesTab';
-import { ProfileUser, Purchase, Purchases, Notification } from '../Profile/types';
+import { type ProfileUser, type Purchases, type Notification, type TabType } from './types';
 
 const API_URL = 'http://localhost:8888/shop/api/v1';
 
@@ -19,9 +19,7 @@ export default function Profile() {
   const [isLoadingEmail, setIsLoadingEmail] = useState(false);
   const [isLoadingBank, setIsLoadingBank] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<
-    'notifications' | 'account' | 'purchase' | 'waitingPayment' | 'shipping' | 'waitingDelivery' | 'completed' | 'cancelled' | 'returned' | 'bank' | 'address' | 'password'
-  >('purchase');
+  const [activeTab, setActiveTab] = useState<TabType>('purchase');
   const [editData, setEditData] = useState<{
     name: string;
     email: string;
@@ -58,14 +56,14 @@ export default function Profile() {
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [bankError, setBankError] = useState<string | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const hasFetchedRef = useRef(false);
 
   useEffect(() => {
+    if (!user?.token || hasFetchedRef.current) {
+      return;
+    }
+
     const fetchProfile = async () => {
-      if (!user?.token) {
-        setError('Vui lòng đăng nhập để xem hồ sơ');
-        setIsLoadingProfile(false);
-        return;
-      }
       try {
         setIsLoadingProfile(true);
         setError(null);
@@ -96,7 +94,7 @@ export default function Profile() {
             address: userData.address || '',
             avatar: null,
           });
-          setUser({ ...user, user: userData });
+          setUser((prevUser) => ({ ...prevUser!, user: userData }));
         } else {
           throw new Error('Dữ liệu người dùng không hợp lệ');
         }
@@ -109,7 +107,6 @@ export default function Profile() {
     };
 
     const fetchBankProfile = async () => {
-      if (!user?.token) return;
       try {
         setIsLoadingBank(true);
         setBankError(null);
@@ -147,6 +144,7 @@ export default function Profile() {
       }
     };
 
+    hasFetchedRef.current = true;
     fetchProfile();
     fetchBankProfile();
 
@@ -155,7 +153,7 @@ export default function Profile() {
         URL.revokeObjectURL(avatarPreview);
       }
     };
-  }, [user?.token, setUser]);
+  }, [user?.token, avatarPreview, setUser]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -222,7 +220,7 @@ export default function Profile() {
       if (data.status === 0 && data.data) {
         const updatedUser = data.data as ProfileUser;
         setProfileData(updatedUser);
-        setUser({ ...user, user: updatedUser });
+        setUser((prevUser) => ({ ...prevUser!, user: updatedUser }));
         if (avatarPreview) {
           URL.revokeObjectURL(avatarPreview);
           setAvatarPreview(null);
@@ -332,7 +330,7 @@ export default function Profile() {
       if (data.status === 0 && data.data) {
         const updatedUser = data.data as ProfileUser;
         setProfileData(updatedUser);
-        setUser({ ...user, user: updatedUser });
+        setUser((prevUser) => ({ ...prevUser!, user: updatedUser }));
         alert('Cập nhật địa chỉ thành công!');
       } else {
         throw new Error('Dữ liệu trả về không hợp lệ');
@@ -501,7 +499,6 @@ export default function Profile() {
             editData={editData}
             setEditData={setEditData}
             avatarPreview={avatarPreview}
-            setAvatarPreview={setAvatarPreview}
             profileData={profileData}
             error={error}
             isLoadingProfile={isLoadingProfile}

@@ -1,10 +1,9 @@
-import { ProfileUser } from './types';
+import { type ProfileUser } from './types';
 
 interface AccountFormProps {
   editData: { name: string; email: string; gender: string; birthDate: string; address: string; avatar: File | null };
   setEditData: (data: { name: string; email: string; gender: string; birthDate: string; address: string; avatar: File | null }) => void;
   avatarPreview: string | null;
-  setAvatarPreview: (preview: string | null) => void;
   profileData: ProfileUser;
   error: string | null;
   isLoadingProfile: boolean;
@@ -18,7 +17,6 @@ export default function AccountForm({
   editData,
   setEditData,
   avatarPreview,
-  setAvatarPreview,
   profileData,
   error,
   isLoadingProfile,

@@ -1,8 +1,8 @@
-import { type Purchases } from './types';
+import { type Purchases, type TabType } from './types';
 
 interface PurchasesTabProps {
-  activeTab: string;
-  setActiveTab: (tab: string) => void;
+  activeTab: TabType;
+  setActiveTab: React.Dispatch<React.SetStateAction<TabType>>;
   purchases: Purchases;
 }
 
@@ -24,7 +24,7 @@ export default function PurchasesTab({ activeTab, setActiveTab, purchases }: Pur
         ].map(({ label, key }) => (
           <button
             key={key}
-            onClick={() => setActiveTab(key)}
+            onClick={() => setActiveTab(key as TabType)}
             className={`px-4 py-2 rounded-lg transition-colors duration-200 ${
               activeTab === key
                 ? 'bg-orange-100 text-orange-600 border-b-2 border-orange-600 font-semibold'
