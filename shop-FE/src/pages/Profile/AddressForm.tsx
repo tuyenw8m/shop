@@ -1,19 +1,14 @@
 type AddressFormProps = {
-  editData: { name: string; email: string; address: string; phone: string };
-  setEditData: React.Dispatch<React.SetStateAction<{
-    name: string;
-    email: string;
-    address: string;
-    phone: string;
-  }>>;
+  address: string;
+  setAddress: React.Dispatch<React.SetStateAction<string>>;
   error: string | null;
   isLoadingProfile: boolean;
   handleSaveAddress: () => Promise<void>;
 };
 
 export default function AddressForm({
-  editData,
-  setEditData,
+  address,
+  setAddress,
   error,
   isLoadingProfile,
   handleSaveAddress,
@@ -47,8 +42,8 @@ export default function AddressForm({
               Địa chỉ giao hàng <span className="text-red-500">*</span>
             </label>
             <textarea
-              value={editData.address}
-              onChange={(e) => setEditData({ ...editData, address: e.target.value })}
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
               rows={3}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200 resize-none"
               placeholder="Nhập địa chỉ của bạn"
