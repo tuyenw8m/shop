@@ -22,14 +22,13 @@ export default function Profile() {
   const [editData, setEditData] = useState<{
     name: string;
     email: string;
-    address: string;
     phone: string;
   }>({
     name: '',
     email: '',
-    address: '',
     phone: '',
   });
+  const [address, setAddress] = useState<string>('');
   const [bankData, setBankData] = useState<{
     bankName: string;
     accountNumber: string;
@@ -62,19 +61,19 @@ export default function Profile() {
       try {
         setIsLoadingProfile(true);
         setError(null);
-        
+
         console.log('Attempting to fetch profile from:', `${API_URL}/users/me`);
         console.log('User token:', user.token ? 'Present' : 'Missing');
-        
+
         const response = await fetch(`${API_URL}/users/me`, {
           headers: {
             Authorization: `Bearer ${user.token}`,
             'Content-Type': 'application/json',
           },
         });
-        
+
         console.log('Response received:', response);
-        
+
         if (!response.ok) {
           const errorText = await response.text();
           console.error('Profile fetch error:', response.status, errorText);
@@ -88,19 +87,19 @@ export default function Profile() {
           }
           throw new Error(`Lỗi khi tải thông tin: ${errorText}`);
         }
-        
+
         const data = await response.json();
         console.log('Profile data received:', data);
-        
+
         if (data.status === 0 && data.data) {
           const userData = data.data as ProfileUser;
           setProfileData(userData);
           setEditData({
             name: userData.name || '',
             email: userData.email || '',
-            address: userData.address || '',
             phone: userData.phone || '',
           });
+          setAddress(userData.address || '');
           setUser((prevUser) => ({ ...prevUser!, user: userData }));
         } else {
           throw new Error('Dữ liệu người dùng không hợp lệ');
@@ -121,7 +120,7 @@ export default function Profile() {
       try {
         setIsLoadingBank(true);
         setBankError(null);
-        setBankError('Endpoint ngân hàng không khả dụng. Vui lòng liên hệ admin.');
+        setBankError('Tính năng đang được phát triển !');
       } catch (err) {
         setBankError(err instanceof Error ? err.message : 'Lỗi khi tải thông tin ngân hàng');
         console.error('Bank profile fetch error:', err);
@@ -154,7 +153,6 @@ export default function Profile() {
         // Always send complete data to prevent backend conflicts
         const payload = {
           name: editData.name,
-          address: editData.address,
           email: editData.email,
           phone: editData.phone,
         };
@@ -187,9 +185,9 @@ export default function Profile() {
               headers,
               body: JSON.stringify(payload),
             });
-            
+
             console.log(`${endpoint.method} ${endpoint.url} Response status:`, response.status);
-            
+
             if (response.ok) {
               console.log(`Success with ${endpoint.method} ${endpoint.url}`);
               break;
@@ -239,13 +237,51 @@ export default function Profile() {
     await debouncedUpdateProfile('Cập nhật hồ sơ thành công!');
   };
 
-  // Remove separate address update function - use the main one
   const handleSaveAddress = async () => {
-    if (!editData.address.trim()) {
+    if (!address.trim()) {
       setError('Địa chỉ không được để trống');
       return;
     }
-    await debouncedUpdateProfile('Cập nhật địa chỉ thành công!');
+    
+    if (!user?.token) {
+      setError('Vui lòng đăng nhập để lưu địa chỉ');
+      return;
+    }
+
+    try {
+      setIsLoadingProfile(true);
+      setError(null);
+
+      const headers = {
+        Authorization: `Bearer ${user.token}`,
+        'Content-Type': 'application/json',
+      };
+
+      const response = await fetch(`${API_URL}/users/me`, {
+        method: 'PUT',
+        headers,
+        body: JSON.stringify({ address: address }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Cập nhật địa chỉ thất bại: ${errorText}`);
+      }
+
+      const data = await response.json();
+      if (data.status === 0 && data.data) {
+        const updatedUser = data.data as ProfileUser;
+        setProfileData(updatedUser);
+        setUser((prevUser) => ({ ...prevUser!, user: updatedUser }));
+        alert('Cập nhật địa chỉ thành công!');
+      } else {
+        throw new Error('Dữ liệu trả về không hợp lệ');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Lỗi khi cập nhật địa chỉ');
+    } finally {
+      setIsLoadingProfile(false);
+    }
   };
 
   const handleSaveBankProfile = async () => {
@@ -371,89 +407,6 @@ export default function Profile() {
     }
   };
 
-  // Check if there's a specific endpoint for email updates
-  const handleSaveEmail = async () => {
-    if (!user?.token) {
-      setError('Vui lòng đăng nhập để cập nhật email');
-      return;
-    }
-
-    try {
-      setIsLoadingProfile(true);
-      setError(null);
-
-      if (!editData.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(editData.email)) {
-        setError('Email không hợp lệ');
-        return;
-      }
-
-      const headers = {
-        Authorization: `Bearer ${user.token}`,
-        'Content-Type': 'application/json',
-      };
-
-      console.log('=== EMAIL UPDATE DEBUG ===');
-      console.log('Email to update:', editData.email);
-
-      // Try different email update endpoints
-      const emailEndpoints = [
-        { url: `${API_URL}/user/me`, method: 'PUT' },
-        { url: `${API_URL}/users/me`, method: 'PUT' },
-        { url: `${API_URL}/users/me`, method: 'PATCH' },
-      ];
-
-      let response = null;
-      let lastError = null;
-
-      for (const endpoint of emailEndpoints) {
-        try {
-          console.log(`Trying email update: ${endpoint.method} ${endpoint.url}...`);
-          response = await fetch(endpoint.url, {
-            method: endpoint.method,
-            headers,
-            body: JSON.stringify({ email: editData.email }),
-          });
-          
-          console.log(`${endpoint.method} ${endpoint.url} Response status:`, response.status);
-          
-          if (response.ok) {
-            console.log(`Email update success with ${endpoint.method} ${endpoint.url}`);
-            break;
-          } else if (response.status !== 405) {
-            lastError = `Status ${response.status}: ${await response.text()}`;
-            break;
-          }
-        } catch (err) {
-          console.log(`Error with ${endpoint.method} ${endpoint.url}:`, err);
-          lastError = err;
-        }
-      }
-
-      if (!response || !response.ok) {
-        const errorText = lastError || await response?.text() || 'Unknown error';
-        console.error('All email update methods failed:', errorText);
-        throw new Error(`Cập nhật email thất bại: ${errorText}`);
-      }
-
-      const data = await response.json();
-      console.log('Email update response:', data);
-
-      if ((data.status === 0 || data.status === "success") && data.data) {
-        const updatedUser = data.data as ProfileUser;
-        setProfileData(updatedUser);
-        setUser((prevUser) => ({ ...prevUser!, user: updatedUser }));
-        alert('Cập nhật email thành công!');
-      } else {
-        throw new Error('Dữ liệu trả về không hợp lệ');
-      }
-    } catch (err) {
-      console.error('Email update error details:', err);
-      setError(err instanceof Error ? err.message : 'Lỗi khi cập nhật email');
-    } finally {
-      setIsLoadingProfile(false);
-    }
-  };
-
   // Cleanup timeout on unmount
   useEffect(() => {
     return () => {
@@ -517,7 +470,6 @@ export default function Profile() {
                 error={error}
                 isLoadingProfile={isLoadingProfile}
                 handleSaveProfile={handleSaveProfile}
-                handleSaveEmail={handleSaveEmail}
               />
             )}
             {activeTab === 'bank' && (
@@ -531,8 +483,8 @@ export default function Profile() {
             )}
             {activeTab === 'address' && (
               <AddressForm
-                editData={editData}
-                setEditData={setEditData}
+                address={address}
+                setAddress={setAddress}
                 error={error}
                 isLoadingProfile={isLoadingProfile}
                 handleSaveAddress={handleSaveAddress}
