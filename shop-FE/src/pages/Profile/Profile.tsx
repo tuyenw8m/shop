@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import ProfileSidebar from './ProfileSidebar';
 import NotificationsTab from './NotificationsTab';
@@ -16,7 +16,6 @@ export default function Profile() {
   const [profileData, setProfileData] = useState<ProfileUser | null>(null);
   const [isLoadingProfile, setIsLoadingProfile] = useState(false);
   const [isLoadingPassword, setIsLoadingPassword] = useState(false);
-  const [isLoadingEmail, setIsLoadingEmail] = useState(false);
   const [isLoadingBank, setIsLoadingBank] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<TabType>('purchase');
@@ -52,6 +51,7 @@ export default function Profile() {
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [bankError, setBankError] = useState<string | null>(null);
   const hasFetchedRef = useRef(false);
+  const updateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (!user?.token || hasFetchedRef.current) {
@@ -135,66 +135,117 @@ export default function Profile() {
     fetchBankProfile();
   }, [user?.token, setUser]);
 
-  const handleSaveProfile = async () => {
-    if (!user?.token) {
-      setError('Vui lòng đăng nhập để lưu hồ sơ');
-      return;
+  // Single debounced update function that always sends complete data
+  const debouncedUpdateProfile = useCallback(async (successMessage: string) => {
+    if (updateTimeoutRef.current) {
+      clearTimeout(updateTimeoutRef.current);
     }
-    try {
-      setIsLoadingProfile(true);
-      setError(null);
 
-      if (!editData.name.trim()) {
-        setError('Tên không được để trống');
+    updateTimeoutRef.current = setTimeout(async () => {
+      if (!user?.token) {
+        setError('Vui lòng đăng nhập để lưu hồ sơ');
         return;
       }
 
-      const payload = {
-        name: editData.name,
-        address: editData.address,
-        email: editData.email,
-        phone: editData.phone,
-      };
+      try {
+        setIsLoadingProfile(true);
+        setError(null);
 
-      console.log('Sending profile update with JSON:', payload);
-      console.log('API URL:', `${API_URL}/users/me`);
-      console.log('Request method: PUT');
+        // Always send complete data to prevent backend conflicts
+        const payload = {
+          name: editData.name,
+          address: editData.address,
+          email: editData.email,
+          phone: editData.phone,
+        };
 
-      const headers = {
-        Authorization: `Bearer ${user.token}`,
-        'Content-Type': 'application/json',
-      };
-      console.log('Request headers:', headers);
+        console.log('=== PROFILE UPDATE DEBUG ===');
+        console.log('Sending complete profile update:', payload);
+        console.log('API URL:', `${API_URL}/users/me`);
+        console.log('Trying different HTTP methods and endpoints...');
 
-      const response = await fetch(`${API_URL}/users/me`, {
-        method: 'PUT',
-        headers,
-        body: JSON.stringify(payload),
-      });
+        const headers = {
+          Authorization: `Bearer ${user.token}`,
+          'Content-Type': 'application/json',
+        };
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Profile save error:', response.status, errorText);
-        throw new Error(`Cập nhật hồ sơ thất bại: ${errorText}`);
+        // Try different endpoints and methods
+        const endpoints = [
+          { url: `${API_URL}/user/me`, method: 'PUT' },
+          { url: `${API_URL}/users/me`, method: 'PUT' },
+          { url: `${API_URL}/users/me`, method: 'PATCH' },
+        ];
+
+        let response = null;
+        let lastError = null;
+
+        for (const endpoint of endpoints) {
+          try {
+            console.log(`Trying ${endpoint.method} ${endpoint.url}...`);
+            response = await fetch(endpoint.url, {
+              method: endpoint.method,
+              headers,
+              body: JSON.stringify(payload),
+            });
+            
+            console.log(`${endpoint.method} ${endpoint.url} Response status:`, response.status);
+            
+            if (response.ok) {
+              console.log(`Success with ${endpoint.method} ${endpoint.url}`);
+              break;
+            } else if (response.status !== 405) {
+              // If it's not 405, it might be a different error (400, 401, etc.)
+              lastError = `Status ${response.status}: ${await response.text()}`;
+              break;
+            }
+          } catch (err) {
+            console.log(`Error with ${endpoint.method} ${endpoint.url}:`, err);
+            lastError = err;
+          }
+        }
+
+        if (!response || !response.ok) {
+          const errorText = lastError || await response?.text() || 'Unknown error';
+          console.error('All profile update methods failed:', errorText);
+          throw new Error(`Cập nhật hồ sơ thất bại: ${errorText}`);
+        }
+
+        const data = await response.json();
+        console.log('Profile update response:', data);
+
+        if ((data.status === 0 || data.status === "success") && data.data) {
+          const updatedUser = data.data as ProfileUser;
+          setProfileData(updatedUser);
+          setUser((prevUser) => ({ ...prevUser!, user: updatedUser }));
+          alert(successMessage);
+        } else {
+          throw new Error('Dữ liệu trả về không hợp lệ');
+        }
+      } catch (err) {
+        console.error('Profile save error details:', err);
+        setError(err instanceof Error ? err.message : 'Lỗi khi cập nhật hồ sơ');
+      } finally {
+        setIsLoadingProfile(false);
       }
+    }, 300); // 300ms debounce
+  }, [user?.token, setUser, editData]);
 
-      const data = await response.json();
-      console.log('Profile update response:', data);
-
-      if (data.status === 0 && data.data) {
-        const updatedUser = data.data as ProfileUser;
-        setProfileData(updatedUser);
-        setUser((prevUser) => ({ ...prevUser!, user: updatedUser }));
-        alert('Cập nhật hồ sơ thành công!');
-      } else {
-        throw new Error('Dữ liệu trả về không hợp lệ');
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Lỗi khi cập nhật hồ sơ');
-      console.error('Profile save error:', err);
-    } finally {
-      setIsLoadingProfile(false);
+  // Single function for all profile updates
+  const handleSaveProfile = async () => {
+    if (!editData.name.trim()) {
+      setError('Tên không được để trống');
+      return;
     }
+    await debouncedUpdateProfile('Cập nhật hồ sơ thành công!');
+  };
+
+  // Remove separate address update function - use the main one
+  const handleSaveAddress = async () => {
+    if (!editData.address.trim()) {
+      setError('Địa chỉ không được để trống');
+      return;
+    }
+    await debouncedUpdateProfile('Cập nhật địa chỉ thành công!');
   };
 
   const handleSaveBankProfile = async () => {
@@ -223,7 +274,6 @@ export default function Profile() {
         Authorization: `Bearer ${user.token}`,
         'Content-Type': 'application/json',
       };
-      console.log('Bank profile request headers:', headers);
 
       const response = await fetch(`${API_URL}/users/me/bank`, {
         method: 'PUT',
@@ -262,110 +312,6 @@ export default function Profile() {
     }
   };
 
-  const handleSaveAddress = async () => {
-    if (!user?.token) {
-      setError('Vui lòng đăng nhập để lưu địa chỉ');
-      return;
-    }
-    try {
-      setIsLoadingProfile(true);
-      setError(null);
-
-      if (!editData.address.trim()) {
-        setError('Địa chỉ không được để trống');
-        return;
-      }
-
-      const payload = {
-        address: editData.address,
-      };
-
-      console.log('Sending address update:', payload);
-
-      const headers = {
-        Authorization: `Bearer ${user.token}`,
-        'Content-Type': 'application/json',
-      };
-      console.log('Address request headers:', headers);
-
-      const response = await fetch(`${API_URL}/users/me`, {
-        method: 'PUT',
-        headers,
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Address save error:', response.status, errorText);
-        throw new Error(`Cập nhật địa chỉ thất bại: ${errorText}`);
-      }
-
-      const data = await response.json();
-      console.log('Address update response:', data);
-
-      if (data.status === 0 && data.data) {
-        const updatedUser = data.data as ProfileUser;
-        setProfileData(updatedUser);
-        setUser((prevUser) => ({ ...prevUser!, user: updatedUser }));
-        alert('Cập nhật địa chỉ thành công!');
-      } else {
-        throw new Error('Dữ liệu trả về không hợp lệ');
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Lỗi khi cập nhật địa chỉ');
-      console.error('Address save error:', err);
-    } finally {
-      setIsLoadingProfile(false);
-    }
-  };
-
-  const handleSaveEmail = async () => {
-    if (!user?.token) {
-      setError('Vui lòng đăng nhập để cập nhật email');
-      return;
-    }
-    try {
-      setIsLoadingEmail(true);
-      setError(null);
-
-      if (!editData.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(editData.email)) {
-        setError('Email không hợp lệ');
-        return;
-      }
-
-      const headers = {
-        Authorization: `Bearer ${user.token}`,
-        'Content-Type': 'application/json',
-      };
-      console.log('Email request headers:', headers);
-      console.log('Email update payload:', { email: editData.email });
-      console.log('API URL:', `${API_URL}/users/me`);
-      console.log('Request method: PUT');
-
-      const response = await fetch(`${API_URL}/users/me`, {
-        method: 'PUT',
-        headers,
-        body: JSON.stringify({ email: editData.email }),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Email update error:', response.status, errorText);
-        throw new Error(`Cập nhật email thất bại: ${errorText}`);
-      }
-
-      const data = await response.json();
-      console.log('Email update response:', data);
-
-      alert('Yêu cầu cập nhật email đã được gửi. Vui lòng kiểm tra hộp thư để xác minh.');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Lỗi khi cập nhật email');
-      console.error('Email update error:', err);
-    } finally {
-      setIsLoadingEmail(false);
-    }
-  };
-
   const handleChangePassword = async () => {
     if (!user?.token) {
       setPasswordError('Vui lòng đăng nhập để đổi mật khẩu');
@@ -392,13 +338,12 @@ export default function Profile() {
         Authorization: `Bearer ${user.token}`,
         'Content-Type': 'application/json',
       };
-      console.log('Password change request headers:', headers);
 
-      const response = await fetch(`${API_URL}/users/me`, {
-        method: 'POST',
+      const response = await fetch(`${API_URL}/changepassword`, {
+        method: 'PUT',
         headers,
         body: JSON.stringify({
-          currentPassword: passwordData.currentPassword,
+          oldPassword: passwordData.currentPassword,
           newPassword: passwordData.newPassword,
         }),
       });
@@ -426,7 +371,99 @@ export default function Profile() {
     }
   };
 
-  const isLoading = isLoadingProfile || isLoadingPassword || isLoadingEmail || isLoadingBank;
+  // Check if there's a specific endpoint for email updates
+  const handleSaveEmail = async () => {
+    if (!user?.token) {
+      setError('Vui lòng đăng nhập để cập nhật email');
+      return;
+    }
+
+    try {
+      setIsLoadingProfile(true);
+      setError(null);
+
+      if (!editData.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(editData.email)) {
+        setError('Email không hợp lệ');
+        return;
+      }
+
+      const headers = {
+        Authorization: `Bearer ${user.token}`,
+        'Content-Type': 'application/json',
+      };
+
+      console.log('=== EMAIL UPDATE DEBUG ===');
+      console.log('Email to update:', editData.email);
+
+      // Try different email update endpoints
+      const emailEndpoints = [
+        { url: `${API_URL}/user/me`, method: 'PUT' },
+        { url: `${API_URL}/users/me`, method: 'PUT' },
+        { url: `${API_URL}/users/me`, method: 'PATCH' },
+      ];
+
+      let response = null;
+      let lastError = null;
+
+      for (const endpoint of emailEndpoints) {
+        try {
+          console.log(`Trying email update: ${endpoint.method} ${endpoint.url}...`);
+          response = await fetch(endpoint.url, {
+            method: endpoint.method,
+            headers,
+            body: JSON.stringify({ email: editData.email }),
+          });
+          
+          console.log(`${endpoint.method} ${endpoint.url} Response status:`, response.status);
+          
+          if (response.ok) {
+            console.log(`Email update success with ${endpoint.method} ${endpoint.url}`);
+            break;
+          } else if (response.status !== 405) {
+            lastError = `Status ${response.status}: ${await response.text()}`;
+            break;
+          }
+        } catch (err) {
+          console.log(`Error with ${endpoint.method} ${endpoint.url}:`, err);
+          lastError = err;
+        }
+      }
+
+      if (!response || !response.ok) {
+        const errorText = lastError || await response?.text() || 'Unknown error';
+        console.error('All email update methods failed:', errorText);
+        throw new Error(`Cập nhật email thất bại: ${errorText}`);
+      }
+
+      const data = await response.json();
+      console.log('Email update response:', data);
+
+      if ((data.status === 0 || data.status === "success") && data.data) {
+        const updatedUser = data.data as ProfileUser;
+        setProfileData(updatedUser);
+        setUser((prevUser) => ({ ...prevUser!, user: updatedUser }));
+        alert('Cập nhật email thành công!');
+      } else {
+        throw new Error('Dữ liệu trả về không hợp lệ');
+      }
+    } catch (err) {
+      console.error('Email update error details:', err);
+      setError(err instanceof Error ? err.message : 'Lỗi khi cập nhật email');
+    } finally {
+      setIsLoadingProfile(false);
+    }
+  };
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (updateTimeoutRef.current) {
+        clearTimeout(updateTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const isLoading = isLoadingProfile || isLoadingPassword || isLoadingBank;
 
   if (isLoading && !profileData) return (
     <div className="flex justify-center items-center h-screen bg-gray-50">
@@ -442,7 +479,7 @@ export default function Profile() {
     <div className="flex justify-center items-center h-screen bg-gray-50">
       <div className="text-lg text-gray-600">
         Bạn cần đăng nhập để xem thông tin hồ sơ.{' '}
-        <a href="/login" className="text-orange-500 hover:underline">Đăng nhập</a>
+        <a href="/login" className="text-green-500 hover:underline">Đăng nhập</a>
       </div>
     </div>
   );
@@ -463,59 +500,62 @@ export default function Profile() {
   };
 
   return (
-    <div className="flex h-screen bg-gray-100 font-sans">
-      <ProfileSidebar
-        profileData={profileData}
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-      />
-      <div className="w-4/5 p-8 bg-white rounded-lg shadow-md">
-        {activeTab === 'notifications' && <NotificationsTab notifications={notifications} />}
-        {activeTab === 'account' && (
-          <AccountForm
-            editData={editData}
-            setEditData={setEditData}
-            error={error}
-            isLoadingProfile={isLoadingProfile}
-            isLoadingEmail={isLoadingEmail}
-            handleSaveProfile={handleSaveProfile}
-            handleSaveEmail={handleSaveEmail}
-          />
-        )}
-        {activeTab === 'bank' && (
-          <BankForm
-            bankData={bankData}
-            setBankData={setBankData}
-            bankError={bankError}
-            isLoadingBank={isLoadingBank}
-            handleSaveBankProfile={handleSaveBankProfile}
-          />
-        )}
-        {activeTab === 'address' && (
-          <AddressForm
-            editData={editData}
-            setEditData={setEditData}
-            error={error}
-            isLoadingProfile={isLoadingProfile}
-            handleSaveAddress={handleSaveAddress}
-          />
-        )}
-        {activeTab === 'password' && (
-          <PasswordForm
-            passwordData={passwordData}
-            setPasswordData={setPasswordData}
-            passwordError={passwordError}
-            isLoadingPassword={isLoadingPassword}
-            handleChangePassword={handleChangePassword}
-          />
-        )}
-        {['purchase', 'waitingPayment', 'shipping', 'waitingDelivery', 'completed', 'cancelled', 'returned'].includes(activeTab) && (
-          <PurchasesTab
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-            purchases={purchases}
-          />
-        )}
+    <div className="min-h-screen bg-gray-50">
+      <div className="flex">
+        <ProfileSidebar
+          profileData={profileData}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+        />
+        <div className="flex-1 p-8">
+          <div className="max-w-4xl mx-auto">
+            {activeTab === 'notifications' && <NotificationsTab notifications={notifications} />}
+            {activeTab === 'account' && (
+              <AccountForm
+                editData={editData}
+                setEditData={setEditData}
+                error={error}
+                isLoadingProfile={isLoadingProfile}
+                handleSaveProfile={handleSaveProfile}
+                handleSaveEmail={handleSaveEmail}
+              />
+            )}
+            {activeTab === 'bank' && (
+              <BankForm
+                bankData={bankData}
+                setBankData={setBankData}
+                bankError={bankError}
+                isLoadingBank={isLoadingBank}
+                handleSaveBankProfile={handleSaveBankProfile}
+              />
+            )}
+            {activeTab === 'address' && (
+              <AddressForm
+                editData={editData}
+                setEditData={setEditData}
+                error={error}
+                isLoadingProfile={isLoadingProfile}
+                handleSaveAddress={handleSaveAddress}
+              />
+            )}
+            {activeTab === 'password' && (
+              <PasswordForm
+                passwordData={passwordData}
+                setPasswordData={setPasswordData}
+                passwordError={passwordError}
+                isLoadingPassword={isLoadingPassword}
+                handleChangePassword={handleChangePassword}
+              />
+            )}
+            {['purchase', 'waitingPayment', 'shipping', 'waitingDelivery', 'completed', 'cancelled', 'returned'].includes(activeTab) && (
+              <PurchasesTab
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
+                purchases={purchases}
+              />
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

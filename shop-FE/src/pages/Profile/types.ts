@@ -1,32 +1,53 @@
+export type TabType = 
+  | 'notifications' 
+  | 'account' 
+  | 'bank' 
+  | 'address' 
+  | 'password' 
+  | 'purchase' 
+  | 'waitingPayment' 
+  | 'shipping' 
+  | 'waitingDelivery' 
+  | 'completed' 
+  | 'cancelled' 
+  | 'returned';
+
 export interface ProfileUser {
   id: string;
-  token?: string;
   name: string;
   email: string;
-  gender?: string;
-  birthDate?: string;
-  avatar_url?: string;
-  address?: string;
   phone?: string;
-  bankName?: string;
-  accountNumber?: string;
-  accountHolder?: string;
+  address?: string;
+  avatar_url?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface Notification {
+  id: number;
+  message: string;
+  read: boolean;
+  created_at?: string;
 }
 
 export interface Purchase {
   id: string;
-  date: string;
-  product: string;
-  originalPrice: string;
-  price: string;
-  totalPrice: string;
+  order_number: string;
   status: string;
-  shop: string;
-  image: string;
+  total_amount: number;
+  created_at: string;
+  items: PurchaseItem[];
+}
+
+export interface PurchaseItem {
+  id: string;
+  product_name: string;
+  quantity: number;
+  price: number;
+  image_url?: string;
 }
 
 export interface Purchases {
-  [key: string]: Purchase[];
   purchase: Purchase[];
   waitingPayment: Purchase[];
   shipping: Purchase[];
@@ -34,12 +55,4 @@ export interface Purchases {
   completed: Purchase[];
   cancelled: Purchase[];
   returned: Purchase[];
-}
-
-export interface Notification {
-  id: number;
-  message: string;
-  read: boolean;
-}
-
-export type TabType = 'notifications' | 'account' | 'purchase' | 'waitingPayment' | 'shipping' | 'waitingDelivery' | 'completed' | 'cancelled' | 'returned' | 'bank' | 'address' | 'password' | 'cart';
+} 
