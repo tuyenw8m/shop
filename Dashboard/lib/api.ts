@@ -169,6 +169,11 @@ class ApiClient {
       method: "DELETE",
     })
   }
+
+  // Dashboard Summary API
+  async getDashboardSummary() {
+    return this.request('/dashboard/summary');
+  }
 }
 
 export const apiClient = new ApiClient()

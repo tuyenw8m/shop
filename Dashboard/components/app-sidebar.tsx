@@ -21,6 +21,8 @@ import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { useAuth } from "@/contexts/auth-context"
+import { useEffect, useState } from "react"
+import { apiClient } from "@/lib/api"
 
 const menuItems = [
   {
@@ -78,6 +80,13 @@ const menuItems = [
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname()
   const { user, logout } = useAuth()
+  const [counts, setCounts] = useState<{ products: number; users: number }>({ products: 0, users: 0 })
+
+  useEffect(() => {
+    apiClient.getDashboardSummary().then((data) => {
+      setCounts({ products: data.totalProducts, users: data.totalUsers })
+    })
+  }, [])
 
   return (
     <Sidebar collapsible="icon" className="border-r-0 shadow-lg" {...props}>
@@ -114,7 +123,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       >
                         {item.title}
                       </span>
-                      {item.badge && (
+                      {item.title === "Sản phẩm" && counts.products > 0 && (
+                        <Badge variant="secondary" className="ml-auto bg-gray-100 text-gray-600 text-xs">
+                          {counts.products.toLocaleString()}
+                        </Badge>
+                      )}
+                      {item.title === "Người dùng" && counts.users > 0 && (
+                        <Badge variant="secondary" className="ml-auto bg-gray-100 text-gray-600 text-xs">
+                          {counts.users.toLocaleString()}
+                        </Badge>
+                      )}
+                      {item.badge && item.title !== "Sản phẩm" && item.title !== "Người dùng" && (
                         <Badge variant="secondary" className="ml-auto bg-gray-100 text-gray-600 text-xs">
                           {item.badge}
                         </Badge>
