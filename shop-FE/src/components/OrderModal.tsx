@@ -21,7 +21,7 @@ interface OrderModalProps {
 
 export default function OrderModal({ user, product, onConfirm, onClose, error, successMessage }: OrderModalProps) {
   return (
-    <div className="fixed inset-0 bg-transparent flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-white bg-opacity-70 flex items-center justify-center z-50">
       <div className="bg-white p-6 rounded shadow-lg w-full max-w-md">
         <h2 className="text-xl font-bold mb-4">Xác nhận đơn hàng</h2>
         <div className="flex gap-4 mb-4">

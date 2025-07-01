@@ -73,10 +73,10 @@ export default function PurchasesTab({ activeTab, setActiveTab, purchases }: Pur
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          productId: selectedProduct.product_id || selectedProduct.id,
+          product_id: selectedProduct.product_id || selectedProduct.id,
           quantity: selectedProduct.quantity || 1,
-          address: userProfile.address,
-          phone: userProfile.phone,
+          // comment: '', // nếu muốn cho phép nhập
+          // status: '',  // nếu muốn cho phép nhập
         }),
       });
       if (!response.ok) {
