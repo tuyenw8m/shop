@@ -16,11 +16,12 @@ interface OrderModalProps {
   onConfirm: () => void;
   onClose: () => void;
   error?: string | null;
+  successMessage?: string;
 }
 
-export default function OrderModal({ user, product, onConfirm, onClose, error }: OrderModalProps) {
+export default function OrderModal({ user, product, onConfirm, onClose, error, successMessage }: OrderModalProps) {
   return (
-    <div className="fixed inset-0 bg-white bg-opacity-60 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-transparent flex items-center justify-center z-50">
       <div className="bg-white p-6 rounded shadow-lg w-full max-w-md">
         <h2 className="text-xl font-bold mb-4">Xác nhận đơn hàng</h2>
         <div className="flex gap-4 mb-4">
@@ -42,6 +43,11 @@ export default function OrderModal({ user, product, onConfirm, onClose, error }:
           <button onClick={onConfirm} className="px-4 py-2 bg-green-500 text-white rounded">Xác nhận đặt hàng</button>
         </div>
       </div>
+      {successMessage && (
+        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-green-100 text-green-700 px-6 py-2 rounded shadow z-50 transition-all duration-300">
+          {successMessage}
+        </div>
+      )}
     </div>
   );
 } 
