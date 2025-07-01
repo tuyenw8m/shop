@@ -8,6 +8,7 @@ type AccountFormProps = {
   error: string | null;
   isLoadingProfile: boolean;
   handleSaveProfile: () => Promise<void>;
+  successMessage?: string | null;
 };
 
 export default function AccountForm({
@@ -16,6 +17,7 @@ export default function AccountForm({
   error,
   isLoadingProfile,
   handleSaveProfile,
+  successMessage,
 }: AccountFormProps) {
   // Tạo email ẩn dạng **
   const maskEmail = (email: string) => {
@@ -49,6 +51,17 @@ export default function AccountForm({
               <div className="ml-3">
                 <p className="text-sm text-red-800">{error}</p>
               </div>
+            </div>
+          </div>
+        )}
+
+        {successMessage && (
+          <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+            <div className="flex items-center">
+              <svg className="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+              <span className="ml-2 text-green-800 text-sm font-medium">{successMessage}</span>
             </div>
           </div>
         )}

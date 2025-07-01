@@ -22,9 +22,11 @@ export default function Register() {
     resolver: yupResolver(schema),
   });
   const [apiError, setApiError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const onSubmit = async (data: FormDataTypeRegister) => {
     setApiError(null);
+    setSuccessMessage(null);
     console.log('Dữ liệu gửi đi:', data);
     const { confirm_password, ...dataToSend } = data;
     try {
@@ -66,7 +68,8 @@ export default function Register() {
       }
 
       console.log('Dữ liệu phản hồi thành công:', result);
-      alert('✅ Đăng ký thành công!');
+      setSuccessMessage('✅ Đăng ký thành công!');
+      setTimeout(() => navigate('/'), 1500);
     } catch (error: any) {
       console.error('Lỗi chi tiết:', error);
       setApiError(error.message || 'Có lỗi xảy ra khi đăng ký!');
@@ -83,6 +86,11 @@ export default function Register() {
           ></div>
           <div className="w-full md:w-1/2 p-6 flex flex-col justify-center items-center">
             <h2 className="text-center text-2xl font-bold text-gray-800 mb-6">ĐĂNG KÝ</h2>
+            {successMessage && (
+              <div className="text-green-600 text-sm text-center mb-4 bg-green-50 border border-green-200 rounded-lg py-2">
+                {successMessage}
+              </div>
+            )}
             {apiError && (
               <div className="text-red-500 text-sm text-center mb-4">{apiError}</div>
             )}
@@ -138,6 +146,11 @@ export default function Register() {
               >
                 Đăng Ký
               </button>
+              {successMessage && (
+                <div className="text-green-600 text-sm text-center mt-4 bg-green-50 border border-green-200 rounded-lg py-2">
+                  {successMessage}
+                </div>
+              )}
             </form>
           </div>
         </div>

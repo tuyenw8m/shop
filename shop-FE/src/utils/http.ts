@@ -4,9 +4,7 @@ import type { AuthResponse } from 'src/types/utils.type'
 
 class Http {
   instance: AxiosInstance
-  private accessToken: string | undefined
   constructor() {
-    this.accessToken = getAccessToken()
     this.instance = axios.create({
       baseURL: 'http://localhost:8888/shop/api/v1',
       timeout: 10000,
@@ -17,9 +15,9 @@ class Http {
     // Add a request interceptor
     this.instance.interceptors.request.use(
       (config) => {
-        if (this.accessToken && config.headers) {
-          config.headers.Authorization = `Bearer ${this.accessToken}`
-          return config
+        const token = getAccessToken(); // luôn lấy token mới nhất
+        if (token && config.headers) {
+          config.headers.Authorization = `Bearer ${token}`
         }
         return config
       },
@@ -32,8 +30,7 @@ class Http {
       const { url } = response.config
       if (url === '/auth/login' || url === '/register') {
         const data = response.data.data as AuthResponse
-        this.accessToken = data.token
-        saveAccessTokenToLocalStorage(this.accessToken)
+        saveAccessTokenToLocalStorage(data.token)
         saveProfileToLocalStorage(data.user)
       }
       return response

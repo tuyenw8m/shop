@@ -21,7 +21,7 @@ const StarRating = ({
         onClick={!readOnly ? () => setRating(star) : undefined}
         disabled={readOnly}
         className={`text-sm transition-colors duration-200 ${
-          star <= rating ? 'text-yellow-500' : 'text-gray-300'
+          star <= rating ? 'text-yellow-500' : 'text-gray-400'
         } ${!readOnly ? 'hover:text-yellow-400 cursor-pointer' : ''}`}
       >
         ★
