@@ -6,6 +6,7 @@ import ProductQuickOverview from '../ProductQuickOverview' // Đảm bảo compo
 import RatingProduct from '../RatingProduct/RatingProduct' // Đảm bảo component này tồn tại
 import { Eye } from 'lucide-react'
 import { useCartMutations } from 'src/hooks/useCartMutations'
+import OrderModal from '../OrderModal'
 
 interface ProductType {
   product: Product
@@ -19,6 +20,8 @@ export function ProductCard({ product }: ProductType) {
   const { addItemToCart } = useCartMutations(user_id)
 
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false)
+  const [showOrderModal, setShowOrderModal] = useState(false)
+  const [orderError, setOrderError] = useState<string | null>(null)
 
   const handleQuickView = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -43,6 +46,54 @@ export function ProductCard({ product }: ProductType) {
     navigate(`/product/${product.id}`)
   }
 
+  const handleBuyNow = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (userProfile) {
+      setShowOrderModal(true)
+    } else {
+      navigate('/login')
+    }
+  }
+
+  const handleConfirmOrder = async () => {
+    setOrderError(null)
+    if (!userProfile?.phone || !userProfile?.address) {
+      setOrderError('Vui lòng cập nhật số điện thoại và địa chỉ trong hồ sơ!')
+      setTimeout(() => {
+        setShowOrderModal(false)
+        navigate('/profile')
+      }, 1500)
+      return
+    }
+    try {
+      const response = await fetch('http://localhost:8888/shop/api/v1/orders', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${userProfile.token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          productId: product.id,
+          quantity: 1,
+          address: userProfile.address,
+          phone: userProfile.phone,
+        }),
+      })
+      if (!response.ok) {
+        const errorText = await response.text()
+        setOrderError('Đặt hàng thất bại: ' + errorText)
+        return
+      }
+      setShowOrderModal(false)
+      alert('Đặt hàng thành công! Đơn hàng đã chuyển sang mục Chờ thanh toán.')
+      navigate('/profile')
+    } catch (err) {
+      setOrderError('Đặt hàng thất bại!')
+      console.error('Order error:', err)
+    }
+  }
+
   const discountPercent =
     product.original_price > product.price
       ? Math.round(((product.original_price - product.price) / product.original_price) * 100)
@@ -51,6 +102,15 @@ export function ProductCard({ product }: ProductType) {
   return (
     <>
       {isQuickViewOpen && <ProductQuickOverview product={product} onClose={handleCloseQuickView} />}
+      {showOrderModal && (
+        <OrderModal
+          user={userProfile}
+          product={product}
+          onConfirm={handleConfirmOrder}
+          onClose={() => setShowOrderModal(false)}
+          error={orderError}
+        />
+      )}
       <div
         className='group bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg hover:border-teal-200 transition-all duration-300 transform hover:-translate-y-1 flex flex-col h-full cursor-pointer'
         onClick={handleCardClick}
@@ -134,12 +194,20 @@ export function ProductCard({ product }: ProductType) {
                 Liên Hệ Đặt Hàng
               </button>
             ) : (
-              <button
-                onClick={handleAddToCart}
-                className='w-full bg-teal-600 hover:bg-teal-700 text-white text-sm rounded-md py-2 transition-colors'
-              >
-                Thêm vào giỏ
-              </button>
+              <>
+                <button
+                  onClick={handleAddToCart}
+                  className='w-full bg-teal-600 hover:bg-teal-700 text-white text-sm rounded-md py-2 transition-colors mb-2'
+                >
+                  Thêm vào giỏ
+                </button>
+                <button
+                  onClick={handleBuyNow}
+                  className='w-full bg-blue-500 hover:bg-blue-600 text-white text-sm rounded-md py-2 transition-colors'
+                >
+                  Mua ngay
+                </button>
+              </>
             )}
           </div>
         </div>

@@ -6,6 +6,7 @@ import ReviewSection from 'src/components/ReviewSection'
 import type { Product } from 'src/types/product.type'
 import { formatPrices, salePercent, getProfileLocalStorage } from 'src/utils/utils'
 import { useCartMutations } from 'src/hooks/useCartMutations'
+import OrderModal from 'src/components/OrderModal'
 
 export default function ProductDetail() {
   const { id = '' } = useParams()
@@ -23,6 +24,8 @@ export default function ProductDetail() {
   const product = data?.data?.data as Product
 
   const [selectedImage, setSelectedImage] = useState(0)
+  const [showOrderModal, setShowOrderModal] = useState(false)
+  const [orderError, setOrderError] = useState<string | null>(null)
 
   if (!product) {
     return <div className='text-center py-10'>404. Sản phẩm không tồn tại...</div>
@@ -38,15 +41,63 @@ export default function ProductDetail() {
 
   const handleBuyNow = () => {
     if (userProfile) {
-      // Navigate to checkout or cart page
-      navigate('/cart')
+      setShowOrderModal(true)
     } else {
       navigate('/login')
     }
   }
 
+  const handleConfirmOrder = async () => {
+    setOrderError(null)
+    if (!userProfile?.phone || !userProfile?.address) {
+      setOrderError('Vui lòng cập nhật số điện thoại và địa chỉ trong hồ sơ!')
+      setTimeout(() => {
+        setShowOrderModal(false)
+        navigate('/profile')
+      }, 1500)
+      return
+    }
+    try {
+      // Gọi API tạo đơn hàng
+      const response = await fetch('http://localhost:8888/shop/api/v1/orders', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${userProfile.token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          productId: product.id,
+          quantity: 1,
+          address: userProfile.address,
+          phone: userProfile.phone,
+        }),
+      })
+      if (!response.ok) {
+        const errorText = await response.text()
+        setOrderError('Đặt hàng thất bại: ' + errorText)
+        return
+      }
+      // Có thể cập nhật lại danh sách đơn hàng ở đây nếu cần
+      setShowOrderModal(false)
+      alert('Đặt hàng thành công! Đơn hàng đã chuyển sang mục Chờ thanh toán.')
+      navigate('/profile')
+    } catch (err) {
+      setOrderError('Đặt hàng thất bại!')
+      console.error('Order error:', err)
+    }
+  }
+
   return (
     <div className='max-w-7xl mx-auto px-12 py-12'>
+      {showOrderModal && (
+        <OrderModal
+          user={userProfile}
+          product={product}
+          onConfirm={handleConfirmOrder}
+          onClose={() => setShowOrderModal(false)}
+          error={orderError}
+        />
+      )}
       <div className='grid lg:grid-cols-3 gap-8'>
         <div className='col-span-2 space-y-4'>
           {product.image_url && product.image_url.length > 0 && (
