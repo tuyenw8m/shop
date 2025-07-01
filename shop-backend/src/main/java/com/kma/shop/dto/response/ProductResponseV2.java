@@ -3,6 +3,7 @@ package com.kma.shop.dto.response;
 import lombok.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Builder
 @Getter

@@ -157,7 +157,7 @@ export default function Profile() {
       };
 
       console.log('Sending profile update with JSON:', payload);
-      console.log('API URL:', `${API_URL}/users/me`);
+      console.log('API URL:', `${API_URL}/user/me`);
       console.log('Request method: PUT');
 
       const headers = {
@@ -166,7 +166,7 @@ export default function Profile() {
       };
       console.log('Request headers:', headers);
 
-      const response = await fetch(`${API_URL}/users/me`, {
+      const response = await fetch(`${API_URL}/user/me`, {
         method: 'PUT',
         headers,
         body: JSON.stringify(payload),
