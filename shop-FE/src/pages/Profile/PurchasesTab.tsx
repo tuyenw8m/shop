@@ -6,6 +6,9 @@ import { useCartQuery } from 'src/hooks/useCartQuery';
 import { getProfileLocalStorage } from 'src/utils/utils';
 import type { RootState } from 'src/app/store';
 import { type Purchases, type TabType } from './types';
+import React, { useState } from 'react';
+import OrderModal from 'src/components/OrderModal';
+import { useNavigate } from 'react-router-dom';
 
 interface PurchasesTabProps {
   activeTab: TabType;
@@ -16,11 +19,17 @@ interface PurchasesTabProps {
 export default function PurchasesTab({ activeTab, setActiveTab, purchases }: PurchasesTabProps) {
   const userProfile = getProfileLocalStorage();
   const user_id = userProfile?.id;
+  const navigate = useNavigate();
 
   useCartQuery(user_id);
 
   const { items } = useSelector((state: RootState) => state.cart);
   const { updateCartItemQuantity, removeCartItem } = useCartMutations(user_id);
+
+  // Modal state
+  const [showOrderModal, setShowOrderModal] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  const [orderError, setOrderError] = useState<string | null>(null);
 
   const handleRemoveFromCart = (itemId: string) => {
     if (user_id) {
@@ -35,6 +44,52 @@ export default function PurchasesTab({ activeTab, setActiveTab, purchases }: Pur
     }
     if (user_id) {
       updateCartItemQuantity.mutate({ item_id: itemId, product_id: productId, quantity: newQuantity });
+    }
+  };
+
+  // Mua ngay/mua lại: mở modal xác nhận
+  const handleBuyNow = (cartItem: any) => {
+    setSelectedProduct(cartItem);
+    setOrderError(null);
+    setShowOrderModal(true);
+  };
+
+  // Xác nhận đặt hàng
+  const handleConfirmOrder = async () => {
+    setOrderError(null);
+    if (!userProfile?.phone || !userProfile?.address) {
+      setOrderError('Vui lòng cập nhật số điện thoại và địa chỉ trong hồ sơ!');
+      setTimeout(() => {
+        setShowOrderModal(false);
+        navigate('/profile');
+      }, 1500);
+      return;
+    }
+    try {
+      const response = await fetch('http://localhost:8888/shop/api/v1/orders', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${userProfile.token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          productId: selectedProduct.product_id || selectedProduct.id,
+          quantity: selectedProduct.quantity || 1,
+          address: userProfile.address,
+          phone: userProfile.phone,
+        }),
+      });
+      if (!response.ok) {
+        const errorText = await response.text();
+        setOrderError('Đặt hàng thất bại: ' + errorText);
+        return;
+      }
+      setShowOrderModal(false);
+      alert('Đặt hàng thành công! Đơn hàng đã chuyển sang mục Chờ thanh toán.');
+      navigate('/profile');
+    } catch (err) {
+      setOrderError('Đặt hàng thất bại!');
+      console.error('Order error:', err);
     }
   };
 
@@ -65,6 +120,20 @@ export default function PurchasesTab({ activeTab, setActiveTab, purchases }: Pur
 
   return (
     <div className="bg-white rounded-lg shadow-sm">
+      {showOrderModal && selectedProduct && (
+        <OrderModal
+          user={userProfile}
+          product={{
+            id: selectedProduct.product_id || selectedProduct.id,
+            name: selectedProduct.product,
+            price: Number(selectedProduct.price?.toString().replace(/[^\d]/g, '')),
+            image_url: [selectedProduct.image],
+          }}
+          onConfirm={handleConfirmOrder}
+          onClose={() => setShowOrderModal(false)}
+          error={orderError}
+        />
+      )}
       <div className="p-6 border-b border-gray-200">
         <h2 className="text-2xl font-bold text-gray-800 mb-2">Đơn Mua</h2>
         <p className="text-gray-600">Quản lý đơn hàng và giỏ hàng của bạn</p>
@@ -243,6 +312,7 @@ export default function PurchasesTab({ activeTab, setActiveTab, purchases }: Pur
                           // Cart item actions
                           <>
                             <button
+                              onClick={() => handleBuyNow(cartItem)}
                               className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-400 to-green-600 text-white rounded-lg hover:from-green-500 hover:to-green-700 text-sm font-medium transition-all duration-200 shadow-md hover:shadow-lg"
                               aria-label={`Mua ngay ${cartItem.product}`}
                             >
@@ -262,6 +332,7 @@ export default function PurchasesTab({ activeTab, setActiveTab, purchases }: Pur
                           // Purchase item actions
                           <>
                             <button
+                              onClick={() => handleBuyNow(cartItem)}
                               className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-400 to-green-600 text-white rounded-lg hover:from-green-500 hover:to-green-700 text-sm font-medium transition-all duration-200 shadow-md hover:shadow-lg"
                               aria-label={`Mua lại ${cartItem.product}`}
                             >
