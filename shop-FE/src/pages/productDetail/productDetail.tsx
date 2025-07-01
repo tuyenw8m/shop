@@ -66,10 +66,10 @@ export default function ProductDetail() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          productId: product.id,
+          product_id: product.id,
           quantity: 1,
-          address: userProfile.address,
-          phone: userProfile.phone,
+          // comment: '', // nếu muốn cho phép nhập
+          // status: '',  // nếu muốn cho phép nhập
         }),
       })
       if (!response.ok) {
