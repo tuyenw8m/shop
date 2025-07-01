@@ -293,7 +293,7 @@ export default function Profile() {
         'Content-Type': 'application/json',
       };
 
-      const response = await fetch(`${API_URL}/users/me`, {
+      const response = await fetch(`${API_URL}/user/me`, {
         method: 'PUT',
         headers,
         body: JSON.stringify({ address: address }),
