@@ -17,7 +17,7 @@ export default function useRouterElement() {
   const [isLoading, setIsLoading] = useState(true)
 
   if (!authContext) {
-    throw new Error('useRouterElement must be used within an AuthProvider')
+    throw new Error('useRouterElement phải được sử dụng trong AuthProvider')
   }
 
   const { user } = authContext

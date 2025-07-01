@@ -14,7 +14,7 @@ export const testBackendConnection = async (): Promise<ConnectionTestResult[]> =
 
   // Test 1: Basic connectivity to backend
   try {
-    console.log('Testing basic connectivity...');
+    console.log('Đang kiểm tra kết nối cơ bản...');
     const startTime = Date.now();
     const response = await fetch(`${API_URL}/products`, {
       method: 'GET',
@@ -31,14 +31,14 @@ export const testBackendConnection = async (): Promise<ConnectionTestResult[]> =
       responseTime: endTime - startTime
     });
     
-    console.log('Basic connectivity test result:', results[0]);
+    console.log('Kết quả kiểm tra kết nối cơ bản:', results[0]);
   } catch (error) {
     results.push({
       url: `${API_URL}/products`,
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown error'
+      error: error instanceof Error ? error.message : 'Lỗi không xác định'
     });
-    console.error('Basic connectivity test failed:', error);
+    console.error('Kiểm tra kết nối cơ bản thất bại:', error);
   }
 
   // Test 2: Test with different ports
@@ -48,7 +48,7 @@ export const testBackendConnection = async (): Promise<ConnectionTestResult[]> =
     
     try {
       const testUrl = `http://localhost:${port}/api/v1/products`;
-      console.log(`Testing port ${port}...`);
+      console.log(`Đang kiểm tra cổng ${port}...`);
       const startTime = Date.now();
       const response = await fetch(testUrl, {
         method: 'GET',
@@ -68,7 +68,7 @@ export const testBackendConnection = async (): Promise<ConnectionTestResult[]> =
       results.push({
         url: `http://localhost:${port}/api/v1/products`,
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Lỗi không xác định'
       });
     }
   }
@@ -84,7 +84,7 @@ export const testBackendConnection = async (): Promise<ConnectionTestResult[]> =
     if (testUrl === `${API_URL}/products`) continue; // Already tested
     
     try {
-      console.log(`Testing URL: ${testUrl}`);
+      console.log(`Đang kiểm tra URL: ${testUrl}`);
       const startTime = Date.now();
       const response = await fetch(testUrl, {
         method: 'GET',
@@ -104,7 +104,7 @@ export const testBackendConnection = async (): Promise<ConnectionTestResult[]> =
       results.push({
         url: testUrl,
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Lỗi không xác định'
       });
     }
   }
@@ -113,18 +113,18 @@ export const testBackendConnection = async (): Promise<ConnectionTestResult[]> =
 };
 
 export const logConnectionResults = (results: ConnectionTestResult[]) => {
-  console.log('=== Connection Test Results ===');
+  console.log('=== Kết Quả Kiểm Tra Kết Nối ===');
   results.forEach((result, index) => {
     console.log(`${index + 1}. ${result.url}`);
-    console.log(`   Success: ${result.success}`);
+    console.log(`   Thành công: ${result.success}`);
     if (result.status) {
-      console.log(`   Status: ${result.status}`);
+      console.log(`   Trạng thái: ${result.status}`);
     }
     if (result.responseTime) {
-      console.log(`   Response Time: ${result.responseTime}ms`);
+      console.log(`   Thời gian phản hồi: ${result.responseTime}ms`);
     }
     if (result.error) {
-      console.log(`   Error: ${result.error}`);
+      console.log(`   Lỗi: ${result.error}`);
     }
     console.log('---');
   });
@@ -133,27 +133,27 @@ export const logConnectionResults = (results: ConnectionTestResult[]) => {
   const successfulTests = results.filter(r => r.success);
   const failedTests = results.filter(r => !r.success);
   
-  console.log('=== Summary ===');
-  console.log(`Total tests: ${results.length}`);
-  console.log(`Successful: ${successfulTests.length}`);
-  console.log(`Failed: ${failedTests.length}`);
+  console.log('=== Tóm Tắt ===');
+  console.log(`Tổng số kiểm tra: ${results.length}`);
+  console.log(`Thành công: ${successfulTests.length}`);
+  console.log(`Thất bại: ${failedTests.length}`);
   
   if (successfulTests.length > 0) {
-    console.log('✅ Backend is reachable!');
-    console.log('Working URLs:', successfulTests.map(r => r.url));
+    console.log('✅ Backend có thể truy cập được!');
+    console.log('URL hoạt động:', successfulTests.map(r => r.url));
   } else {
-    console.log('❌ Backend is not reachable');
-    console.log('Possible issues:');
-    console.log('1. Backend server is not running');
-    console.log('2. Wrong port number');
-    console.log('3. CORS configuration issue');
-    console.log('4. Network connectivity problem');
+    console.log('❌ Backend không thể truy cập được');
+    console.log('Các vấn đề có thể gặp:');
+    console.log('1. Máy chủ backend không đang chạy');
+    console.log('2. Số cổng không đúng');
+    console.log('3. Vấn đề cấu hình CORS');
+    console.log('4. Vấn đề kết nối mạng');
   }
 };
 
 // Quick test function
 export const quickConnectionTest = async () => {
-  console.log('🔍 Starting quick connection test...');
+  console.log('🔍 Bắt đầu kiểm tra kết nối nhanh...');
   const results = await testBackendConnection();
   logConnectionResults(results);
   return results;

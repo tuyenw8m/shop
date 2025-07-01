@@ -73,8 +73,8 @@ export default function Profile() {
         setIsLoadingProfile(true);
         setError(null);
 
-        console.log('Attempting to fetch profile from:', `${API_URL}/users/me`);
-        console.log('User token:', user.token ? 'Present' : 'Missing');
+        console.log('Đang cố gắng tải hồ sơ từ:', `${API_URL}/users/me`);
+        console.log('Token người dùng:', user.token ? 'Có' : 'Thiếu');
 
         const response = await fetch(`${API_URL}/users/me`, {
           headers: {
@@ -83,11 +83,11 @@ export default function Profile() {
           },
         });
 
-        console.log('Response received:', response);
+        console.log('Đã nhận phản hồi:', response);
 
         if (!response.ok) {
           const errorText = await response.text();
-          console.error('Profile fetch error:', response.status, errorText);
+          console.error('Lỗi tải hồ sơ:', response.status, errorText);
           if (response.status === 401) {
             setError('Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.');
             return;
@@ -100,7 +100,7 @@ export default function Profile() {
         }
 
         const data = await response.json();
-        console.log('Profile data received:', data);
+        console.log('Dữ liệu hồ sơ đã nhận:', data);
 
         if (data.status === 0 && data.data) {
           const userData = data.data as ProfileUser;
@@ -117,7 +117,7 @@ export default function Profile() {
           throw new Error('Dữ liệu người dùng không hợp lệ');
         }
       } catch (err) {
-        console.error('Fetch error details:', err);
+        console.error('Chi tiết lỗi tải dữ liệu:', err);
         if (err instanceof TypeError && err.message.includes('fetch')) {
           setError('Không thể kết nối đến server. Vui lòng kiểm tra: 1) Backend có đang chạy không? 2) URL có đúng không? 3) CORS có được cấu hình không?');
         } else {
@@ -135,7 +135,7 @@ export default function Profile() {
         setBankError('Tính năng đang được phát triển !');
       } catch (err) {
         setBankError(err instanceof Error ? err.message : 'Lỗi khi tải thông tin ngân hàng');
-        console.error('Bank profile fetch error:', err);
+        console.error('Lỗi tải hồ sơ ngân hàng:', err);
       } finally {
         setIsLoadingBank(false);
       }
@@ -166,8 +166,8 @@ export default function Profile() {
             returned: allOrders.filter(o => o.status === 'returned'),
           });
         }
-      } catch (e) {
-        // handle error nếu cần
+      } catch (error) {
+        console.error('Lỗi tải đơn hàng:', error);
       }
     };
     fetchOrders();
@@ -196,10 +196,10 @@ export default function Profile() {
           phone: editData.phone,
         };
 
-        console.log('=== PROFILE UPDATE DEBUG ===');
-        console.log('Sending complete profile update:', payload);
-        console.log('API URL:', `${API_URL}/users/me`);
-        console.log('Trying different HTTP methods and endpoints...');
+        console.log('=== GỠ LỖI CẬP NHẬT HỒ SƠ ===');
+        console.log('Gửi cập nhật hồ sơ hoàn chỉnh:', payload);
+        console.log('URL API:', `${API_URL}/users/me`);
+        console.log('Thử các phương thức HTTP và endpoint khác nhau...');
 
         const headers = {
           Authorization: `Bearer ${user.token}`,
@@ -218,37 +218,37 @@ export default function Profile() {
 
         for (const endpoint of endpoints) {
           try {
-            console.log(`Trying ${endpoint.method} ${endpoint.url}...`);
+            console.log(`Thử ${endpoint.method} ${endpoint.url}...`);
             response = await fetch(endpoint.url, {
               method: endpoint.method,
               headers,
               body: JSON.stringify(payload),
             });
 
-            console.log(`${endpoint.method} ${endpoint.url} Response status:`, response.status);
+            console.log(`${endpoint.method} ${endpoint.url} Trạng thái phản hồi:`, response.status);
 
             if (response.ok) {
-              console.log(`Success with ${endpoint.method} ${endpoint.url}`);
+              console.log(`Thành công với ${endpoint.method} ${endpoint.url}`);
               break;
             } else if (response.status !== 405) {
               // If it's not 405, it might be a different error (400, 401, etc.)
-              lastError = `Status ${response.status}: ${await response.text()}`;
+              lastError = `Trạng thái ${response.status}: ${await response.text()}`;
               break;
             }
           } catch (err) {
-            console.log(`Error with ${endpoint.method} ${endpoint.url}:`, err);
+            console.log(`Lỗi với ${endpoint.method} ${endpoint.url}:`, err);
             lastError = err;
           }
         }
 
         if (!response || !response.ok) {
-          const errorText = lastError || await response?.text() || 'Unknown error';
-          console.error('All profile update methods failed:', errorText);
+          const errorText = lastError || await response?.text() || 'Lỗi không xác định';
+          console.error('Tất cả các phương thức cập nhật hồ sơ đều thất bại:', errorText);
           throw new Error(`Cập nhật hồ sơ thất bại: ${errorText}`);
         }
 
         const data = await response.json();
-        console.log('Profile update response:', data);
+        console.log('Phản hồi cập nhật hồ sơ:', data);
 
         if ((data.status === 0 || data.status === "success") && data.data) {
           const updatedUser = data.data as ProfileUser;
@@ -260,7 +260,7 @@ export default function Profile() {
           throw new Error('Dữ liệu trả về không hợp lệ');
         }
       } catch (err) {
-        console.error('Profile save error details:', err);
+        console.error('Chi tiết lỗi lưu hồ sơ:', err);
         setError(err instanceof Error ? err.message : 'Lỗi khi cập nhật hồ sơ');
       } finally {
         setIsLoadingProfile(false);
@@ -364,12 +364,12 @@ export default function Profile() {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('Bank profile save error:', response.status, errorText);
+        console.error('Lỗi lưu hồ sơ ngân hàng:', response.status, errorText);
         throw new Error(`Cập nhật hồ sơ ngân hàng thất bại: ${errorText}`);
       }
 
       const data = await response.json();
-      console.log('Bank profile update response:', data);
+      console.log('Phản hồi cập nhật hồ sơ ngân hàng:', data);
 
       if (data.status === 0 && data.data) {
         setBankData({
@@ -384,7 +384,7 @@ export default function Profile() {
       }
     } catch (err) {
       setBankError(err instanceof Error ? err.message : 'Lỗi khi cập nhật hồ sơ ngân hàng');
-      console.error('Bank profile save error:', err);
+      console.error('Lỗi lưu hồ sơ ngân hàng:', err);
     } finally {
       setIsLoadingBank(false);
     }
@@ -428,12 +428,12 @@ export default function Profile() {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('Password change error:', response.status, errorText);
+        console.error('Lỗi đổi mật khẩu:', response.status, errorText);
         throw new Error(`Đổi mật khẩu thất bại: ${errorText}`);
       }
 
       const data = await response.json();
-      console.log('Password change response:', data);
+      console.log('Phản hồi đổi mật khẩu:', data);
 
       if (data.status === 0) {
         setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
@@ -444,7 +444,7 @@ export default function Profile() {
       }
     } catch (err) {
       setPasswordError(err instanceof Error ? err.message : 'Lỗi khi đổi mật khẩu');
-      console.error('Password change error:', err);
+      console.error('Lỗi đổi mật khẩu:', err);
     } finally {
       setIsLoadingPassword(false);
     }
@@ -494,11 +494,6 @@ export default function Profile() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {successMessage && (
-        <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-green-100 text-green-700 px-6 py-2 rounded shadow z-50 transition-all duration-300">
-          {successMessage}
-        </div>
-      )}
       <div className="flex">
         <ProfileSidebar
           profileData={profileData}
@@ -515,6 +510,7 @@ export default function Profile() {
                 error={error}
                 isLoadingProfile={isLoadingProfile}
                 handleSaveProfile={handleSaveProfile}
+                successMessage={successMessage}
               />
             )}
             {activeTab === 'bank' && (
@@ -524,6 +520,7 @@ export default function Profile() {
                 bankError={bankError}
                 isLoadingBank={isLoadingBank}
                 handleSaveBankProfile={handleSaveBankProfile}
+                successMessage={successMessage}
               />
             )}
             {activeTab === 'address' && (
@@ -533,6 +530,7 @@ export default function Profile() {
                 error={error}
                 isLoadingProfile={isLoadingProfile}
                 handleSaveAddress={handleSaveAddress}
+                successMessage={successMessage}
               />
             )}
             {activeTab === 'password' && (
@@ -542,6 +540,7 @@ export default function Profile() {
                 passwordError={passwordError}
                 isLoadingPassword={isLoadingPassword}
                 handleChangePassword={handleChangePassword}
+                successMessage={successMessage}
               />
             )}
             {['purchase', 'waitingPayment', 'shipping', 'waitingDelivery', 'completed', 'cancelled', 'returned'].includes(activeTab) && (

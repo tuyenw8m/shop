@@ -42,7 +42,7 @@ export const testApiEndpoints = async (token?: string): Promise<ApiTestResult[]>
       method: 'GET',
       success: false,
       status: 0,
-      error: error instanceof Error ? error.message : 'Unknown error'
+      error: error instanceof Error ? error.message : 'Lỗi không xác định'
     });
   }
 
@@ -63,7 +63,7 @@ export const testApiEndpoints = async (token?: string): Promise<ApiTestResult[]>
       method: 'GET',
       success: false,
       status: 0,
-      error: error instanceof Error ? error.message : 'Unknown error'
+      error: error instanceof Error ? error.message : 'Lỗi không xác định'
     });
   }
 
@@ -90,7 +90,7 @@ export const testApiEndpoints = async (token?: string): Promise<ApiTestResult[]>
         method: 'GET',
         success: false,
         status: 0,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Lỗi không xác định'
       });
     }
   }
@@ -118,7 +118,7 @@ export const testApiEndpoints = async (token?: string): Promise<ApiTestResult[]>
         method: 'GET',
         success: false,
         status: 0,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Lỗi không xác định'
       });
     }
   }
@@ -146,7 +146,7 @@ export const testApiEndpoints = async (token?: string): Promise<ApiTestResult[]>
         method: 'GET',
         success: false,
         status: 0,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Lỗi không xác định'
       });
     }
   }
@@ -178,7 +178,7 @@ export const testProfileUpdate = async (token: string, testData: ProfileTestData
       method: 'PUT',
       success: false,
       status: 0,
-      error: error instanceof Error ? error.message : 'Unknown error'
+      error: error instanceof Error ? error.message : 'Lỗi không xác định'
     };
   }
 };
@@ -207,24 +207,24 @@ export const testPasswordChange = async (token: string, passwordData: PasswordTe
       method: 'POST',
       success: false,
       status: 0,
-      error: error instanceof Error ? error.message : 'Unknown error'
+      error: error instanceof Error ? error.message : 'Lỗi không xác định'
     };
   }
 };
 
 // Console logging utility for debugging
 export const logApiResults = (results: ApiTestResult[]) => {
-  console.log('=== API Test Results ===');
+  console.log('=== Kết Quả Kiểm Tra API ===');
   results.forEach((result, index) => {
     console.log(`${index + 1}. ${result.method} ${result.endpoint}`);
-    console.log(`   Status: ${result.status}`);
-    console.log(`   Success: ${result.success}`);
+    console.log(`   Trạng thái: ${result.status}`);
+    console.log(`   Thành công: ${result.success}`);
     if (result.error) {
-      console.log(`   Error: ${result.error}`);
+      console.log(`   Lỗi: ${result.error}`);
     } else if (result.response) {
       const response = result.response as { status?: number; data?: unknown };
-      console.log(`   Response Status: ${response.status}`);
-      console.log(`   Response Data:`, response.data);
+      console.log(`   Trạng thái phản hồi: ${response.status}`);
+      console.log(`   Dữ liệu phản hồi:`, response.data);
     }
     console.log('---');
   });

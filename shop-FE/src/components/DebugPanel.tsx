@@ -19,7 +19,7 @@ export default function DebugPanel({ userToken }: DebugPanelProps) {
       const results = await quickConnectionTest();
       setConnectionResults(results);
     } catch (error) {
-      console.error('Connection test failed:', error);
+      console.error('Kiểm tra kết nối thất bại:', error);
     } finally {
       setIsLoading(false);
     }
@@ -32,7 +32,7 @@ export default function DebugPanel({ userToken }: DebugPanelProps) {
       setApiResults(results);
       logApiResults(results);
     } catch (error) {
-      console.error('API test failed:', error);
+      console.error('Kiểm tra API thất bại:', error);
     } finally {
       setIsLoading(false);
     }
@@ -40,7 +40,7 @@ export default function DebugPanel({ userToken }: DebugPanelProps) {
 
   return (
     <div className="fixed bottom-4 right-4 bg-white border border-gray-300 rounded-lg shadow-lg p-4 max-w-md">
-      <h3 className="text-lg font-semibold mb-3">🔧 Debug Panel</h3>
+      <h3 className="text-lg font-semibold mb-3">🔧 Bảng Gỡ Lỗi</h3>
       
       <div className="space-y-3">
         <button
@@ -48,7 +48,7 @@ export default function DebugPanel({ userToken }: DebugPanelProps) {
           disabled={isLoading}
           className="w-full px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400"
         >
-          {isLoading ? 'Testing...' : 'Test Connection'}
+          {isLoading ? 'Đang kiểm tra...' : 'Kiểm tra kết nối'}
         </button>
         
         <button
@@ -56,7 +56,7 @@ export default function DebugPanel({ userToken }: DebugPanelProps) {
           disabled={isLoading || !userToken}
           className="w-full px-3 py-2 bg-green-500 text-white rounded hover:bg-green-600 disabled:bg-gray-400"
         >
-          {isLoading ? 'Testing...' : 'Test API Endpoints'}
+          {isLoading ? 'Đang kiểm tra...' : 'Kiểm tra API'}
         </button>
       </div>
 

@@ -1,6 +1,6 @@
 import { useSelector } from 'react-redux';
 import { Minus, Plus, Trash2, ShoppingCart, Eye, MessageCircle, RefreshCw } from 'lucide-react';
-import { formatPrices } from 'src/utils/utils';
+import { formatPrices, getAccessToken } from 'src/utils/utils';
 import { useCartMutations } from 'src/hooks/useCartMutations';
 import { useCartQuery } from 'src/hooks/useCartQuery';
 import { getProfileLocalStorage } from 'src/utils/utils';
@@ -30,6 +30,7 @@ export default function PurchasesTab({ activeTab, setActiveTab, purchases }: Pur
   const [showOrderModal, setShowOrderModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [orderError, setOrderError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const handleRemoveFromCart = (itemId: string) => {
     if (user_id) {
@@ -69,14 +70,13 @@ export default function PurchasesTab({ activeTab, setActiveTab, purchases }: Pur
       const response = await fetch('http://localhost:8888/shop/api/v1/orders', {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${userProfile.token}`,
+          Authorization: `Bearer ${getAccessToken()}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           product_id: selectedProduct.product_id || selectedProduct.id,
           quantity: selectedProduct.quantity || 1,
-          // comment: '', // nếu muốn cho phép nhập
-          // status: '',  // nếu muốn cho phép nhập
+          comment: ''
         }),
       });
       if (!response.ok) {
@@ -84,9 +84,12 @@ export default function PurchasesTab({ activeTab, setActiveTab, purchases }: Pur
         setOrderError('Đặt hàng thất bại: ' + errorText);
         return;
       }
-      setShowOrderModal(false);
-      alert('Đặt hàng thành công! Đơn hàng đã chuyển sang mục Chờ thanh toán.');
-      navigate('/profile');
+      setSuccessMessage('Đặt hàng thành công! ');
+      setTimeout(() => {
+        setShowOrderModal(false);
+        setSuccessMessage(null);
+        navigate('/profile');
+      }, 2000);
     } catch (err) {
       setOrderError('Đặt hàng thất bại!');
       console.error('Order error:', err);
@@ -132,6 +135,7 @@ export default function PurchasesTab({ activeTab, setActiveTab, purchases }: Pur
           onConfirm={handleConfirmOrder}
           onClose={() => setShowOrderModal(false)}
           error={orderError}
+          successMessage={successMessage}
         />
       )}
       <div className="p-6 border-b border-gray-200">
