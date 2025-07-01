@@ -8,6 +8,7 @@ import AddressForm from './AddressForm';
 import PasswordForm from './PasswordForm';
 import PurchasesTab from './PurchasesTab';
 import { type ProfileUser, type Purchases, type Notification, type TabType, type Purchase } from './types';
+import { saveProfileToLocalStorage } from 'src/utils/utils';
 
 const API_URL = 'http://localhost:8888/shop/api/v1';
 
@@ -60,6 +61,7 @@ export default function Profile() {
     cancelled: [],
     returned: [],
   });
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user?.token || hasFetchedRef.current) {
@@ -110,6 +112,7 @@ export default function Profile() {
           });
           setAddress(userData.address || '');
           setUser((prevUser) => ({ ...prevUser!, user: userData }));
+          saveProfileToLocalStorage(userData);
         } else {
           throw new Error('Dữ liệu người dùng không hợp lệ');
         }
@@ -251,7 +254,8 @@ export default function Profile() {
           const updatedUser = data.data as ProfileUser;
           setProfileData(updatedUser);
           setUser((prevUser) => ({ ...prevUser!, user: updatedUser }));
-          alert(successMessage);
+          saveProfileToLocalStorage(updatedUser);
+          setSuccessMessage(successMessage);
         } else {
           throw new Error('Dữ liệu trả về không hợp lệ');
         }
@@ -309,7 +313,8 @@ export default function Profile() {
         const updatedUser = data.data as ProfileUser;
         setProfileData(updatedUser);
         setUser((prevUser) => ({ ...prevUser!, user: updatedUser }));
-        alert('Cập nhật địa chỉ thành công!');
+        saveProfileToLocalStorage(updatedUser);
+        setSuccessMessage('Cập nhật địa chỉ thành công!');
       } else {
         throw new Error('Dữ liệu trả về không hợp lệ');
       }
@@ -372,7 +377,8 @@ export default function Profile() {
           accountNumber: data.data.accountNumber || '',
           accountHolder: data.data.accountHolder || '',
         });
-        alert('Cập nhật hồ sơ ngân hàng thành công!');
+        saveProfileToLocalStorage(data.data as ProfileUser);
+        setSuccessMessage('Cập nhật hồ sơ ngân hàng thành công!');
       } else {
         throw new Error('Dữ liệu ngân hàng không hợp lệ');
       }
@@ -431,7 +437,8 @@ export default function Profile() {
 
       if (data.status === 0) {
         setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
-        alert('Đổi mật khẩu thành công!');
+        saveProfileToLocalStorage(data.data as ProfileUser);
+        setSuccessMessage('Đổi mật khẩu thành công!');
       } else {
         throw new Error('Dữ liệu trả về không hợp lệ');
       }
@@ -451,6 +458,13 @@ export default function Profile() {
       }
     };
   }, []);
+
+  useEffect(() => {
+    if (successMessage) {
+      const timer = setTimeout(() => setSuccessMessage(null), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [successMessage]);
 
   const isLoading = isLoadingProfile || isLoadingPassword || isLoadingBank;
 
@@ -480,6 +494,11 @@ export default function Profile() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {successMessage && (
+        <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-green-100 text-green-700 px-6 py-2 rounded shadow z-50 transition-all duration-300">
+          {successMessage}
+        </div>
+      )}
       <div className="flex">
         <ProfileSidebar
           profileData={profileData}
