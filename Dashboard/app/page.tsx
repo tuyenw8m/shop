@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Package, Users, ShoppingCart, Star, TrendingUp, DollarSign, Eye, AlertTriangle } from "lucide-react"
+import { Package, Users, ShoppingCart, Star, TrendingUp, DollarSign, Eye, AlertTriangle, Calendar, Download, MapPin, RefreshCcw } from "lucide-react"
 import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
+import { useToast } from "@/hooks/use-toast"
+import { apiClient } from "@/lib/api"
 
 // Mock data for dashboard
 const salesData = [
@@ -31,27 +33,42 @@ const recentOrders = [
   { id: "ORD-004", customer: "Phạm Thị D", amount: 950000, status: "completed", time: "15 phút trước" },
 ]
 
+// Mock data for new features
+const topCustomers = [
+  { name: "Nguyễn Văn A", total: 12000000 },
+  { name: "Trần Thị B", total: 9500000 },
+  { name: "Lê Văn C", total: 8700000 },
+];
+const recentActivities = [
+  { type: "order", text: "Đơn hàng mới từ Nguyễn Văn A", time: "1 phút trước" },
+  { type: "review", text: "Đánh giá mới cho sản phẩm Camera", time: "5 phút trước" },
+  { type: "stock", text: "Sản phẩm Laptop sắp hết hàng", time: "10 phút trước" },
+];
+const lowStockProducts = [
+  { name: "Laptop Dell XPS 13", stock: 2 },
+  { name: "Camera Canon EOS", stock: 1 },
+  { name: "Chuột Logitech", stock: 3 },
+];
+const refunds = { count: 3, value: 3500000 };
+const salesByRegion = [
+  { region: "Hà Nội", sales: 50000000 },
+  { region: "Hồ Chí Minh", sales: 42000000 },
+  { region: "Đà Nẵng", sales: 15000000 },
+];
+
 export default function Dashboard() {
-  const [stats, setStats] = useState({
-    totalProducts: 0,
-    totalUsers: 0,
-    totalOrders: 0,
-    totalRevenue: 0,
-    pendingOrders: 0,
-    lowStockProducts: 0,
-  })
+  const [summary, setSummary] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [date, setDate] = useState<Date | undefined>(new Date());
+  const { toast } = useToast();
 
   useEffect(() => {
-    // Simulate API calls to get dashboard stats
-    setStats({
-      totalProducts: 1250,
-      totalUsers: 3420,
-      totalOrders: 892,
-      totalRevenue: 125430000,
-      pendingOrders: 23,
-      lowStockProducts: 8,
-    })
-  }, [])
+    setLoading(true);
+    apiClient.getDashboardSummary()
+      .then((data) => setSummary(data))
+      .catch(() => toast({ title: "Lỗi", description: "Không thể tải dữ liệu dashboard", variant: "destructive" }))
+      .finally(() => setLoading(false));
+  }, []);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("vi-VN", {
@@ -66,9 +83,15 @@ export default function Dashboard() {
       pending: { label: "Chờ xử lý", variant: "secondary" as const, color: "bg-yellow-100 text-yellow-800" },
       processing: { label: "Đang xử lý", variant: "outline" as const, color: "bg-blue-100 text-blue-800" },
     }
-
     const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.pending
     return <Badge className={config.color}>{config.label}</Badge>
+  }
+
+  if (loading) {
+    return <div className="flex justify-center items-center h-[60vh] text-xl">Đang tải dữ liệu...</div>;
+  }
+  if (!summary) {
+    return <div className="flex justify-center items-center h-[60vh] text-xl text-red-500">Không có dữ liệu dashboard</div>;
   }
 
   return (
@@ -80,6 +103,20 @@ export default function Dashboard() {
         <p className="text-gray-600">Chào mừng trở lại! Đây là tổng quan về cửa hàng của bạn.</p>
       </div>
 
+      {/* Date Range Picker and Export Button */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-2">
+        <div className="flex items-center gap-2">
+          <Calendar mode="single" selected={date} onSelect={setDate} className="rounded-md border shadow-sm" />
+          <span className="ml-2 text-gray-600">Chọn ngày (mô phỏng)</span>
+        </div>
+        <button
+          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700 transition"
+          onClick={() => toast({ title: "Export", description: "Xuất dữ liệu (mô phỏng)" })}
+        >
+          <Download className="h-4 w-4" /> Xuất dữ liệu
+        </button>
+      </div>
+
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-500 to-blue-600 text-white hover:shadow-xl transition-all duration-300">
@@ -88,10 +125,10 @@ export default function Dashboard() {
             <Package className="h-5 w-5 opacity-80" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalProducts.toLocaleString()}</div>
+            <div className="text-2xl font-bold">{summary.totalProducts?.toLocaleString()}</div>
             <div className="flex items-center text-xs opacity-80 mt-1">
               <TrendingUp className="h-3 w-3 mr-1" />
-              +12% so với tháng trước
+              {/* You can add growth % if backend provides */}
             </div>
           </CardContent>
         </Card>
@@ -102,10 +139,9 @@ export default function Dashboard() {
             <Users className="h-5 w-5 opacity-80" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalUsers.toLocaleString()}</div>
+            <div className="text-2xl font-bold">{summary.totalUsers?.toLocaleString()}</div>
             <div className="flex items-center text-xs opacity-80 mt-1">
               <TrendingUp className="h-3 w-3 mr-1" />
-              +8% so với tháng trước
             </div>
           </CardContent>
         </Card>
@@ -116,10 +152,9 @@ export default function Dashboard() {
             <ShoppingCart className="h-5 w-5 opacity-80" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalOrders.toLocaleString()}</div>
+            <div className="text-2xl font-bold">{summary.totalOrders?.toLocaleString()}</div>
             <div className="flex items-center text-xs opacity-80 mt-1">
               <TrendingUp className="h-3 w-3 mr-1" />
-              +23% so với tháng trước
             </div>
           </CardContent>
         </Card>
@@ -130,10 +165,9 @@ export default function Dashboard() {
             <DollarSign className="h-5 w-5 opacity-80" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(stats.totalRevenue)}</div>
+            <div className="text-2xl font-bold">{formatCurrency(summary.totalRevenue)}</div>
             <div className="flex items-center text-xs opacity-80 mt-1">
               <TrendingUp className="h-3 w-3 mr-1" />
-              +15% so với tháng trước
             </div>
           </CardContent>
         </Card>
@@ -194,13 +228,13 @@ export default function Dashboard() {
               <div className="flex items-center justify-between">
                 <span className="text-sm text-gray-600">Đơn hàng chờ xử lý</span>
                 <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
-                  {stats.pendingOrders}
+                  {/* You can add pending orders count if backend provides */}
                 </Badge>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm text-gray-600">Sản phẩm sắp hết</span>
                 <Badge variant="destructive" className="bg-red-100 text-red-800">
-                  {stats.lowStockProducts}
+                  {/* You can add low stock products count if backend provides */}
                 </Badge>
               </div>
               <div className="space-y-2">
@@ -274,6 +308,107 @@ export default function Dashboard() {
               </div>
             ))}
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Top Customers & Refunds/Returns */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card className="border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-gray-800">
+              <Users className="h-5 w-5 text-blue-600" />
+              Top Khách hàng
+            </CardTitle>
+            <CardDescription>Khách hàng có tổng giá trị đơn hàng cao nhất</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ul className="divide-y">
+              {summary.topCustomers?.map((c: any, i: number) => (
+                <li key={i} className="py-2 flex justify-between">
+                  <span className="font-medium">{c.name}</span>
+                  <span className="text-blue-700 font-semibold">{formatCurrency(c.total)}</span>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+        <Card className="border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-gray-800">
+              <RefreshCcw className="h-5 w-5 text-orange-600" />
+              Hoàn tiền/Trả hàng
+            </CardTitle>
+            <CardDescription>Đơn hoàn tiền hoặc trả hàng gần đây</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center gap-4">
+              <span className="text-2xl font-bold text-orange-700">{summary.refunds?.count}</span>
+              <span className="text-gray-600">đơn •</span>
+              <span className="font-semibold text-orange-700">{formatCurrency(summary.refunds?.value)}</span>
+            </div>
+            <div className="text-xs text-gray-500 mt-2">(Dữ liệu từ hệ thống)</div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Stock Alerts & Sales by Region */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card className="border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-gray-800">
+              <AlertTriangle className="h-5 w-5 text-red-600" />
+              Sản phẩm sắp hết hàng
+            </CardTitle>
+            <CardDescription>Danh sách sản phẩm tồn kho thấp</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ul className="divide-y">
+              <li className="py-2 flex justify-between">
+                <span>Số lượng sản phẩm tồn kho thấp</span>
+                <span className="text-red-700 font-semibold">{summary.lowStockProducts}</span>
+              </li>
+            </ul>
+          </CardContent>
+        </Card>
+        <Card className="border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-gray-800">
+              <MapPin className="h-5 w-5 text-green-600" />
+              Doanh thu theo khu vực
+            </CardTitle>
+            <CardDescription>Phân tích doanh thu theo khu vực</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ul className="divide-y">
+              {summary.salesByRegion?.map((r: any, i: number) => (
+                <li key={i} className="py-2 flex justify-between">
+                  <span>{r.region}</span>
+                  <span className="text-green-700 font-semibold">{formatCurrency(r.sales)}</span>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Recent Activity Feed */}
+      <Card className="border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-gray-800">
+            <Eye className="h-5 w-5 text-blue-600" />
+            Hoạt động gần đây
+          </CardTitle>
+          <CardDescription>Các hoạt động mới nhất trong hệ thống</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ul className="divide-y">
+            {summary.recentActivities?.map((a: any, i: number) => (
+              <li key={i} className="py-2 flex justify-between">
+                <span>{a.text}</span>
+                <span className="text-xs text-gray-500">{a.time}</span>
+              </li>
+            ))}
+          </ul>
         </CardContent>
       </Card>
     </div>
