@@ -7,7 +7,7 @@ import BankForm from './BankForm';
 import AddressForm from './AddressForm';
 import PasswordForm from './PasswordForm';
 import PurchasesTab from './PurchasesTab';
-import { type ProfileUser, type Purchases, type Notification, type TabType } from './types';
+import { type ProfileUser, type Purchases, type Notification, type TabType, type Purchase } from './types';
 
 const API_URL = 'http://localhost:8888/shop/api/v1';
 
@@ -51,6 +51,15 @@ export default function Profile() {
   const [bankError, setBankError] = useState<string | null>(null);
   const hasFetchedRef = useRef(false);
   const updateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [purchases, setPurchases] = useState<Purchases>({
+    purchase: [],
+    waitingPayment: [],
+    shipping: [],
+    waitingDelivery: [],
+    completed: [],
+    cancelled: [],
+    returned: [],
+  });
 
   useEffect(() => {
     if (!user?.token || hasFetchedRef.current) {
@@ -133,6 +142,33 @@ export default function Profile() {
     fetchProfile();
     fetchBankProfile();
   }, [user?.token, setUser]);
+
+  useEffect(() => {
+    if (!user?.token) return;
+    const fetchOrders = async () => {
+      try {
+        const res = await fetch(`${API_URL}/orders`, {
+          headers: { Authorization: `Bearer ${user.token}` }
+        });
+        const data = await res.json();
+        if ((data.status === 'success' || data.status === 0) && data.data?.content) {
+          const allOrders: Purchase[] = data.data.content;
+          setPurchases({
+            purchase: allOrders,
+            waitingPayment: allOrders.filter(o => o.status === 'pending' || o.status === 'waitingPayment'),
+            shipping: allOrders.filter(o => o.status === 'shipping'),
+            waitingDelivery: allOrders.filter(o => o.status === 'waitingDelivery'),
+            completed: allOrders.filter(o => o.status === 'completed' || o.status === 'delivered'),
+            cancelled: allOrders.filter(o => o.status === 'cancelled'),
+            returned: allOrders.filter(o => o.status === 'returned'),
+          });
+        }
+      } catch (e) {
+        // handle error nếu cần
+      }
+    };
+    fetchOrders();
+  }, [user?.token]);
 
   // Single debounced update function that always sends complete data
   const debouncedUpdateProfile = useCallback(async (successMessage: string) => {
@@ -441,16 +477,6 @@ export default function Profile() {
     { id: 1, message: 'Bạn có đơn hàng mới vào 03:00 PM, 17/06/2025', read: false },
     { id: 2, message: 'Đơn hàng #12345 đã được giao', read: true },
   ];
-
-  const purchases: Purchases = {
-    purchase: [],
-    waitingPayment: [],
-    shipping: [],
-    waitingDelivery: [],
-    completed: [],
-    cancelled: [],
-    returned: [],
-  };
 
   return (
     <div className="min-h-screen bg-gray-50">

@@ -140,6 +140,8 @@ export default function PurchasesTab({ activeTab, setActiveTab, purchases }: Pur
                 isCartItem: boolean;
                 item_id: string;
                 product_id: string;
+                address?: string;
+                phone?: string;
               };
               return (
               <div
@@ -219,6 +221,13 @@ export default function PurchasesTab({ activeTab, setActiveTab, purchases }: Pur
                         >
                           {cartItem.status}
                         </p>
+
+                        {!cartItem.isCartItem && cartItem.address && (
+                          <p className="text-sm text-gray-500 mb-1">Địa chỉ nhận: {cartItem.address}</p>
+                        )}
+                        {!cartItem.isCartItem && cartItem.phone && (
+                          <p className="text-sm text-gray-500 mb-1">SĐT: {cartItem.phone}</p>
+                        )}
                       </div>
                     </div>
 

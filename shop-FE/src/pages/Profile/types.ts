@@ -37,6 +37,8 @@ export interface Purchase {
   total_amount: number;
   created_at: string;
   items: PurchaseItem[];
+  address?: string;
+  phone?: string;
 }
 
 export interface PurchaseItem {
