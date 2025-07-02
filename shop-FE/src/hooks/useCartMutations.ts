@@ -26,7 +26,7 @@ export const useCartMutations = (user_id: string | undefined) => {
       queryClient.invalidateQueries({ queryKey: ['cart', user_id || 'guest'] })
     },
     onError: (error) => {
-      console.error('Failed to add item to cart:', error)
+      console.error('Thất bại khi thêm sản phẩm vào giỏ hàng:', error)
     }
   })
 
@@ -40,7 +40,7 @@ export const useCartMutations = (user_id: string | undefined) => {
       queryClient.invalidateQueries({ queryKey: ['cart', user_id || 'guest'] })
     },
     onError: (error) => {
-      console.error('Failed to update item quantity:', error)
+      console.error('Thất bại khi cập nhật số lượng sản phẩm:', error)
     }
   })
 
@@ -53,7 +53,7 @@ export const useCartMutations = (user_id: string | undefined) => {
       queryClient.invalidateQueries({ queryKey: ['cart', user_id || 'guest'] })
     },
     onError: (error) => {
-      console.error('Lỗi rồi hahahuhu:', error)
+      console.error('Lỗi khi xóa sản phẩm khỏi giỏ hàng:', error)
     }
   })
 

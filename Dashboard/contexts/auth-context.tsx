@@ -42,7 +42,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   useEffect(() => {
-    // Redirect to login if not authenticated and not on login page
+    // Chuyển hướng đến trang đăng nhập nếu chưa xác thực và không ở trang đăng nhập
     if (!isLoading && !user && pathname !== "/login") {
       router.push("/login")
     }

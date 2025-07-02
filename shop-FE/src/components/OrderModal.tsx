@@ -21,9 +21,21 @@ interface OrderModalProps {
 
 export default function OrderModal({ user, product, onConfirm, onClose, error, successMessage }: OrderModalProps) {
   return (
-    <div className="fixed inset-0 bg-transparent flex items-center justify-center z-50">
-      <div className="bg-white p-6 rounded shadow-lg w-full max-w-md">
+    <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
+      <div className="bg-white/90 p-6 rounded-lg shadow-xl w-full max-w-md border border-gray-200">
         <h2 className="text-xl font-bold mb-4">Xác nhận đơn hàng</h2>
+        
+        {successMessage && (
+          <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-md">
+            <div className="flex items-center">
+              <svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+              <span className="text-green-700 font-medium">{successMessage}</span>
+            </div>
+          </div>
+        )}
+        
         <div className="flex gap-4 mb-4">
           <img src={product.image_url?.[0] || '/placeholder.svg'} alt={product.name} className="w-20 h-20 object-cover rounded" />
           <div>
@@ -43,11 +55,6 @@ export default function OrderModal({ user, product, onConfirm, onClose, error, s
           <button onClick={onConfirm} className="px-4 py-2 bg-green-500 text-white rounded">Xác nhận đặt hàng</button>
         </div>
       </div>
-      {successMessage && (
-        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-green-100 text-green-700 px-6 py-2 rounded shadow z-50 transition-all duration-300">
-          {successMessage}
-        </div>
-      )}
     </div>
   );
 } 

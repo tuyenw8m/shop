@@ -1,27 +1,31 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { Product } from 'src/types/product.type' // Đảm bảo bạn có kiểu Product này
-import { formatPrices, getCategoryStyle, getProfileLocalStorage } from 'src/utils/utils'
+import { formatPrices, getCategoryStyle, getProfileLocalStorage, getAccessToken } from 'src/utils/utils'
 import ProductQuickOverview from '../ProductQuickOverview' // Đảm bảo component này tồn tại
 import RatingProduct from '../RatingProduct/RatingProduct' // Đảm bảo component này tồn tại
 import { Eye } from 'lucide-react'
 import { useCartMutations } from 'src/hooks/useCartMutations'
 import OrderModal from '../OrderModal'
+import { useOrderContext } from 'src/pages/contexts/OrderContext'
 
 interface ProductType {
   product: Product
+  onOrderSuccess?: () => void
 }
 
-export function ProductCard({ product }: ProductType) {
+export function ProductCard({ product, onOrderSuccess }: ProductType) {
   const userProfile = getProfileLocalStorage()
   const user_id = userProfile?.id
   const navigate = useNavigate()
+  const { refreshOrders } = useOrderContext()
 
   const { addItemToCart } = useCartMutations(user_id)
 
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false)
   const [showOrderModal, setShowOrderModal] = useState(false)
   const [orderError, setOrderError] = useState<string | null>(null)
+  const [successMessage, setSuccessMessage] = useState<string | null>(null)
 
   const handleQuickView = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -70,14 +74,13 @@ export function ProductCard({ product }: ProductType) {
       const response = await fetch('http://localhost:8888/shop/api/v1/orders', {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${userProfile.token}`,
+          Authorization: `Bearer ${getAccessToken()}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          productId: product.id,
+          product_id: product.id,
           quantity: 1,
-          address: userProfile.address,
-          phone: userProfile.phone,
+          comment: ''
         }),
       })
       if (!response.ok) {
@@ -85,9 +88,16 @@ export function ProductCard({ product }: ProductType) {
         setOrderError('Đặt hàng thất bại: ' + errorText)
         return
       }
-      setShowOrderModal(false)
-      alert('Đặt hàng thành công! Đơn hàng đã chuyển sang mục Chờ thanh toán.')
-      navigate('/profile')
+      setSuccessMessage('Đặt hàng thành công! Đơn hàng đã chuyển sang mục Chờ thanh toán.')
+      setTimeout(() => {
+        setShowOrderModal(false)
+        setSuccessMessage(null)
+        refreshOrders()
+        navigate('/profile')
+      }, 2000)
+      if (onOrderSuccess) {
+        onOrderSuccess()
+      }
     } catch (err) {
       setOrderError('Đặt hàng thất bại!')
       console.error('Order error:', err)
@@ -108,7 +118,8 @@ export function ProductCard({ product }: ProductType) {
           product={product}
           onConfirm={handleConfirmOrder}
           onClose={() => setShowOrderModal(false)}
-          error={orderError}
+          error={orderError || undefined}
+          successMessage={successMessage || undefined}
         />
       )}
       <div

@@ -4,15 +4,17 @@ import { useParams, useNavigate } from 'react-router-dom'
 import productApi from 'src/apis/ProductService.api'
 import ReviewSection from 'src/components/ReviewSection'
 import type { Product } from 'src/types/product.type'
-import { formatPrices, salePercent, getProfileLocalStorage } from 'src/utils/utils'
+import { formatPrices, salePercent, getProfileLocalStorage, getAccessToken } from 'src/utils/utils'
 import { useCartMutations } from 'src/hooks/useCartMutations'
 import OrderModal from 'src/components/OrderModal'
+import { useOrderContext } from 'src/pages/contexts/OrderContext'
 
 export default function ProductDetail() {
   const { id = '' } = useParams()
   const navigate = useNavigate()
   const userProfile = getProfileLocalStorage()
   const { addItemToCart } = useCartMutations(userProfile?.id)
+  const { refreshOrders } = useOrderContext()
 
   const { data } = useQuery({
     queryKey: ['product', id],
@@ -26,6 +28,7 @@ export default function ProductDetail() {
   const [selectedImage, setSelectedImage] = useState(0)
   const [showOrderModal, setShowOrderModal] = useState(false)
   const [orderError, setOrderError] = useState<string | null>(null)
+  const [successMessage, setSuccessMessage] = useState<string | null>(null)
 
   if (!product) {
     return <div className='text-center py-10'>404. Sản phẩm không tồn tại...</div>
@@ -34,6 +37,8 @@ export default function ProductDetail() {
   const handleAddToCart = () => {
     if (userProfile) {
       addItemToCart.mutate({ product })
+      setSuccessMessage('Đã thêm vào giỏ hàng!')
+      setTimeout(() => setSuccessMessage(null), 2000)
     } else {
       navigate('/login')
     }
@@ -58,18 +63,16 @@ export default function ProductDetail() {
       return
     }
     try {
-      // Gọi API tạo đơn hàng
       const response = await fetch('http://localhost:8888/shop/api/v1/orders', {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${userProfile.token}`,
+          Authorization: `Bearer ${getAccessToken()}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          productId: product.id,
+          product_id: product.id,
           quantity: 1,
-          address: userProfile.address,
-          phone: userProfile.phone,
+          comment: ''
         }),
       })
       if (!response.ok) {
@@ -77,10 +80,13 @@ export default function ProductDetail() {
         setOrderError('Đặt hàng thất bại: ' + errorText)
         return
       }
-      // Có thể cập nhật lại danh sách đơn hàng ở đây nếu cần
-      setShowOrderModal(false)
-      alert('Đặt hàng thành công! Đơn hàng đã chuyển sang mục Chờ thanh toán.')
-      navigate('/profile')
+      setSuccessMessage('Đặt hàng thành công! Đơn hàng đã chuyển sang mục Chờ thanh toán.')
+      setTimeout(() => {
+        setShowOrderModal(false)
+        setSuccessMessage(null)
+        refreshOrders()
+        navigate('/profile')
+      }, 2000)
     } catch (err) {
       setOrderError('Đặt hàng thất bại!')
       console.error('Order error:', err)
@@ -89,13 +95,19 @@ export default function ProductDetail() {
 
   return (
     <div className='max-w-7xl mx-auto px-12 py-12'>
+      {successMessage && (
+        <div className='fixed top-4 left-1/2 transform -translate-x-1/2 bg-green-100 text-green-700 px-6 py-2 rounded shadow z-50 transition-all duration-300'>
+          {successMessage}
+        </div>
+      )}
       {showOrderModal && (
         <OrderModal
           user={userProfile}
           product={product}
           onConfirm={handleConfirmOrder}
           onClose={() => setShowOrderModal(false)}
-          error={orderError}
+          error={orderError || undefined}
+          successMessage={successMessage || undefined}
         />
       )}
       <div className='grid lg:grid-cols-3 gap-8'>

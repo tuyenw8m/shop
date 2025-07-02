@@ -6,9 +6,11 @@ import ProductGrid from 'src/components/ProductGird'
 import type { ProductList } from 'src/types/product.type'
 import FeaturesCategory from 'src/components/FeaturesCategory'
 import FeaturedBrands from '../FeaturedBrands'
+import { useOrderContext } from 'src/pages/contexts/OrderContext'
 
 export default function ContentHome() {
   const queryParamsUrl = useQueryParams()
+  const { refreshOrders } = useOrderContext()
 
   // API phần best-selling
   const { data: dataBestSelling, error: errorBestSelling } = useQuery({
@@ -61,8 +63,14 @@ export default function ContentHome() {
         child_title='Được bán nhiều nhất'
         products={products}
         viewAllLink='/best-selling'
+        onOrderSuccess={refreshOrders}
       />
-      <ProductGrid title='Suggest' child_title='Sản Phẩm Ngẫu Nhiên ' products={listSuggest} />
+      <ProductGrid 
+        title='Suggest' 
+        child_title='Sản Phẩm Ngẫu Nhiên ' 
+        products={listSuggest} 
+        onOrderSuccess={refreshOrders}
+      />
       <FeaturedBrands />
     </>
   )

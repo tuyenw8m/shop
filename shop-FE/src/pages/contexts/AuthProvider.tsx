@@ -22,7 +22,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       })
         .then((res) => {
           if (!res.ok) {
-            console.error('User fetch failed:', res.status, res.statusText)
+            console.error('Tải thông tin người dùng thất bại:', res.status, res.statusText)
             if (res.status === 401 || res.status === 404) {
               localStorage.removeItem('token')
               setUser(null)
@@ -36,16 +36,16 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           if (data && data.status === 0 && data.data) {
             setUser({ token, user: data.data })
           } else {
-            console.warn('No valid user data:', data)
+            console.warn('Không có dữ liệu người dùng hợp lệ:', data)
             setUser(null)
           }
         })
         .catch((error) => {
-          console.error('Auth Error:', error.message)
+          console.error('Lỗi xác thực:', error.message)
           setUser(null)
         })
     } else {
-      console.log('No token found')
+      console.log('Không tìm thấy token')
       setUser(null)
     }
   }, [])
