@@ -13,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/orders")
@@ -55,10 +57,16 @@ public class OrderController {
     }
 
     @PostMapping
-    @Transactional
     public ApiResponse<OrderResponse> create(@RequestBody OrderRequest request) throws AppException {
         return ApiResponse.<OrderResponse>builder()
                 .data(orderService.create(request))
+                .build();
+    }
+
+    @PostMapping("/list")
+    public ApiResponse<List<OrderResponse>> createMultiOrder(@RequestBody List<OrderRequest> request) throws AppException {
+        return ApiResponse.<List<OrderResponse>>builder()
+                .data(orderService.createMultiOrder(request))
                 .build();
     }
 
