@@ -7,12 +7,14 @@ import type { Product } from 'src/types/product.type'
 import { formatPrices, salePercent, getProfileLocalStorage, getAccessToken } from 'src/utils/utils'
 import { useCartMutations } from 'src/hooks/useCartMutations'
 import OrderModal from 'src/components/OrderModal'
+import { useOrderContext } from 'src/pages/contexts/OrderContext'
 
 export default function ProductDetail() {
   const { id = '' } = useParams()
   const navigate = useNavigate()
   const userProfile = getProfileLocalStorage()
   const { addItemToCart } = useCartMutations(userProfile?.id)
+  const { refreshOrders } = useOrderContext()
 
   const { data } = useQuery({
     queryKey: ['product', id],
@@ -82,6 +84,7 @@ export default function ProductDetail() {
       setTimeout(() => {
         setShowOrderModal(false)
         setSuccessMessage(null)
+        refreshOrders()
         navigate('/profile')
       }, 2000)
     } catch (err) {
@@ -103,8 +106,8 @@ export default function ProductDetail() {
           product={product}
           onConfirm={handleConfirmOrder}
           onClose={() => setShowOrderModal(false)}
-          error={orderError}
-          successMessage={successMessage}
+          error={orderError || undefined}
+          successMessage={successMessage || undefined}
         />
       )}
       <div className='grid lg:grid-cols-3 gap-8'>

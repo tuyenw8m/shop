@@ -12,11 +12,13 @@ import Pagination from 'src/components/Pagination'
 import { sortType } from 'src/constant/sort.constant'
 import { createSearchParams, useNavigate } from 'react-router-dom'
 import { ArrowDownUp, Package } from 'lucide-react'
+import { useOrderContext } from 'src/pages/contexts/OrderContext'
 
 export function Category() {
   const MAX_PRICE = 200000000
   const navigate = useNavigate()
   const queryParamsUrl: ProductSearchParamsConfig = useQueryParams()
+  const { refreshOrders } = useOrderContext()
 
   const cleannedQueryParams: ProductSearchParamsConfig = useMemo(() => {
     return omitBy(
@@ -222,7 +224,7 @@ export function Category() {
 
               <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6'>
                 {filteredProducts.length > 0 ? (
-                  filteredProducts.map((product: Product) => <ProductCard key={product.id} product={product} />)
+                  filteredProducts.map((product: Product) => <ProductCard key={product.id} product={product} onOrderSuccess={refreshOrders} />)
                 ) : (
                   <div className='col-span-full text-center py-16 bg-gray-50 rounded-lg'>
                     <p className='text-gray-700 text-xl font-semibold mb-4'>

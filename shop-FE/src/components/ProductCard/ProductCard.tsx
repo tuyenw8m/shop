@@ -7,15 +7,18 @@ import RatingProduct from '../RatingProduct/RatingProduct' // Đảm bảo compo
 import { Eye } from 'lucide-react'
 import { useCartMutations } from 'src/hooks/useCartMutations'
 import OrderModal from '../OrderModal'
+import { useOrderContext } from 'src/pages/contexts/OrderContext'
 
 interface ProductType {
   product: Product
+  onOrderSuccess?: () => void
 }
 
-export function ProductCard({ product }: ProductType) {
+export function ProductCard({ product, onOrderSuccess }: ProductType) {
   const userProfile = getProfileLocalStorage()
   const user_id = userProfile?.id
   const navigate = useNavigate()
+  const { refreshOrders } = useOrderContext()
 
   const { addItemToCart } = useCartMutations(user_id)
 
@@ -89,8 +92,12 @@ export function ProductCard({ product }: ProductType) {
       setTimeout(() => {
         setShowOrderModal(false)
         setSuccessMessage(null)
+        refreshOrders()
         navigate('/profile')
       }, 2000)
+      if (onOrderSuccess) {
+        onOrderSuccess()
+      }
     } catch (err) {
       setOrderError('Đặt hàng thất bại!')
       console.error('Order error:', err)
@@ -111,8 +118,8 @@ export function ProductCard({ product }: ProductType) {
           product={product}
           onConfirm={handleConfirmOrder}
           onClose={() => setShowOrderModal(false)}
-          error={orderError}
-          successMessage={successMessage}
+          error={orderError || undefined}
+          successMessage={successMessage || undefined}
         />
       )}
       <div

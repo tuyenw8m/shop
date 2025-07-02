@@ -49,12 +49,30 @@ export interface PurchaseItem {
   image_url?: string;
 }
 
+// Interface phù hợp với backend OrderResponse
+export interface OrderResponse {
+  id: string;
+  user_id: string;
+  product_id: string;
+  total_price: number;
+  status: string;
+  items_count: number;
+  created_at: string;
+  price: number;
+  product?: {
+    id: string;
+    name: string;
+    image_url?: string[];
+    price: number;
+  } | null;
+}
+
 export interface Purchases {
-  purchase: Purchase[];
-  waitingPayment: Purchase[];
-  shipping: Purchase[];
-  waitingDelivery: Purchase[];
-  completed: Purchase[];
-  cancelled: Purchase[];
-  returned: Purchase[];
+  purchase: OrderResponse[];
+  waitingPayment: OrderResponse[];
+  shipping: OrderResponse[];
+  waitingDelivery: OrderResponse[];
+  completed: OrderResponse[];
+  cancelled: OrderResponse[];
+  returned: OrderResponse[];
 } 
