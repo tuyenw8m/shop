@@ -58,9 +58,9 @@ export default function ProfileSidebar({ profileData, activeTab, setActiveTab }:
   };
 
   return (
-    <div className="w-80 bg-white shadow-lg">
+    <div className="w-full lg:w-80 bg-white shadow-lg">
       {/* User Profile Header */}
-      <div className="p-6 border-b border-gray-200">
+      <div className="p-4 lg:p-6 border-b border-gray-200">
         <div className="flex flex-col items-center">
           <h3 className="text-lg font-semibold text-gray-900">{profileData.name || 'Người dùng'}</h3>
           <p className="text-sm text-gray-500">{maskEmail(profileData.email)}</p>
@@ -71,12 +71,12 @@ export default function ProfileSidebar({ profileData, activeTab, setActiveTab }:
       </div>
 
       {/* Navigation Menu */}
-      <nav className="p-4">
-        <div className="space-y-2">
+      <nav className="p-2 lg:p-4">
+        <div className="space-y-1 lg:space-y-2">
           {/* Notifications */}
           <button
             onClick={() => setActiveTab('notifications')}
-            className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors duration-200 ${
+            className={`w-full flex items-center space-x-2 lg:space-x-3 px-3 lg:px-4 py-2 lg:py-3 rounded-lg transition-colors duration-200 text-sm lg:text-base ${
               activeTab === 'notifications'
                 ? 'bg-green-50 text-green-700 border border-green-200'
                 : 'text-gray-700 hover:bg-gray-50'
@@ -88,14 +88,14 @@ export default function ProfileSidebar({ profileData, activeTab, setActiveTab }:
           </button>
 
           {/* Account Management Section */}
-          <div className="pt-4">
-            <h4 className="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+          <div className="pt-2 lg:pt-4">
+            <h4 className="px-3 lg:px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1 lg:mb-2">
               Tài Khoản Của Tôi
             </h4>
             <div className="space-y-1">
               <button
                 onClick={() => setActiveTab('account')}
-                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors duration-200 ${
+                className={`w-full flex items-center space-x-2 lg:space-x-3 px-3 lg:px-4 py-2 lg:py-3 rounded-lg transition-colors duration-200 text-sm lg:text-base ${
                   activeTab === 'account'
                     ? 'bg-green-50 text-green-700 border border-green-200'
                     : 'text-gray-700 hover:bg-gray-50'
@@ -107,7 +107,7 @@ export default function ProfileSidebar({ profileData, activeTab, setActiveTab }:
 
               <button
                 onClick={() => setActiveTab('bank')}
-                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors duration-200 ${
+                className={`w-full flex items-center space-x-2 lg:space-x-3 px-3 lg:px-4 py-2 lg:py-3 rounded-lg transition-colors duration-200 text-sm lg:text-base ${
                   activeTab === 'bank'
                     ? 'bg-green-50 text-green-700 border border-green-200'
                     : 'text-gray-700 hover:bg-gray-50'
@@ -119,7 +119,7 @@ export default function ProfileSidebar({ profileData, activeTab, setActiveTab }:
 
               <button
                 onClick={() => setActiveTab('address')}
-                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors duration-200 ${
+                className={`w-full flex items-center space-x-2 lg:space-x-3 px-3 lg:px-4 py-2 lg:py-3 rounded-lg transition-colors duration-200 text-sm lg:text-base ${
                   activeTab === 'address'
                     ? 'bg-green-50 text-green-700 border border-green-200'
                     : 'text-gray-700 hover:bg-gray-50'
@@ -131,7 +131,7 @@ export default function ProfileSidebar({ profileData, activeTab, setActiveTab }:
 
               <button
                 onClick={() => setActiveTab('password')}
-                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors duration-200 ${
+                className={`w-full flex items-center space-x-2 lg:space-x-3 px-3 lg:px-4 py-2 lg:py-3 rounded-lg transition-colors duration-200 text-sm lg:text-base ${
                   activeTab === 'password'
                     ? 'bg-green-50 text-green-700 border border-green-200'
                     : 'text-gray-700 hover:bg-gray-50'
@@ -144,13 +144,13 @@ export default function ProfileSidebar({ profileData, activeTab, setActiveTab }:
           </div>
 
           {/* Orders Section */}
-          <div className="pt-4">
-            <h4 className="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+          <div className="pt-2 lg:pt-4">
+            <h4 className="px-3 lg:px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1 lg:mb-2">
               Đơn Hàng
             </h4>
             <button
               onClick={() => setActiveTab('purchase')}
-              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors duration-200 ${
+              className={`w-full flex items-center space-x-2 lg:space-x-3 px-3 lg:px-4 py-2 lg:py-3 rounded-lg transition-colors duration-200 text-sm lg:text-base ${
                 activeTab === 'purchase'
                   ? 'bg-green-50 text-green-700 border border-green-200'
                   : 'text-gray-700 hover:bg-gray-50'
@@ -164,14 +164,14 @@ export default function ProfileSidebar({ profileData, activeTab, setActiveTab }:
       </nav>
 
       {/* Quick Stats */}
-      <div className="p-4 border-t border-gray-200">
-        <div className="grid grid-cols-2 gap-4">
-          <div className="text-center p-3 bg-gray-50 rounded-lg">
-            <div className="text-lg font-semibold text-gray-900">0</div>
+      <div className="p-2 lg:p-4 border-t border-gray-200">
+        <div className="grid grid-cols-2 gap-2 lg:gap-4">
+          <div className="text-center p-2 lg:p-3 bg-gray-50 rounded-lg">
+            <div className="text-sm lg:text-lg font-semibold text-gray-900">0</div>
             <div className="text-xs text-gray-500">Đơn hàng</div>
           </div>
-          <div className="text-center p-3 bg-gray-50 rounded-lg">
-            <div className="text-lg font-semibold text-gray-900">0</div>
+          <div className="text-center p-2 lg:p-3 bg-gray-50 rounded-lg">
+            <div className="text-sm lg:text-lg font-semibold text-gray-900">0</div>
             <div className="text-xs text-gray-500">Đánh giá</div>
           </div>
         </div>

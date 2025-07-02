@@ -7,13 +7,15 @@ import BankForm from './BankForm';
 import AddressForm from './AddressForm';
 import PasswordForm from './PasswordForm';
 import PurchasesTab from './PurchasesTab';
-import { type ProfileUser, type Purchases, type Notification, type TabType, type Purchase } from './types';
+import { type ProfileUser, type Purchases, type Notification, type TabType, type OrderResponse } from './types';
 import { saveProfileToLocalStorage } from 'src/utils/utils';
+import { useOrderContext } from '../contexts/OrderContext';
 
 const API_URL = 'http://localhost:8888/shop/api/v1';
 
 export default function Profile() {
   const { user, setUser } = useAuth();
+  const { refreshTrigger } = useOrderContext();
   const [profileData, setProfileData] = useState<ProfileUser | null>(null);
   const [isLoadingProfile, setIsLoadingProfile] = useState(false);
   const [isLoadingPassword, setIsLoadingPassword] = useState(false);
@@ -146,32 +148,65 @@ export default function Profile() {
     fetchBankProfile();
   }, [user?.token, setUser]);
 
+  // Function to fetch orders that can be called from outside
+  const fetchOrders = useCallback(async () => {
+    if (!user?.token) return;
+    try {
+      console.log('🔄 Fetching orders...');
+      const res = await fetch(`${API_URL}/orders`, {
+        headers: { Authorization: `Bearer ${user.token}` }
+      });
+      const data = await res.json();
+      console.log('📦 Orders API response:', data);
+      
+      if ((data.status === 'success' || data.status === 0) && data.data?.content) {
+        const allOrders: OrderResponse[] = data.data.content;
+        console.log('📋 Parsed orders:', allOrders);
+        
+        // Fetch product details for each order
+        const ordersWithProducts = await Promise.all(
+          allOrders.map(async (order) => {
+            try {
+              const productRes = await fetch(`${API_URL}/products/${order.product_id}`, {
+                headers: { Authorization: `Bearer ${user.token}` }
+              });
+              const productData = await productRes.json();
+              return {
+                ...order,
+                product: productData.data || null
+              };
+            } catch (error) {
+              console.error(`Error fetching product ${order.product_id}:`, error);
+              return {
+                ...order,
+                product: null
+              };
+            }
+          })
+        );
+        
+        setPurchases({
+          purchase: ordersWithProducts,
+          waitingPayment: ordersWithProducts.filter(o => o.status === 'PENDING'),
+          shipping: ordersWithProducts.filter(o => o.status === 'SHIPPED'),
+          waitingDelivery: ordersWithProducts.filter(o => o.status === 'CONFIRMED'),
+          completed: ordersWithProducts.filter(o => o.status === 'DELIVERED'),
+          cancelled: ordersWithProducts.filter(o => o.status === 'CANCELLED'),
+          returned: [],
+        });
+        console.log('✅ Orders updated in state');
+      } else {
+        console.log('❌ Invalid orders response structure:', data);
+      }
+    } catch (error) {
+      console.error('❌ Lỗi tải đơn hàng:', error);
+    }
+  }, [user?.token]);
+
   useEffect(() => {
     if (!user?.token) return;
-    const fetchOrders = async () => {
-      try {
-        const res = await fetch(`${API_URL}/orders`, {
-          headers: { Authorization: `Bearer ${user.token}` }
-        });
-        const data = await res.json();
-        if ((data.status === 'success' || data.status === 0) && data.data?.content) {
-          const allOrders: Purchase[] = data.data.content;
-          setPurchases({
-            purchase: allOrders,
-            waitingPayment: allOrders.filter(o => o.status === 'pending' || o.status === 'waitingPayment'),
-            shipping: allOrders.filter(o => o.status === 'shipping'),
-            waitingDelivery: allOrders.filter(o => o.status === 'waitingDelivery'),
-            completed: allOrders.filter(o => o.status === 'completed' || o.status === 'delivered'),
-            cancelled: allOrders.filter(o => o.status === 'cancelled'),
-            returned: allOrders.filter(o => o.status === 'returned'),
-          });
-        }
-      } catch (error) {
-        console.error('Lỗi tải đơn hàng:', error);
-      }
-    };
     fetchOrders();
-  }, [user?.token]);
+  }, [user?.token, refreshTrigger, fetchOrders]);
 
   // Single debounced update function that always sends complete data
   const debouncedUpdateProfile = useCallback(async (successMessage: string) => {
@@ -494,13 +529,13 @@ export default function Profile() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="flex">
+      <div className="flex flex-col lg:flex-row">
         <ProfileSidebar
           profileData={profileData}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
         />
-        <div className="flex-1 p-8">
+        <div className="flex-1 p-4 lg:p-8">
           <div className="max-w-4xl mx-auto">
             {activeTab === 'notifications' && <NotificationsTab notifications={notifications} />}
             {activeTab === 'account' && (

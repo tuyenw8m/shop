@@ -7,9 +7,10 @@ interface Props {
   child_title: string
   products: ProductList | undefined
   viewAllLink?: string
+  onOrderSuccess?: () => void
 }
 
-export function ProductGrid({ title, child_title, products, viewAllLink }: Props) {
+export function ProductGrid({ title, child_title, products, viewAllLink, onOrderSuccess }: Props) {
   return (
     <div className='mt-8 mb-12'>
       <div className='flex items-center justify-between mb-4'>
@@ -33,7 +34,7 @@ export function ProductGrid({ title, child_title, products, viewAllLink }: Props
       </div>
 
       <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4'>
-        {products?.content && products?.content.map((product) => <ProductCard key={product.id} product={product} />)}
+        {products?.content && products?.content.map((product) => <ProductCard key={product.id} product={product} onOrderSuccess={onOrderSuccess} />)}
       </div>
     </div>
   )
