@@ -8,6 +8,8 @@ import { Eye } from 'lucide-react'
 import { useCartMutations } from 'src/hooks/useCartMutations'
 import OrderModal from '../OrderModal'
 import { useOrderContext } from 'src/pages/contexts/OrderContext'
+import { useSelector } from 'react-redux'
+import type { RootState } from 'src/app/store'
 
 interface ProductType {
   product: Product
@@ -19,6 +21,7 @@ export function ProductCard({ product, onOrderSuccess }: ProductType) {
   const user_id = userProfile?.id
   const navigate = useNavigate()
   const { refreshOrders } = useOrderContext()
+  const cartItems = useSelector((state: RootState) => state.cart.items)
 
   const { addItemToCart } = useCartMutations(user_id)
 
@@ -41,7 +44,9 @@ export function ProductCard({ product, onOrderSuccess }: ProductType) {
     e.preventDefault()
     e.stopPropagation()
     if (userProfile) {
-      return addItemToCart.mutate({ product })
+      const existingItem = cartItems.find(item => item.product_id === product.id)
+      const quantity = existingItem ? existingItem.quantity + 1 : 1
+      return addItemToCart.mutate({ product, quantity })
     }
     navigate('/login')
   }
