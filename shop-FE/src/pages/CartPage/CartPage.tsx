@@ -25,6 +25,7 @@ export function CartPage() {
 
   const [note, setNote] = useState<string>('')
   const [paymentMethod, setPaymentMethod] = useState('cash')
+  const [orderSuccess, setOrderSuccess] = useState(false)
 
   const subtotal = total_price
   const tax = Math.round(subtotal * 0.1)
@@ -41,18 +42,21 @@ export function CartPage() {
   const orderList: OrderList = items.map((item) => ({
     quantity: item.quantity,
     comment: note || '',
-    status: 'pending',
+    status: 'PENDING',
     product_id: item.product_id
   }))
 
   const handleMutateBuyNow = useMutation({
     mutationFn: (body: OrderList) => OrderAPI.createOrder(body),
     onSuccess: () => {
-      return (
-        <div className='fixed top-4 left-1/2 transform -translate-x-1/2 bg-green-100 text-green-700 px-6 py-2 rounded shadow z-50 transition-all duration-300'>
-          Đặt hàng thành công, đơn hàng chờ xác nhận !
-        </div>
-      )
+      setOrderSuccess(true)
+
+      setTimeout(() => {
+        setOrderSuccess(false)
+        items.forEach((item) => {
+          removeCartItem.mutate(item.item_id)
+        })
+      }, 3000)
     }
   })
 
@@ -94,6 +98,11 @@ export function CartPage() {
   return (
     <div className='min-h-screen bg-gray-50 py-8'>
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
+        {orderSuccess && (
+          <div className='fixed top-4 left-1/2 transform -translate-x-1/2 bg-green-100 text-green-700 px-6 py-2 rounded shadow z-50 transition-all duration-300'>
+            Đặt hàng thành công, đơn hàng chờ xác nhận !
+          </div>
+        )}
         {/* Header */}
         <div className='mb-8'>
           <h1 className='flex items-center text-2xl md:text-3xl font-semibold text-teal-600 mb-2 uppercase'>
