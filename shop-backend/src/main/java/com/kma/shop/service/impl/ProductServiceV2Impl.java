@@ -292,7 +292,6 @@ public class ProductServiceV2Impl implements ProductServiceV2 {
         if(request == null)  throw new AppException(ErrorCode.INVALID_INPUT);
 
         if(!existsById(id)) throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
-        if(existsByName(request.getName())) throw new AppException(ErrorCode.PRODUCT_EXISTED);
 
         if(!categoryServiceV2.isSameParent(request.getChildren_categories_id()))
             throw new AppException(ErrorCode.INVALID_INPUT);

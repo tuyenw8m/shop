@@ -119,16 +119,10 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/products/v2/disable/*").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/products/v2/enable/*").hasRole("ADMIN")
 
-<<<<<<< HEAD
                                 .requestMatchers(HttpMethod.POST,"/events").hasRole("ADMIN")
                                 .requestMatchers(HttpMethod.PUT,"/events/*").hasRole("ADMIN")
                                 .requestMatchers(HttpMethod.DELETE,"/events/*").hasRole("ADMIN")
                                 .requestMatchers(HttpMethod.GET,"/dashboard/summary").hasRole("ADMIN")
-=======
-                        .requestMatchers(HttpMethod.POST, "/events").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/events/*").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/events/*").hasRole("ADMIN")
->>>>>>> 2fe38ddd65fb212ce751b6e1dd96bd8e3a919183
 
                         // Đảm bảo bất kỳ request nào khác đều phải được xác thực
                         .anyRequest().authenticated());
