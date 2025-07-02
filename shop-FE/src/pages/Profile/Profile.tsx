@@ -64,6 +64,7 @@ export default function Profile() {
     returned: [],
   });
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [isLoadingOrders, setIsLoadingOrders] = useState(false);
 
   useEffect(() => {
     if (!user?.token || hasFetchedRef.current) {
@@ -152,10 +153,17 @@ export default function Profile() {
   const fetchOrders = useCallback(async () => {
     if (!user?.token) return;
     try {
+      setIsLoadingOrders(true);
       console.log('🔄 Fetching orders...');
       const res = await fetch(`${API_URL}/orders`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
+      
+      if (!res.ok) {
+        console.error('❌ Orders API error:', res.status, res.statusText);
+        return;
+      }
+      
       const data = await res.json();
       console.log('📦 Orders API response:', data);
       
@@ -170,6 +178,15 @@ export default function Profile() {
               const productRes = await fetch(`${API_URL}/products/${order.product_id}`, {
                 headers: { Authorization: `Bearer ${user.token}` }
               });
+              
+              if (!productRes.ok) {
+                console.error(`Error fetching product ${order.product_id}:`, productRes.status);
+                return {
+                  ...order,
+                  product: null
+                };
+              }
+              
               const productData = await productRes.json();
               return {
                 ...order,
@@ -200,6 +217,18 @@ export default function Profile() {
       }
     } catch (error) {
       console.error('❌ Lỗi tải đơn hàng:', error);
+      // Set empty purchases to avoid showing stale data
+      setPurchases({
+        purchase: [],
+        waitingPayment: [],
+        shipping: [],
+        waitingDelivery: [],
+        completed: [],
+        cancelled: [],
+        returned: [],
+      });
+    } finally {
+      setIsLoadingOrders(false);
     }
   }, [user?.token]);
 
@@ -579,11 +608,12 @@ export default function Profile() {
               />
             )}
             {['purchase', 'waitingPayment', 'shipping', 'waitingDelivery', 'completed', 'cancelled', 'returned'].includes(activeTab) && (
-              <PurchasesTab
-                activeTab={activeTab}
-                setActiveTab={setActiveTab}
-                purchases={purchases}
-              />
+                          <PurchasesTab
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+              purchases={purchases}
+              isLoading={isLoadingOrders}
+            />
             )}
           </div>
         </div>

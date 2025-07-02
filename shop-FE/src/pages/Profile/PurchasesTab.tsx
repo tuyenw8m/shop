@@ -10,14 +10,16 @@ import React, { useState } from 'react';
 import OrderModal from 'src/components/OrderModal';
 import { useNavigate } from 'react-router-dom';
 import { useOrderContext } from '../contexts/OrderContext';
+import ConfirmCancelModal from 'src/components/ConfirmCancelModal';
 
 interface PurchasesTabProps {
   activeTab: TabType;
   setActiveTab: React.Dispatch<React.SetStateAction<TabType>>;
   purchases: Purchases;
+  isLoading?: boolean;
 }
 
-export default function PurchasesTab({ activeTab, setActiveTab, purchases }: PurchasesTabProps) {
+export default function PurchasesTab({ activeTab, setActiveTab, purchases, isLoading = false }: PurchasesTabProps) {
   const userProfile = getProfileLocalStorage();
   const user_id = userProfile?.id;
   const navigate = useNavigate();
@@ -28,13 +30,13 @@ export default function PurchasesTab({ activeTab, setActiveTab, purchases }: Pur
   const { items } = useSelector((state: RootState) => state.cart);
   const { updateCartItemQuantity, removeCartItem } = useCartMutations(user_id);
 
-
-
   // Modal state
   const [showOrderModal, setShowOrderModal] = useState(false);
+  const [showCancelModal, setShowCancelModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<{
     id?: string;
     product_id?: string;
+    item_id?: string;
     product: string;
     price: string;
     image: string;
@@ -42,6 +44,9 @@ export default function PurchasesTab({ activeTab, setActiveTab, purchases }: Pur
   } | null>(null);
   const [orderError, setOrderError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [cancelOrderId, setCancelOrderId] = useState<string | null>(null);
+  const [cancelProductName, setCancelProductName] = useState<string | undefined>(undefined);
+  const [cancelProductImage, setCancelProductImage] = useState<string | undefined>(undefined);
 
   const handleRemoveFromCart = (itemId: string) => {
     if (user_id) {
@@ -63,6 +68,7 @@ export default function PurchasesTab({ activeTab, setActiveTab, purchases }: Pur
   const handleBuyNow = (cartItem: {
     id?: string;
     product_id?: string;
+    item_id?: string;
     product: string;
     price: string;
     image: string;
@@ -97,11 +103,16 @@ export default function PurchasesTab({ activeTab, setActiveTab, purchases }: Pur
           comment: ''
         }),
       });
+      
+      const responseData = await response.json();
+      console.log('Order response:', responseData);
+      
       if (!response.ok) {
-        const errorText = await response.text();
+        const errorText = responseData.message || await response.text();
         setOrderError('Đặt hàng thất bại: ' + errorText);
         return;
       }
+      
       setSuccessMessage('Đặt hàng thành công! ');
       
       // Xóa sản phẩm khỏi giỏ hàng sau khi đặt hàng thành công
@@ -113,11 +124,46 @@ export default function PurchasesTab({ activeTab, setActiveTab, purchases }: Pur
         setShowOrderModal(false);
         setSuccessMessage(null);
         refreshOrders();
-        navigate('/profile');
+        // Không navigate để user có thể thấy order mới trong tab "Chờ thanh toán"
       }, 2000);
     } catch (err) {
       setOrderError('Đặt hàng thất bại!');
       console.error('Order error:', err);
+    }
+  };
+
+  // Hủy đơn hàng: mở modal xác nhận
+  const handleOpenCancelModal = (orderId: string, productName?: string, productImage?: string) => {
+    setCancelOrderId(orderId);
+    setCancelProductName(productName);
+    setCancelProductImage(productImage);
+    setShowCancelModal(true);
+  };
+
+  // Hủy đơn hàng: xác nhận trong modal
+  const handleConfirmCancelOrder = async () => {
+    if (!cancelOrderId) return;
+    try {
+      const response = await fetch(`http://localhost:8888/shop/api/v1/orders/${cancelOrderId}/cancel`, {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${getAccessToken()}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      if (!response.ok) {
+        const errorText = await response.text();
+        setShowCancelModal(false);
+        alert('Hủy đơn hàng thất bại: ' + errorText);
+        return;
+      }
+      setShowCancelModal(false);
+      refreshOrders();
+      // Có thể show toast hoặc modal thành công nếu muốn
+    } catch (err) {
+      setShowCancelModal(false);
+      alert('Hủy đơn hàng thất bại! Vui lòng thử lại sau.');
+      console.error('Cancel order error:', err);
     }
   };
 
@@ -191,9 +237,21 @@ export default function PurchasesTab({ activeTab, setActiveTab, purchases }: Pur
           successMessage={successMessage || undefined}
         />
       )}
+      {showCancelModal && (
+        <ConfirmCancelModal
+          onConfirm={handleConfirmCancelOrder}
+          onClose={() => setShowCancelModal(false)}
+          productName={cancelProductName}
+          productImage={cancelProductImage}
+        />
+      )}
       <div className="p-4 lg:p-6 border-b border-gray-200">
-        <h2 className="text-xl lg:text-2xl font-bold text-gray-800 mb-2">Đơn Mua</h2>
-        <p className="text-sm lg:text-base text-gray-600">Quản lý đơn hàng và giỏ hàng của bạn</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-xl lg:text-2xl font-bold text-gray-800 mb-2">Đơn Mua</h2>
+            <p className="text-sm lg:text-base text-gray-600">Quản lý đơn hàng và giỏ hàng của bạn</p>
+          </div>
+        </div>
       </div>
 
       {/* Tab Navigation */}
@@ -255,7 +313,19 @@ export default function PurchasesTab({ activeTab, setActiveTab, purchases }: Pur
       {/* Items List */}
       <div className="p-4 lg:p-6">
         <div className="space-y-3 lg:space-y-4 max-h-[calc(100vh-400px)] overflow-y-auto">
-          {activeItems.length > 0 ? (
+          {isLoading ? (
+            <div className="text-center py-8 lg:py-12">
+              <div className="text-gray-400 mb-4">
+                <RefreshCw className="w-12 h-12 lg:w-16 lg:h-16 mx-auto animate-spin" />
+              </div>
+              <h3 className="text-base lg:text-lg font-medium text-gray-900 mb-2">
+                Đang tải đơn hàng...
+              </h3>
+              <p className="text-sm lg:text-base text-gray-500">
+                Vui lòng chờ trong giây lát
+              </p>
+            </div>
+          ) : activeItems.length > 0 ? (
             activeItems.map((item) => {
               const cartItem = item as unknown as {
                 id: string;
@@ -271,6 +341,7 @@ export default function PurchasesTab({ activeTab, setActiveTab, purchases }: Pur
                 isCartItem: boolean;
                 item_id: string;
                 product_id: string;
+                order_id?: string;
                 address?: string;
                 phone?: string;
               };
@@ -346,8 +417,26 @@ export default function PurchasesTab({ activeTab, setActiveTab, purchases }: Pur
                         <p
                           className="text-xs lg:text-sm font-medium inline-flex items-center gap-1 px-2 lg:px-3 py-1 rounded-full"
                           style={{ 
-                            backgroundColor: cartItem.status === 'Đã giao' ? '#dcfce7' : '#fef3c7',
-                            color: cartItem.status === 'Đã giao' ? '#166534' : '#92400e'
+                            backgroundColor: (() => {
+                              switch (cartItem.status) {
+                                case 'Đã giao hàng': return '#dcfce7';
+                                case 'Đang vận chuyển': return '#dbeafe';
+                                case 'Đã xác nhận': return '#fef3c7';
+                                case 'Chờ thanh toán': return '#fef2f2';
+                                case 'Đã hủy': return '#fee2e2';
+                                default: return '#f3f4f6';
+                              }
+                            })(),
+                            color: (() => {
+                              switch (cartItem.status) {
+                                case 'Đã giao hàng': return '#166534';
+                                case 'Đang vận chuyển': return '#1e40af';
+                                case 'Đã xác nhận': return '#92400e';
+                                case 'Chờ thanh toán': return '#dc2626';
+                                case 'Đã hủy': return '#991b1b';
+                                default: return '#374151';
+                              }
+                            })()
                           }}
                         >
                           {cartItem.status}
@@ -401,6 +490,15 @@ export default function PurchasesTab({ activeTab, setActiveTab, purchases }: Pur
                               <RefreshCw className="w-3 h-3 lg:w-4 lg:h-4" />
                               Mua lại
                             </button>
+                            {cartItem.status === 'Chờ thanh toán' && (
+                              <button
+                                onClick={() => handleOpenCancelModal(cartItem.id, cartItem.product, cartItem.image)}
+                                className="flex items-center justify-center gap-1 lg:gap-2 px-3 lg:px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 text-xs lg:text-sm font-medium transition-all duration-200"
+                                aria-label={`Hủy đơn hàng ${cartItem.id}`}
+                              >
+                                <Trash2 className="w-4 h-4" /> Hủy đơn
+                              </button>
+                            )}
                             <button
                               className="flex items-center justify-center gap-1 lg:gap-2 px-3 lg:px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 text-xs lg:text-sm font-medium transition-all duration-200"
                               aria-label={`Xem chi tiết đơn hàng ${cartItem.id}`}
@@ -430,11 +528,27 @@ export default function PurchasesTab({ activeTab, setActiveTab, purchases }: Pur
                 <ShoppingCart className="w-12 h-12 lg:w-16 lg:h-16 mx-auto" />
               </div>
               <h3 className="text-base lg:text-lg font-medium text-gray-900 mb-2">
-                {activeTab === 'purchase' ? 'Giỏ hàng trống' : 'Không có đơn hàng'}
+                {activeTab === 'purchase' ? 'Giỏ hàng trống' : 
+                 activeTab === 'waitingPayment' ? 'Không có đơn hàng chờ thanh toán' :
+                 activeTab === 'shipping' ? 'Không có đơn hàng đang vận chuyển' :
+                 activeTab === 'waitingDelivery' ? 'Không có đơn hàng chờ giao' :
+                 activeTab === 'completed' ? 'Không có đơn hàng đã hoàn thành' :
+                 activeTab === 'cancelled' ? 'Không có đơn hàng đã hủy' :
+                 'Không có đơn hàng'}
               </h3>
               <p className="text-sm lg:text-base text-gray-500">
                 {activeTab === 'purchase' 
                   ? 'Bạn chưa có sản phẩm nào trong giỏ hàng.' 
+                  : activeTab === 'waitingPayment'
+                  ? 'Tất cả đơn hàng của bạn đã được thanh toán hoặc chưa có đơn hàng nào.'
+                  : activeTab === 'shipping'
+                  ? 'Hiện tại không có đơn hàng nào đang được vận chuyển.'
+                  : activeTab === 'waitingDelivery'
+                  ? 'Không có đơn hàng nào đang chờ giao đến bạn.'
+                  : activeTab === 'completed'
+                  ? 'Bạn chưa có đơn hàng nào đã hoàn thành.'
+                  : activeTab === 'cancelled'
+                  ? 'Bạn chưa có đơn hàng nào bị hủy.'
                   : 'Chưa có đơn hàng nào trong danh mục này.'
                 }
               </p>
