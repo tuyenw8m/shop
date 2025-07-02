@@ -97,6 +97,7 @@ export default function ProductsPage() {
     parent_category_name: "",
     children_category_name: [] as string[],
     image_url: [] as string[],
+    image_files: [] as File[],
     original_price: "",
     promotions: "",
     features: "",
@@ -117,8 +118,8 @@ export default function ProductsPage() {
         ...(searchTerm && { search: searchTerm }),
         ...(selectedCategory &&
           selectedCategory !== "all" && {
-            parent_category_name: selectedCategory,
-          }),
+          parent_category_name: selectedCategory,
+        }),
         ...(sortBy && { sort_by: sortBy }),
         ...(sortType && { sort_type: sortType }),
       };
@@ -153,12 +154,16 @@ export default function ProductsPage() {
   };
   const handleCreateProduct = async () => {
     try {
-      const productData = {
+      const productData: any = {
         ...formData,
         price: Number.parseFloat(formData.price),
         stock: Number.parseInt(formData.stock),
         original_price: Number.parseFloat(formData.original_price),
       };
+      // Chuẩn hóa image_url: nếu là file, truyền file, nếu là url, truyền url
+      if (formData.image_url && formData.image_url.length > 0) {
+        productData.image_url = formData.image_url;
+      }
       const response = await apiClient.createProduct(productData);
       if (response.status === 0) {
         toast({
@@ -180,14 +185,23 @@ export default function ProductsPage() {
   const handleEditProduct = async () => {
     if (!editingProduct) return;
     try {
-      const productData = {
-        ...formData,
+      const productData: any = {
+        name: formData.name,
         price: Number.parseFloat(formData.price),
+        description: formData.description,
+        technical_specs: formData.technical_specs,
+        highlight_specs: formData.highlight_specs,
         stock: Number.parseInt(formData.stock),
-        original_price: Number.parseFloat(formData.original_price),
-        image_url: formData.image_url.filter((url) => url && url.trim() !== ""),
+        promotions: formData.promotions,
+        category_name: formData.category_name || [],
+        parent_category_id: formData.parent_category_id || "",
+        children_categories_id: formData.children_category_name || [],
+        branch_name: formData.branch_name,
       };
-      console.log(productData);
+      // Chỉ gửi image nếu có file
+      if (formData.image_files && formData.image_files.length > 0) {
+        productData.image = formData.image_files;
+      }
       const response = await apiClient.updateProduct(
         editingProduct.id,
         productData
@@ -204,9 +218,6 @@ export default function ProductsPage() {
       }
     } catch (error) {
       console.error("API Error during product update:", error);
-      if (error.response && error.response.data) {
-        console.error("Backend validation errors:", error.response.data);
-      }
       toast({
         title: "Lỗi",
         description: "Không thể cập nhật sản phẩm",
@@ -243,6 +254,7 @@ export default function ProductsPage() {
       parent_category_name: product.parent_category_name,
       children_category_name: product.children_category_name,
       image_url: product.image_url,
+      image_files: [],
       original_price: product.original_price.toString(),
       promotions: product.promotions,
       features: product.features,
@@ -261,6 +273,7 @@ export default function ProductsPage() {
       parent_category_name: "",
       children_category_name: [],
       image_url: [],
+      image_files: [],
       original_price: "",
       promotions: "",
       features: "",
@@ -932,32 +945,21 @@ export default function ProductsPage() {
               </div>
             </div>
             <div className="space-y-2">
-              <Label>URL Hình ảnh</Label>
-              {formData.image_url.map((url, index) => (
-                <div key={index} className="flex gap-2">
-                  <Input
-                    value={url}
-                    onChange={(e) => updateImageUrl(index, e.target.value)}
-                    placeholder="URL hình ảnh"
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => removeImageUrl(index)}
-                  >
-                    Xóa
-                  </Button>
-                </div>
-              ))}
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={addImageUrl}
-              >
-                Thêm ảnh
-              </Button>
+              <Label>Ảnh sản phẩm (có thể chọn nhiều)</Label>
+              <Input
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={e => {
+                  const files = e.target.files ? Array.from(e.target.files) : [];
+                  setFormData(prev => ({ ...prev, image_files: files }));
+                }}
+              />
+              <div className="flex flex-wrap gap-2 mt-2">
+                {formData.image_url && formData.image_url.map((url, idx) => (
+                  <img key={idx} src={url} alt="Ảnh sản phẩm" className="h-16 w-16 object-cover rounded" />
+                ))}
+              </div>
             </div>
           </div>
           <DialogFooter>

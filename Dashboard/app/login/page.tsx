@@ -29,8 +29,8 @@ export default function LoginPage() {
     try {
       await login(email, password)
       router.push("/")
-    } catch (error) {
-      setError("Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.")
+    } catch (error: any) {
+      setError(error?.message || "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.")
     } finally {
       setIsLoading(false)
     }

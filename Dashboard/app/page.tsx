@@ -8,6 +8,8 @@ import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { useToast } from "@/hooks/use-toast"
 import { apiClient } from "@/lib/api"
+import { useAuth } from "@/contexts/auth-context"
+import { useRouter } from "next/navigation"
 
 // Mock data for dashboard
 const salesData = [
@@ -58,14 +60,34 @@ const salesByRegion = [
 
 export default function Dashboard() {
   const [summary, setSummary] = useState<any>(null);
+  const [monthlyRevenue, setMonthlyRevenue] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [date, setDate] = useState<Date | undefined>(new Date());
   const { toast } = useToast();
+  const { user, isLoading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isLoading && user && user.role !== "ADMIN") {
+      router.push("/login");
+    }
+  }, [user, isLoading, router]);
 
   useEffect(() => {
     setLoading(true);
-    apiClient.getDashboardSummary()
-      .then((data) => setSummary(data))
+    Promise.all([
+      apiClient.getDashboardSummary(),
+      apiClient.getMonthlyRevenue()
+    ])
+      .then(([summaryData, revenueData]) => {
+        setSummary(summaryData);
+        // Chuyển đổi dữ liệu cho biểu đồ
+        setMonthlyRevenue(revenueData.map((item: any) => ({
+          name: `T${item.month}`,
+          sales: item.revenue,
+          orders: item.orderCount
+        })));
+      })
       .catch(() => toast({ title: "Lỗi", description: "Không thể tải dữ liệu dashboard", variant: "destructive" }))
       .finally(() => setLoading(false));
   }, []);
@@ -85,6 +107,10 @@ export default function Dashboard() {
     }
     const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.pending
     return <Badge className={config.color}>{config.label}</Badge>
+  }
+
+  if (!isLoading && user && user.role !== "ADMIN") {
+    return <div className="flex justify-center items-center h-[60vh] text-xl text-red-500">Bạn không có quyền truy cập trang này</div>;
   }
 
   if (loading) {
@@ -186,7 +212,7 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={350}>
-                <BarChart data={salesData}>
+                <BarChart data={monthlyRevenue}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                   <XAxis dataKey="name" stroke="#666" />
                   <YAxis stroke="#666" />

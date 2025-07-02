@@ -72,11 +72,10 @@ export default function PurchasesTab({ activeTab, setActiveTab, purchases }: Pur
           Authorization: `Bearer ${userProfile.token}`,
           'Content-Type': 'application/json',
         },
+
         body: JSON.stringify({
           productId: selectedProduct.product_id || selectedProduct.id,
-          quantity: selectedProduct.quantity || 1,
-          address: userProfile.address,
-          phone: userProfile.phone,
+          quantity: selectedProduct.quantity || 1
         }),
       });
       if (!response.ok) {

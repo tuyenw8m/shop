@@ -62,12 +62,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (data.status === 0 && data.data.token) {
         const { token: authToken, user: userData } = data.data
-
+        if (!userData.roles || !Array.isArray(userData.roles) || !userData.roles.includes("ADMIN")) {
+          throw new Error("Chỉ admin mới được phép đăng nhập vào hệ thống này.")
+        }
         setToken(authToken)
-        setUser(userData)
-
+        setUser({ ...userData, role: "ADMIN" })
         localStorage.setItem("admin_token", authToken)
-        localStorage.setItem("admin_user", JSON.stringify(userData))
+        localStorage.setItem("admin_user", JSON.stringify({ ...userData, role: "ADMIN" }))
       } else {
         throw new Error("Login failed")
       }
