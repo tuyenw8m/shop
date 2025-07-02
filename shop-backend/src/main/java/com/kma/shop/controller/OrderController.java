@@ -17,11 +17,11 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RequestMapping("/orders")
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class OrderController{
+public class OrderController {
     OrderService orderService;
 
     @GetMapping("/count")
-    public ApiResponse<Float> countTotalPrice(){
+    public ApiResponse<Float> countTotalPrice() {
         return ApiResponse.<Float>builder()
                 .data(orderService.countTotalPrice())
                 .build();
@@ -29,7 +29,8 @@ public class OrderController{
 
     @PutMapping("/{id}")
     @Transactional
-    public ApiResponse<OrderResponse> update(@PathVariable String id, @RequestBody StatusRequest status) throws AppException {
+    public ApiResponse<OrderResponse> update(@PathVariable String id, @RequestBody StatusRequest status)
+            throws AppException {
         return ApiResponse.<OrderResponse>builder()
                 .data(orderService.update(id, status.getStatus()))
                 .build();
@@ -65,6 +66,14 @@ public class OrderController{
     public ApiResponse<Void> delete(@PathVariable String id) throws AppException {
         orderService.delete(id);
         return ApiResponse.<Void>builder()
+                .build();
+    }
+
+    @PutMapping("/{id}/cancel")
+    @Transactional
+    public ApiResponse<OrderResponse> cancelOrder(@PathVariable String id) throws AppException {
+        return ApiResponse.<OrderResponse>builder()
+                .data(orderService.userUpdateStateOrder(id, "CANCELLED"))
                 .build();
     }
 
