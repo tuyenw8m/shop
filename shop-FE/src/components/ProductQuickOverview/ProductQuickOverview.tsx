@@ -10,9 +10,10 @@ import type { User } from 'src/pages/contexts/auth.types'
 interface Props {
   product: Product
   onClose: () => void
+  handleShowOrderModal: () => void
 }
 
-export default function ProductQuickOverview({ product, onClose }: Props) {
+export default function ProductQuickOverview({ product, onClose, handleShowOrderModal }: Props) {
   const navigate = useNavigate()
   const user: User | null = getProfileLocalStorage()
   const { addItemToCart } = useCartMutations(user?.id)
@@ -69,12 +70,12 @@ export default function ProductQuickOverview({ product, onClose }: Props) {
   }
 
   const handleBuyNow = () => {
-    if (!user) {
+    if (user) {
+      onClose()
+      handleShowOrderModal(true)
+    } else {
       navigate('/login')
-      return
     }
-    // Navigate to checkout or cart page
-    navigate('/cart')
   }
 
   if (!mounted) return null

@@ -60,6 +60,10 @@ export function ProductCard({ product, onOrderSuccess }: ProductType) {
     }
   }
 
+  const handleShowOrderModal = () => {
+    setShowOrderModal(true)
+  }
+
   const handleConfirmOrder = async () => {
     setOrderError(null)
     if (!userProfile?.phone || !userProfile?.address) {
@@ -75,13 +79,13 @@ export function ProductCard({ product, onOrderSuccess }: ProductType) {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${getAccessToken()}`,
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           product_id: product.id,
           quantity: 1,
           comment: ''
-        }),
+        })
       })
       if (!response.ok) {
         const errorText = await response.text()
@@ -111,7 +115,13 @@ export function ProductCard({ product, onOrderSuccess }: ProductType) {
 
   return (
     <>
-      {isQuickViewOpen && <ProductQuickOverview product={product} onClose={handleCloseQuickView} />}
+      {isQuickViewOpen && (
+        <ProductQuickOverview
+          product={product}
+          onClose={handleCloseQuickView}
+          handleShowOrderModal={handleShowOrderModal}
+        />
+      )}
       {showOrderModal && (
         <OrderModal
           user={userProfile}

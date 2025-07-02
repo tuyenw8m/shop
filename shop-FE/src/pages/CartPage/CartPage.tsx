@@ -6,6 +6,10 @@ import type { RootState } from 'src/app/store'
 import { useCartMutations } from 'src/hooks/useCartMutations'
 import { useCartQuery } from 'src/hooks/useCartQuery'
 import { formatPrices, getProfileLocalStorage } from 'src/utils/utils' // Corrected formatPrice to formatPrices
+import { useMutation, useQuery } from '@tanstack/react-query'
+import http from 'src/utils/http'
+import OrderAPI from 'src/apis/Order.api'
+import type { OrderList } from 'src/types/order.type'
 
 export function CartPage() {
   const userProfile = getProfileLocalStorage()
@@ -14,17 +18,43 @@ export function CartPage() {
   useCartQuery(user_id)
 
   const cartState = useSelector((state: RootState) => state.cart)
+
   const { items, total_items, total_price } = cartState
 
   const { updateCartItemQuantity, removeCartItem } = useCartMutations()
 
-  const [shippingMethod, setShippingMethod] = useState('standard')
+  const [note, setNote] = useState<string>('')
   const [paymentMethod, setPaymentMethod] = useState('cash')
 
   const subtotal = total_price
   const tax = Math.round(subtotal * 0.1)
-  const shippingFee = shippingMethod === 'express' ? 50000 : 0
-  const total = subtotal + tax + shippingFee
+  const total = subtotal + tax
+
+  const { data: UserData } = useQuery({
+    queryKey: ['userInfo'],
+    queryFn: async () => {
+      const res = await http.get('/users/me')
+      return res.data.data
+    }
+  })
+
+  const orderList: OrderList = items.map((item) => ({
+    quantity: item.quantity,
+    comment: note || '',
+    status: 'pending',
+    product_id: item.product_id
+  }))
+
+  const handleMutateBuyNow = useMutation({
+    mutationFn: (body: OrderList) => OrderAPI.createOrder(body),
+    onSuccess: () => {
+      return (
+        <div className='fixed top-4 left-1/2 transform -translate-x-1/2 bg-green-100 text-green-700 px-6 py-2 rounded shadow z-50 transition-all duration-300'>
+          Đặt hàng thành công, đơn hàng chờ xác nhận !
+        </div>
+      )
+    }
+  })
 
   const handleRemoveFromCart = (itemId: string) => {
     if (user_id) {
@@ -208,14 +238,21 @@ export function CartPage() {
                   <MapPin className='w-5 h-5 text-blue-600' />
                   <h3 className='font-semibold text-gray-800'>Địa chỉ giao hàng</h3>
                 </div>
-                <button className='inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors border border-blue-600 text-blue-600 hover:bg-blue-50 px-3 py-1.5'>
+                <Link
+                  to='/profile'
+                  className='inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors border border-blue-600 text-blue-600 hover:bg-blue-50 px-3 py-1.5'
+                >
                   Thay đổi
-                </button>
+                </Link>
               </div>
               <div className='space-y-2 text-gray-700'>
-                <p className='font-medium'>Thanh Quân</p>
-                <p>(+84)888888888</p>
-                <p>88/99 Ba Đình, Thành phố Hà nội</p>
+                {UserData && (
+                  <>
+                    <p className='font-medium'>Tên người nhận: {UserData.name}</p>
+                    <p>SĐT:(+84) {UserData.phone}</p>
+                    <p>Địa chỉ: {UserData.address}</p>
+                  </>
+                )}
               </div>
             </div>
 
@@ -223,50 +260,16 @@ export function CartPage() {
             <div className='bg-white rounded-lg shadow-md border border-gray-200 p-6'>
               <div className='flex items-center space-x-2 mb-4'>
                 <Truck className='w-5 h-5 text-teal-600' />
-                <h3 className='font-semibold text-gray-800'>Phương thức giao hàng</h3>
+                <h3 className='font-semibold text-gray-800'>Ghi chú cho người bán</h3>
               </div>
-              <div
-                role='radiogroup'
-                className='grid gap-3' // Increased gap for better spacing
-                aria-label='Shipping method'
-              >
-                <div className='flex items-center space-x-3 cursor-pointer p-2 -m-2 rounded-md hover:bg-gray-50'>
-                  <input
-                    type='radio'
-                    value='standard'
-                    id='standard'
-                    name='shippingMethod'
-                    className='h-4 w-4 text-teal-600 focus:ring-teal-500 border-gray-300'
-                    checked={shippingMethod === 'standard'}
-                    onChange={(e) => setShippingMethod(e.target.value)}
-                  />
-                  <label
-                    htmlFor='standard'
-                    className='flex-1 cursor-pointer text-base font-medium text-gray-800 leading-tight'
-                  >
-                    Giao hàng tiêu chuẩn
-                    <p className='text-sm text-gray-500'>3-5 ngày làm việc • Miễn phí</p>
-                  </label>
-                </div>
-                <div className='flex items-center space-x-3 cursor-pointer p-2 -m-2 rounded-md hover:bg-gray-50'>
-                  <input
-                    type='radio'
-                    value='express'
-                    id='express'
-                    name='shippingMethod'
-                    className='h-4 w-4 text-teal-600 focus:ring-teal-500 border-gray-300'
-                    checked={shippingMethod === 'express'}
-                    onChange={(e) => setShippingMethod(e.target.value)}
-                  />
-                  <label
-                    htmlFor='express'
-                    className='flex-1 cursor-pointer text-base font-medium text-gray-800 leading-tight'
-                  >
-                    Giao hàng nhanh
-                    <p className='text-sm text-gray-500'>1-2 ngày làm việc • {formatPrices(50000)}</p>
-                  </label>
-                </div>
-              </div>
+
+              <textarea
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                rows={4}
+                placeholder='Ghi chú (Ví dụ: Giao hàng ngoài giờ hành chính, gọi trước khi đến...)'
+                className='w-full border border-gray-300 rounded-md p-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-teal-500 shadow-sm transition'
+              />
             </div>
 
             {/* Payment Method */}
@@ -335,7 +338,7 @@ export function CartPage() {
                 </div>
                 <div className='flex justify-between text-gray-700'>
                   <span>Phí vận chuyển</span>
-                  <span className='font-medium'>{shippingFee > 0 ? formatPrices(shippingFee) : 'Miễn phí'}</span>
+                  <span className='font-medium'>Miễn phí</span>
                 </div>
                 <div className='flex justify-between text-gray-700'>
                   <span>Thuế (10%)</span>
@@ -348,7 +351,10 @@ export function CartPage() {
                 </div>
               </div>
 
-              <button className='w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 text-lg shadow-lg hover:shadow-xl transition-all duration-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50'>
+              <button
+                onClick={() => handleMutateBuyNow.mutate(orderList)}
+                className='w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 text-lg shadow-lg hover:shadow-xl transition-all duration-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50'
+              >
                 🛒 Đặt mua ngay
               </button>
 
