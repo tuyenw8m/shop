@@ -97,10 +97,16 @@ export default function PurchasesTab({ activeTab, setActiveTab, purchases, isLoa
           Authorization: `Bearer ${getAccessToken()}`,
           'Content-Type': 'application/json',
         },
+
         body: JSON.stringify({
+<<<<<<< HEAD
+          productId: selectedProduct.product_id || selectedProduct.id,
+          quantity: selectedProduct.quantity || 1
+=======
           product_id: selectedProduct?.product_id || selectedProduct?.id || '',
           quantity: selectedProduct?.quantity || 1,
           comment: ''
+>>>>>>> 2fe38ddd65fb212ce751b6e1dd96bd8e3a919183
         }),
       });
       

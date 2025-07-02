@@ -15,6 +15,7 @@ import com.kma.shop.service.interfaces.OrderService;
 import com.kma.shop.service.interfaces.ProductService;
 import com.kma.shop.service.interfaces.UserService;
 import com.kma.shop.specification.OrderSpecification;
+import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -176,6 +177,7 @@ public class OrderServiceImpl implements OrderService {
 
 
     @Override
+    @Transactional
     public OrderResponse create(OrderRequest request) throws AppException {
         if(Objects.isNull(request) || request.getQuantity() <= 0) throw new AppException(ErrorCode.INVALID_INPUT);
         if(request.getProduct_id() == null || request.getProduct_id().isEmpty()) throw new AppException(ErrorCode.INVALID_INPUT);
@@ -187,6 +189,18 @@ public class OrderServiceImpl implements OrderService {
 
         OrderEntity order = orderMapping.toOrderEntity(request, product, user);
         return orderMapping.toOrderResponse(orderRepo.save(order));
+    }
+
+    @Transactional
+    @Override
+    public List<OrderResponse> createMultiOrder(List<OrderRequest> requests) throws AppException {
+        if(requests == null || requests.isEmpty())
+            throw new AppException(ErrorCode.INVALID_INPUT);
+        List<OrderResponse> responses = new ArrayList<>();
+        for (OrderRequest request : requests) {
+            responses.add(create(request));
+        }
+        return responses;
     }
 
     @Override

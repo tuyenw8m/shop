@@ -1,11 +1,13 @@
 package com.kma.shop.service.impl;
 
 import com.kma.shop.dto.response.DashboardSummaryResponse;
+import com.kma.shop.dto.response.MonthlyRevenueResponse;
 import com.kma.shop.service.interfaces.DashboardService;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 @Service
 public class DashboardServiceImpl implements DashboardService {
@@ -48,5 +50,17 @@ public class DashboardServiceImpl implements DashboardService {
         resp.setRecentActivities(Arrays.asList(a1, a2, a3));
 
         return resp;
+    }
+
+    @Override
+    public List<MonthlyRevenueResponse> getMonthlyRevenue() {
+        return Arrays.asList(
+            new MonthlyRevenueResponse(1, 4000000L, 240),
+            new MonthlyRevenueResponse(2, 3000000L, 139),
+            new MonthlyRevenueResponse(3, 2000000L, 980),
+            new MonthlyRevenueResponse(4, 2780000L, 390),
+            new MonthlyRevenueResponse(5, 1890000L, 480),
+            new MonthlyRevenueResponse(6, 2390000L, 380)
+        );
     }
 } 

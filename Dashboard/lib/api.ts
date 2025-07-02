@@ -42,17 +42,51 @@ class ApiClient {
   }
 
   async createProduct(data: any) {
-    return this.request("/products/v2", {
+    const formData = new FormData();
+    Object.entries(data).forEach(([key, value]) => {
+      if (Array.isArray(value)) {
+        value.forEach((v, i) => {
+          formData.append(`${key}`, v);
+        });
+      } else {
+        formData.append(key, value);
+      }
+    });
+    return fetch(`${API_BASE_URL}/products/v2`, {
       method: "POST",
-      body: JSON.stringify(data),
-    })
+      headers: {
+        ...(localStorage.getItem("admin_token") && { Authorization: `Bearer ${localStorage.getItem("admin_token")}` })
+      },
+      body: formData,
+    }).then(async (res) => {
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "API request failed");
+      return data;
+    });
   }
 
   async updateProduct(id: string, data: any) {
-    return this.request(`/products/v2/${id}`, {
+    const formData = new FormData();
+    Object.entries(data).forEach(([key, value]) => {
+      if (Array.isArray(value)) {
+        value.forEach((v, i) => {
+          formData.append(`${key}`, v);
+        });
+      } else {
+        formData.append(key, value);
+      }
+    });
+    return fetch(`${API_BASE_URL}/products/v2/${id}`, {
       method: "PUT",
-      body: JSON.stringify(data),
-    })
+      headers: {
+        ...(localStorage.getItem("admin_token") && { Authorization: `Bearer ${localStorage.getItem("admin_token")}` })
+      },
+      body: formData,
+    }).then(async (res) => {
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "API request failed");
+      return data;
+    });
   }
 
   async deleteProduct(id: string) {
@@ -173,6 +207,10 @@ class ApiClient {
   // Dashboard Summary API
   async getDashboardSummary() {
     return this.request('/dashboard/summary');
+  }
+
+  async getMonthlyRevenue() {
+    return this.request('/dashboard/monthly-revenue');
   }
 }
 

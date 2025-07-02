@@ -16,6 +16,15 @@ const productApi = {
   },
   getProductDetail(id: string) {
     return http.get<SuccessResponse<Product>>(`${pathURL}/${id}`)
+  },
+  addProduct(data: Product) {
+    return http.post<SuccessResponse<Product>>(pathURL, data)
+  },
+  updateProduct(id: string, data: Product) {
+    return http.put<SuccessResponse<Product>>(`${pathURL}/${id}`, data)
+  },
+  deleteProduct(id: string) {
+    return http.delete<SuccessResponse<null>>(`${pathURL}/${id}`)
   }
 }
 
