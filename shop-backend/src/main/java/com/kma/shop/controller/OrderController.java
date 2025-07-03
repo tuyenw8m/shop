@@ -11,6 +11,7 @@ import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -82,6 +83,14 @@ public class OrderController {
     public ApiResponse<OrderResponse> cancelOrder(@PathVariable String id) throws AppException {
         return ApiResponse.<OrderResponse>builder()
                 .data(orderService.userUpdateStateOrder(id, "CANCELLED"))
+                .build();
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/total")
+    public ApiResponse<Long> getOrderCount() {
+        return ApiResponse.<Long>builder()
+                .data(orderService.count())
                 .build();
     }
 

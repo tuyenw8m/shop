@@ -143,4 +143,12 @@ public class ProductControllerV2 {
                 .data(productServiceV2.getTopSoldInWeekV2(children_category_name,parent_category_name, name, min_price, max_price, page - 1, limit, sort_by))
                 .build();
     }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/count")
+    public ApiResponse<Integer> getProductCount() {
+        return ApiResponse.<Integer>builder()
+                .data(productServiceV2.count())
+                .build();
+    }
 }

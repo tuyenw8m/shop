@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -38,42 +38,10 @@ import {
   ShoppingCart,
   Users,
   Package,
+  Box,
 } from "lucide-react";
-
-// Mock data for analytics
-const salesData = [
-  { month: "Jan", revenue: 45000, orders: 120, customers: 89 },
-  { month: "Feb", revenue: 52000, orders: 145, customers: 102 },
-  { month: "Mar", revenue: 48000, orders: 132, customers: 95 },
-  { month: "Apr", revenue: 61000, orders: 168, customers: 118 },
-  { month: "May", revenue: 55000, orders: 152, customers: 108 },
-  { month: "Jun", revenue: 67000, orders: 189, customers: 134 },
-];
-
-const productPerformance = [
-  { name: "iPhone 14 Pro", sales: 450, revenue: 449550 },
-  { name: "MacBook Air M2", sales: 280, revenue: 335720 },
-  { name: "AirPods Pro", sales: 620, revenue: 154380 },
-  { name: "iPad Air", sales: 340, revenue: 203660 },
-  { name: "Apple Watch", sales: 510, revenue: 204510 },
-];
-
-const categoryData = [
-  { name: "Phones", value: 35, color: "#0088FE" },
-  { name: "Laptops", value: 25, color: "#00C49F" },
-  { name: "Accessories", value: 20, color: "#FFBB28" },
-  { name: "Tablets", value: 15, color: "#FF8042" },
-  { name: "Wearables", value: 5, color: "#8884D8" },
-];
-
-const customerData = [
-  { month: "Jan", new: 45, returning: 78 },
-  { month: "Feb", new: 52, returning: 85 },
-  { month: "Mar", new: 48, returning: 82 },
-  { month: "Apr", new: 61, returning: 95 },
-  { month: "May", new: 55, returning: 88 },
-  { month: "Jun", new: 67, returning: 102 },
-];
+import { apiClient } from "@/lib/api";
+import { toast } from "@/components/ui/use-toast";
 
 export default function AnalyticsPage() {
   const [timeRange, setTimeRange] = useState("6months");
@@ -87,6 +55,31 @@ export default function AnalyticsPage() {
     avgOrderValue: 272,
     avgOrderGrowth: 4.1,
   });
+  const [productCount, setProductCount] = useState<number | null>(null);
+  const [orderCount, setOrderCount] = useState<number | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [summary, setSummary] = useState(null);
+  const [monthlyRevenue, setMonthlyRevenue] = useState([]);
+
+  useEffect(() => {
+    setLoading(true);
+    Promise.all([
+      apiClient.getDashboardSummary(),
+      apiClient.getMonthlyRevenue()
+    ])
+      .then(([summaryData, revenueData]) => {
+        setSummary(summaryData);
+        setMonthlyRevenue(revenueData.map((item: any) => ({
+          name: `T${item.month}`,
+          sales: item.revenue,
+          orders: item.orderCount
+        })));
+        console.log('Dashboard summary:', summaryData);
+        console.log('Monthly revenue:', revenueData);
+      })
+      .catch(() => toast({ title: "Lỗi", description: "Không thể tải dữ liệu dashboard", variant: "destructive" }))
+      .finally(() => setLoading(false));
+  }, []);
 
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
@@ -140,18 +133,14 @@ export default function AnalyticsPage() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
-                  Total Orders
+                  Tổng đơn hàng
                 </CardTitle>
                 <ShoppingCart className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {metrics.totalOrders.toLocaleString()}
+                  {orderCount !== null ? orderCount.toLocaleString() : "..."}
                 </div>
-                <p className="text-xs text-muted-foreground flex items-center">
-                  <TrendingUp className="h-3 w-3 mr-1 text-green-500" />+
-                  {metrics.ordersGrowth}% from last period
-                </p>
               </CardContent>
             </Card>
 
@@ -190,6 +179,20 @@ export default function AnalyticsPage() {
                 </p>
               </CardContent>
             </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  Tổng sản phẩm
+                </CardTitle>
+                <Box className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {productCount !== null ? productCount.toLocaleString() : "..."}
+                </div>
+              </CardContent>
+            </Card>
           </div>
 
           {/* Charts */}
@@ -200,9 +203,9 @@ export default function AnalyticsPage() {
               </CardHeader>
               <CardContent className="pl-2">
                 <ResponsiveContainer width="100%" height={350}>
-                  <AreaChart data={salesData}>
+                  <AreaChart data={monthlyRevenue}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
+                    <XAxis dataKey="name" />
                     <YAxis />
                     <Tooltip
                       formatter={(value) => [
@@ -212,14 +215,7 @@ export default function AnalyticsPage() {
                     />
                     <Area
                       type="monotone"
-                      dataKey="revenue"
-                      stroke="#8884d8"
-                      fill="#8884d8"
-                      fillOpacity={0.3}
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="revenue"
+                      dataKey="sales"
                       stroke="#8884d8"
                       fill="#8884d8"
                       fillOpacity={0.3}
@@ -237,7 +233,7 @@ export default function AnalyticsPage() {
                 <ResponsiveContainer width="100%" height={350}>
                   <PieChart>
                     <Pie
-                      data={categoryData}
+                      data={summary?.categoryData || []}
                       cx="50%"
                       cy="50%"
                       labelLine={false}
@@ -248,7 +244,7 @@ export default function AnalyticsPage() {
                       fill="#8884d8"
                       dataKey="value"
                     >
-                      {categoryData.map((entry, index) => (
+                      {summary?.categoryData?.map((entry: any, index: number) => (
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
                     </Pie>
@@ -271,13 +267,13 @@ export default function AnalyticsPage() {
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={350}>
-                  <LineChart data={salesData}>
+                  <LineChart data={monthlyRevenue}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
+                    <XAxis dataKey="name" />
                     <YAxis yAxisId="left" />
                     <YAxis yAxisId="right" orientation="right" />
                     <Tooltip />
-                    <Bar yAxisId="left" dataKey="revenue" fill="#8884d8" />
+                    <Bar yAxisId="left" dataKey="sales" fill="#8884d8" />
                     <Line
                       yAxisId="right"
                       type="monotone"
@@ -297,9 +293,9 @@ export default function AnalyticsPage() {
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={350}>
-                  <BarChart data={salesData}>
+                  <BarChart data={monthlyRevenue}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
+                    <XAxis dataKey="name" />
                     <YAxis />
                     <Tooltip />
                     <Bar dataKey="orders" fill="#82ca9d" />
@@ -320,7 +316,7 @@ export default function AnalyticsPage() {
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={400}>
-                <BarChart data={productPerformance} layout="horizontal">
+                <BarChart data={summary?.productPerformance || []} layout="horizontal">
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis type="number" />
                   <YAxis dataKey="name" type="category" width={100} />
@@ -348,7 +344,7 @@ export default function AnalyticsPage() {
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={350}>
-                  <AreaChart data={customerData}>
+                  <AreaChart data={summary?.customerData || []}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="month" />
                     <YAxis />
@@ -381,7 +377,7 @@ export default function AnalyticsPage() {
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={350}>
-                  <LineChart data={customerData}>
+                  <LineChart data={summary?.customerData || []}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="month" />
                     <YAxis />

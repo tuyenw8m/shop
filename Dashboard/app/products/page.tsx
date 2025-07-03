@@ -71,6 +71,7 @@ interface Category {
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [branches, setBranches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
@@ -107,6 +108,7 @@ export default function ProductsPage() {
   useEffect(() => {
     fetchProducts();
     fetchCategories();
+    fetchBranches();
   }, [pagination.pageNumber, searchTerm, selectedCategory, sortBy, sortType]);
 
   const fetchProducts = async () => {
@@ -152,6 +154,16 @@ export default function ProductsPage() {
       console.error("Failed to fetch categories:", error);
     }
   };
+  const fetchBranches = async () => {
+    try {
+      const response = await apiClient.getBranches();
+      if (response.status === 0) {
+        setBranches(response.data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch branches:", error);
+    }
+  };
   const handleCreateProduct = async () => {
     try {
       const productData: any = {
@@ -164,7 +176,17 @@ export default function ProductsPage() {
       if (formData.image_url && formData.image_url.length > 0) {
         productData.image_url = formData.image_url;
       }
-      const response = await apiClient.createProduct(productData);
+      // Tạo formData để gửi đúng dạng multipart/form-data
+      const fd = new FormData();
+      Object.entries(productData).forEach(([key, value]) => {
+        if (Array.isArray(value)) {
+          value.forEach((v) => fd.append(key, v));
+        } else if (value !== undefined && value !== null) {
+          fd.append(key, value);
+        }
+      });
+      console.log('FormData gửi lên:', Array.from(fd.entries()));
+      const response = await apiClient.createProduct(fd);
       if (response.status === 0) {
         toast({
           title: "Thành công",
@@ -198,26 +220,27 @@ export default function ProductsPage() {
         children_categories_id: formData.children_category_name || [],
         branch_name: formData.branch_name,
       };
-      // Chỉ gửi image nếu có file
-      if (formData.image_files && formData.image_files.length > 0) {
-        productData.image = formData.image_files;
-      }
-      const response = await apiClient.updateProduct(
-        editingProduct.id,
-        productData
-      );
+      // Tạo formData để gửi đúng dạng multipart/form-data
+      const fd = new FormData();
+      Object.entries(productData).forEach(([key, value]) => {
+        if (Array.isArray(value)) {
+          value.forEach((v) => fd.append(key, v));
+        } else if (value !== undefined && value !== null) {
+          fd.append(key, value);
+        }
+      });
+      console.log('FormData gửi lên:', Array.from(fd.entries()));
+      const response = await apiClient.updateProduct(editingProduct.id, fd);
       if (response.status === 0) {
         toast({
           title: "Thành công",
           description: "Cập nhật sản phẩm thành công",
         });
         setIsEditDialogOpen(false);
-        setEditingProduct(null);
         resetForm();
         fetchProducts();
       }
     } catch (error) {
-      console.error("API Error during product update:", error);
       toast({
         title: "Lỗi",
         description: "Không thể cập nhật sản phẩm",
@@ -485,17 +508,24 @@ export default function ProductsPage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="branch_name">Thương hiệu</Label>
-                  <Input
-                    id="branch_name"
+                  <Select
                     value={formData.branch_name}
-                    onChange={(e) =>
+                    onValueChange={(value) =>
                       setFormData((prev) => ({
                         ...prev,
-                        branch_name: e.target.value,
+                        branch_name: value,
                       }))
                     }
-                    placeholder="Tên thương hiệu"
-                  />
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Chọn chi nhánh" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {branches.map((b: any) => (
+                        <SelectItem key={b.name} value={b.name}>{b.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
               <div className="space-y-2">
@@ -930,18 +960,24 @@ export default function ProductsPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="edit-branch_name">Thương hiệu</Label>
-                <Input
-                  id="edit-branch_name"
-                  name="branch_name"
+                <Select
                   value={formData.branch_name}
-                  onChange={(e) =>
+                  onValueChange={(value) =>
                     setFormData((prev) => ({
                       ...prev,
-                      branch_name: e.target.value,
+                      branch_name: value,
                     }))
                   }
-                  placeholder="Tên thương hiệu"
-                />
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Chọn chi nhánh" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {branches.map((b: any) => (
+                      <SelectItem key={b.name} value={b.name}>{b.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             <div className="space-y-2">

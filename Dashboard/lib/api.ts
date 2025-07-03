@@ -66,22 +66,23 @@ class ApiClient {
   }
 
   async updateProduct(id: string, data: any) {
-    const formData = new FormData();
-    Object.entries(data).forEach(([key, value]) => {
-      if (Array.isArray(value)) {
-        value.forEach((v, i) => {
-          formData.append(`${key}`, v);
-        });
-      } else {
-        formData.append(key, value);
-      }
-    });
+    let body: any = data;
+    let headers: any = {};
+    const token = localStorage.getItem("admin_token");
+    if (data instanceof FormData) {
+      // Để browser tự set Content-Type với boundary
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+    } else {
+      headers = {
+        "Content-Type": "application/json",
+        ...(token && { Authorization: `Bearer ${token}` }),
+      };
+      body = JSON.stringify(data);
+    }
     return fetch(`${API_BASE_URL}/products/v2/${id}`, {
       method: "PUT",
-      headers: {
-        ...(localStorage.getItem("admin_token") && { Authorization: `Bearer ${localStorage.getItem("admin_token")}` })
-      },
-      body: formData,
+      headers,
+      body,
     }).then(async (res) => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "API request failed");
@@ -211,6 +212,18 @@ class ApiClient {
 
   async getMonthlyRevenue() {
     return this.request('/dashboard/monthly-revenue');
+  }
+
+  async getProductCount() {
+    return this.request('/products/v2/count');
+  }
+
+  async getOrderCount() {
+    return this.request('/orders/total');
+  }
+
+  async getBranches() {
+    return this.request('/branches');
   }
 }
 

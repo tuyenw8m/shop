@@ -3,6 +3,11 @@ package com.kma.shop.service.impl;
 import com.kma.shop.dto.response.DashboardSummaryResponse;
 import com.kma.shop.dto.response.MonthlyRevenueResponse;
 import com.kma.shop.service.interfaces.DashboardService;
+import com.kma.shop.service.interfaces.ProductServiceV2;
+import com.kma.shop.service.interfaces.OrderService;
+import com.kma.shop.service.interfaces.UserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
@@ -11,13 +16,24 @@ import java.util.List;
 
 @Service
 public class DashboardServiceImpl implements DashboardService {
+    private static final Logger logger = LoggerFactory.getLogger(DashboardServiceImpl.class);
+    private final ProductServiceV2 productServiceV2;
+    private final OrderService orderService;
+    private final UserService userService;
+
+    public DashboardServiceImpl(ProductServiceV2 productServiceV2, OrderService orderService, UserService userService) {
+        this.productServiceV2 = productServiceV2;
+        this.orderService = orderService;
+        this.userService = userService;
+    }
+
     @Override
     public DashboardSummaryResponse getDashboardSummary() {
         DashboardSummaryResponse resp = new DashboardSummaryResponse();
-        resp.setTotalProducts(1250);
-        resp.setTotalUsers(3420);
-        resp.setTotalOrders(892);
-        resp.setTotalRevenue(125430000L);
+        resp.setTotalProducts(productServiceV2.count());
+        resp.setTotalUsers((int) userService.count());
+        resp.setTotalOrders((int) orderService.count());
+        resp.setTotalRevenue((long) orderService.countTotalPrice());
         resp.setPendingOrders(23);
         resp.setLowStockProducts(8);
 
@@ -49,6 +65,7 @@ public class DashboardServiceImpl implements DashboardService {
         a3.setType("stock"); a3.setText("Sản phẩm Laptop sắp hết hàng"); a3.setTime("10 phút trước");
         resp.setRecentActivities(Arrays.asList(a1, a2, a3));
 
+        logger.info("Dashboard summary: {}", resp);
         return resp;
     }
 
