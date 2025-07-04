@@ -107,6 +107,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/orders/*/cancel").hasRole("USER")
                         .requestMatchers(HttpMethod.DELETE, "/orders/*").hasRole("USER")
                         .requestMatchers(HttpMethod.GET, "/orders/count").hasRole("USER")
+                        .requestMatchers(HttpMethod.GET, "/orders/all").hasRole("ADMIN")
 
                         .requestMatchers(HttpMethod.POST, "/products/*/reviews").hasRole("USER")
                         .requestMatchers(HttpMethod.DELETE, "/reviews/*").hasRole("USER")

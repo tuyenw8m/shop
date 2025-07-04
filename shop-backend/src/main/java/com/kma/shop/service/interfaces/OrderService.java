@@ -27,6 +27,8 @@ public interface OrderService {
     PageResponse<OrderResponse> getMyOrders(String status, String search, int page, int limit) throws AppException;
 
 
+    PageResponse<OrderResponse> getAllAdmin(String status, String search, int page, int limit);
+
     OrderResponse userUpdateQuantityeOrder(String orderId, int quantity) throws AppException;
 
     OrderResponse userUpdateStateOrder(String orderId, String state) throws AppException;

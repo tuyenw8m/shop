@@ -107,6 +107,26 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public PageResponse<OrderResponse> getAllAdmin(String status, String search, int page, int limit)   {
+        if(page < 0) page = 1;
+        if(limit < 1) limit = 10;
+        Pageable pageable = PageRequest.of(page, limit);
+
+        Specification<OrderEntity> specification = Specification
+                .where(OrderSpecification.hasStatus(status == null ? null : Status.valueOf(status)));
+        Page<OrderEntity> result = orderRepo.findAll(specification, pageable);
+
+        return PageResponse.<OrderResponse>builder()
+                .content(orderMapping.toOrderResponses(result.getContent()))
+                .pageNumber(result.getNumber() + 1)
+                .pageSize(result.getSize())
+                .totalElements(result.getTotalElements())
+                .totalPages(result.getTotalPages())
+                .build();
+    }
+
+
+    @Override
     public OrderResponse userUpdateQuantityeOrder(String orderId, int quantity) throws AppException {
         if(quantity <= 0) throw new AppException(ErrorCode.INVALID_INPUT);
         if(orderId == null | orderId.trim().isEmpty()) throw new AppException(ErrorCode.INVALID_INPUT);

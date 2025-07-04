@@ -50,6 +50,18 @@ public class OrderController {
                 .build();
     }
 
+
+    @GetMapping("/all")
+    public ApiResponse<PageResponse<OrderResponse>> getAllAdmin(
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false, defaultValue = "") String search,
+            @RequestParam(required = false, defaultValue = "1") int page,
+            @RequestParam(required = false, defaultValue = "10") int limit) throws AppException {
+        return ApiResponse.<PageResponse<OrderResponse>>builder()
+                .data(orderService.getAllAdmin(status, search, page - 1, limit))
+                .build();
+    }
+
     @GetMapping("/{id}")
     public ApiResponse<OrderResponse> get(@PathVariable String id) throws AppException {
         return ApiResponse.<OrderResponse>builder()
