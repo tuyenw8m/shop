@@ -1,6 +1,57 @@
-import axios, { type AxiosInstance } from "axios";
+import axios, { type AxiosInstance, AxiosRequestConfig } from "axios";
 
 const API_BASE_URL = "http://localhost:8888/shop/api/v1";
+
+const buildProductFormData = (productData: any): FormData => {
+  const formData = new FormData();
+
+  for (const key of [
+    "name",
+    "description",
+    "technical_specs",
+    "highlight_specs",
+    "promotions",
+    "branch_name",
+    "parent_category_id",
+  ]) {
+    if (productData[key]) {
+      formData.append(key, productData[key]);
+    }
+  }
+
+  // Handle number types that need string conversion
+  for (const key of ["price", "stock"]) {
+    if (productData[key] !== undefined && productData[key] !== null) {
+      formData.append(key, productData[key].toString());
+    }
+  }
+
+  // Handle array of strings (category_name)
+  if (productData.category_name && productData.category_name.length > 0) {
+    productData.category_name.forEach((categoryName: string) => {
+      formData.append("category_name", categoryName);
+    });
+  }
+
+  // Handle array of strings (children_categories_id)
+  if (
+    productData.children_categories_id &&
+    productData.children_categories_id.length > 0
+  ) {
+    productData.children_categories_id.forEach((categoryId: string) => {
+      formData.append("children_categories_id", categoryId);
+    });
+  }
+
+  // Handle image files
+  if (productData.images && productData.images.length > 0) {
+    productData.images.forEach((image: File) => {
+      formData.append("image", image);
+    });
+  }
+
+  return formData;
+};
 
 class ApiClient {
   private axiosInstance: AxiosInstance;
@@ -11,12 +62,22 @@ class ApiClient {
       timeout: 30000,
     });
 
-    // Request interceptor thêm auth token
+    // Request interceptor để thêm auth token
     this.axiosInstance.interceptors.request.use(
       (config) => {
-        const token = localStorage.getItem("admin_token");
-        if (token) {
-          config.headers.Authorization = `Bearer ${token}`;
+        // Chỉ thêm token nếu request không phải là login
+        if (!config.url?.endsWith("/auth/login")) {
+          const token = localStorage.getItem("admin_token");
+          if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+          }
+        }
+        // Đặt Content-Type mặc định cho các request JSON
+        if (
+          !(config.data instanceof FormData) &&
+          !config.headers["Content-Type"]
+        ) {
+          config.headers["Content-Type"] = "application/json";
         }
         return config;
       },
@@ -25,13 +86,13 @@ class ApiClient {
       }
     );
 
-    // Response interceptor xử lý lỗi
+    // Response interceptor để xử lý lỗi
     this.axiosInstance.interceptors.response.use(
       (response) => response.data,
       (error) => {
         console.error("API Error:", error);
 
-        // Logout nếu dính tới auth
+        // Logout nếu dính tới lỗi authentication/authorization
         if (
           error.response?.status === 401 &&
           error.response?.data?.message?.includes("token")
@@ -46,7 +107,7 @@ class ApiClient {
     );
   }
 
-  // API của Products v2
+  // --- API của Products v2 ---
   async getProducts(params?: any) {
     return this.axiosInstance.get("/products/v2", { params });
   }
@@ -56,50 +117,7 @@ class ApiClient {
   }
 
   async createProduct(productData: any) {
-    const formData = new FormData();
-
-    if (productData.name) formData.append("name", productData.name);
-    if (productData.price)
-      formData.append("price", productData.price.toString());
-    if (productData.description)
-      formData.append("description", productData.description);
-    if (productData.technical_specs)
-      formData.append("technical_specs", productData.technical_specs);
-    if (productData.highlight_specs)
-      formData.append("highlight_specs", productData.highlight_specs);
-    if (productData.stock)
-      formData.append("stock", productData.stock.toString());
-    if (productData.promotions)
-      formData.append("promotions", productData.promotions);
-    if (productData.branch_name)
-      formData.append("branch_name", productData.branch_name);
-    if (productData.parent_category_id)
-      formData.append("parent_category_id", productData.parent_category_id);
-
-    // Xử lý phần category_name thành mảng array
-    if (productData.category_name && productData.category_name.length > 0) {
-      productData.category_name.forEach((categoryName: string) => {
-        formData.append("category_name", categoryName);
-      });
-    }
-
-    // Xử lý children_categories_id array (dùng id)
-    if (
-      productData.children_categories_id &&
-      productData.children_categories_id.length > 0
-    ) {
-      productData.children_categories_id.forEach((categoryId: string) => {
-        formData.append("children_categories_id", categoryId);
-      });
-    }
-
-    // Handle images - field name là "image" theo Java class
-    if (productData.images && productData.images.length > 0) {
-      productData.images.forEach((image: File) => {
-        formData.append("image", image);
-      });
-    }
-
+    const formData = buildProductFormData(productData);
     return this.axiosInstance.post("/products/v2/add", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
@@ -108,47 +126,7 @@ class ApiClient {
   }
 
   async updateProduct(id: string, productData: any) {
-    const formData = new FormData();
-
-    if (productData.name) formData.append("name", productData.name);
-    if (productData.price)
-      formData.append("price", productData.price.toString());
-    if (productData.description)
-      formData.append("description", productData.description);
-    if (productData.technical_specs)
-      formData.append("technical_specs", productData.technical_specs);
-    if (productData.highlight_specs)
-      formData.append("highlight_specs", productData.highlight_specs);
-    if (productData.stock)
-      formData.append("stock", productData.stock.toString());
-    if (productData.promotions)
-      formData.append("promotions", productData.promotions);
-    if (productData.branch_name)
-      formData.append("branch_name", productData.branch_name);
-    if (productData.parent_category_id)
-      formData.append("parent_category_id", productData.parent_category_id);
-
-    if (productData.category_name && productData.category_name.length > 0) {
-      productData.category_name.forEach((categoryName: string) => {
-        formData.append("category_name", categoryName);
-      });
-    }
-
-    if (
-      productData.children_categories_id &&
-      productData.children_categories_id.length > 0
-    ) {
-      productData.children_categories_id.forEach((categoryId: string) => {
-        formData.append("children_categories_id", categoryId);
-      });
-    }
-
-    if (productData.images && productData.images.length > 0) {
-      productData.images.forEach((image: File) => {
-        formData.append("image", image);
-      });
-    }
-
+    const formData = buildProductFormData(productData);
     return this.axiosInstance.put(`/products/v2/${id}`, formData, {
       headers: {
         "Content-Type": "multipart/form-data",
@@ -160,7 +138,7 @@ class ApiClient {
     return this.axiosInstance.delete(`/products/v2/${id}`);
   }
 
-  // API phần danh mục v2
+  // --- API phần danh mục v2 ---
   async getCategories(params?: any) {
     return this.axiosInstance.get("/categories/v2", { params });
   }
@@ -174,35 +152,19 @@ class ApiClient {
   }
 
   async createParentCategory(data: any) {
-    return this.axiosInstance.post("/categories/v2/parent", data, {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    return this.axiosInstance.post("/categories/v2/parent", data);
   }
 
   async createChildCategory(parentId: string, data: any) {
-    return this.axiosInstance.post(`/categories/v2/child/${parentId}`, data, {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    return this.axiosInstance.post(`/categories/v2/child/${parentId}`, data);
   }
 
   async updateParentCategory(id: string, data: any) {
-    return this.axiosInstance.put(`/categories/v2/parent/${id}`, data, {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    return this.axiosInstance.put(`/categories/v2/parent/${id}`, data);
   }
 
   async updateChildCategory(id: string, data: any) {
-    return this.axiosInstance.put(`/categories/v2/child/${id}`, data, {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    return this.axiosInstance.put(`/categories/v2/child/${id}`, data);
   }
 
   async deleteParentCategory(id: string) {
@@ -213,16 +175,9 @@ class ApiClient {
     return this.axiosInstance.delete(`/categories/v2/child/${id}`);
   }
 
-  // Orders API lấy tất cả
+  // --- Orders API ---
   async getOrders(params?: any) {
-    const token = localStorage.getItem("admin_token");
-    return this.axiosInstance.get("/orders/all", {
-      params,
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    return this.axiosInstance.get("/orders/all", { params });
   }
 
   async getOrder(id: string) {
@@ -230,22 +185,14 @@ class ApiClient {
   }
 
   async updateOrderStatus(id: string, status: string) {
-    return this.axiosInstance.put(
-      `/orders/${id}`,
-      { status },
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    return this.axiosInstance.put(`/orders/${id}`, { status });
   }
 
   async cancelOrder(id: string) {
     return this.axiosInstance.delete(`/orders/${id}`);
   }
 
-  // Users API
+  // --- Users API ---
   async getUsers(params?: any) {
     return this.axiosInstance.get("/users", { params });
   }
@@ -254,7 +201,7 @@ class ApiClient {
     return this.axiosInstance.get(`/users/${id}`);
   }
 
-  // Reviews API (chưa làm xong)
+  // --- Reviews API ---
   async getProductReviews(productId: string, params?: any) {
     return this.axiosInstance.get(`/products/${productId}/reviews`, { params });
   }
@@ -263,53 +210,33 @@ class ApiClient {
     return this.axiosInstance.delete(`/reviews/${id}`);
   }
 
+  // --- Coupons API ---
   async getCoupons(params?: any) {
     return this.axiosInstance.get("/coupons", { params });
   }
 
   async createCoupon(data: any) {
-    return this.axiosInstance.post("/coupons", data, {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    return this.axiosInstance.post("/coupons", data);
   }
 
   async updateCoupon(id: string, data: any) {
-    return this.axiosInstance.put(`/coupons/${id}`, data, {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    return this.axiosInstance.put(`/coupons/${id}`, data);
   }
 
   async deleteCoupon(id: string) {
     return this.axiosInstance.delete(`/coupons/${id}`);
   }
 
-  // Dashboard API - Vừa mock vừa call API
+  // --- Dashboard API ---
   async getDashboardSummary() {
-    const token = localStorage.getItem("admin_token");
-    console.log(token);
-    return this.axiosInstance.get("/dashboard/summary", {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    return this.axiosInstance.get("/dashboard/summary");
   }
 
   async getMonthlyRevenue() {
-    const token = localStorage.getItem("admin_token");
-    return this.axiosInstance.get("/dashboard/monthly-revenue", {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    return this.axiosInstance.get("/dashboard/monthly-revenue");
   }
 
-  // Auth API
+  // --- Auth API ---
   async login(email: string, password: string) {
     return axios.post(
       `${API_BASE_URL}/auth/login`,
